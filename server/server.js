@@ -17,7 +17,7 @@ app.post('/data', (req, res) => {
     if (!name || typeof name !== 'string') {
         return res.status(400).json({ error: 'Invalid name provided' });
     }
-    res.json({ message: `Hello, ${name}!` });
+    res.json({ message: `Hello, ${name}! I love you!` });
 });
 
 // Start server

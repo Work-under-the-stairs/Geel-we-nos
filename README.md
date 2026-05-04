@@ -3,7 +3,7 @@ to run server:
 ```bash
 cd server
 npm install
-npm start
+npm run dev
 ```
 
 to run client:
