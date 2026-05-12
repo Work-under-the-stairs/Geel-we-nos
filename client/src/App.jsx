@@ -19,9 +19,9 @@ const App = () => {
 
         <Route path="/" element={userData? <Layout/> : <Login/>} >
           <Route index element={<Home/>}/>
-          <Route path="/:category" element={<Category/>}>
-            <Route path=":id" element={<News/>}/>
-          </Route>
+          <Route path="/:category" element={<Category/>} />
+          <Route path="/news/:id" element={<News/>}/>
+
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
