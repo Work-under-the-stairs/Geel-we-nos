@@ -1,5 +1,4 @@
 @import "tailwindcss";
-/* Import Cairo font for a modern Arabic UI */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
 
 @theme {
@@ -16,12 +15,12 @@
 }
 
 /* Dark Mode Variant Configuration */
-@variant dark (&:where(.dark, .dark *));
+/* @variant dark (&:where(.dark, .dark *)); */
 
-@theme dark {
+/* @theme dark {
     --color-main-bg: #111827;
     --color-main-text: white;
-}
+} */
 
 /* Global Styles */
 body {
