@@ -1,1 +1,33 @@
 @import "tailwindcss";
+/* Import Cairo font for a modern Arabic UI */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
+
+@theme {
+    /* Brand Colors */
+    --color-primary: #0d4b5a;
+    --color-secondary: #fc6955;
+
+    /* Typography */
+    --font-arabic: "Cairo", sans-serif;
+    
+    /* Theme Variables */
+    --color-main-bg: white;
+    --color-main-text: #111827;
+}
+
+/* Dark Mode Variant Configuration */
+@variant dark (&:where(.dark, .dark *));
+
+@theme dark {
+    --color-main-bg: #111827;
+    --color-main-text: white;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--color-main-bg);
+    color: var(--color-main-text);
+    /* Apply Arabic font and smooth color transitions */
+    @apply font-arabic transition-colors duration-300;
+    direction: rtl;
+}
