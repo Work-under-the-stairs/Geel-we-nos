@@ -4,7 +4,7 @@
 
 @theme {
     /* Brand Colors */
-    --color-primary: #0d4b5a;
+    --color-primary: #0D4B58;
     --color-secondary: #fc6955;
 
     /* Typography */
@@ -12,6 +12,7 @@
     
     /* Theme Variables */
     --color-main-bg: white;
+    /* --color-main-bg: #F8FAFC; */
     --color-main-text: #111827;
 }
 
@@ -20,6 +21,7 @@
 
 /* @theme dark {
     --color-main-bg: #111827;
+    --color-main-text: white;
     --color-main-text: white;
 } */
 
@@ -30,4 +32,15 @@ body {
     /* Apply Arabic font and smooth color transitions */
     @apply font-arabic transition-colors duration-300;
     direction: rtl;
+}
+
+/* إخفاء السكرول بار مع الحفاظ على التمرير */
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* لمتصفحات Chrome, Safari, Opera */
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* لمتصفح IE و Edge القديم */
+    scrollbar-width: none;  /* لمتصفح Firefox */
+  }
 }
