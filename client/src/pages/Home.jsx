@@ -13,6 +13,7 @@ import MultimediaHub from '../components/ui/MultimediaHub'
 import InspirationalGrid from '../components/ui/InspirationalGrid'
 import Footer from '../components/layout/Footer'
 import CategoriesGrid from '../components/ui/CategoriesGrid'
+import BreakingNewsBar from '../components/ui/BreakingNewsBar'
 
 export default function Home() {
   return (
@@ -21,6 +22,10 @@ export default function Home() {
       {/* <div className="max-w-7xl mx-auto px-6 md:px-10 py-8"></div> */}
       {/* Featured / Cross Media */}
       {/* <FeaturedStories stories={FEATURED_NEWS} /> */}
+
+
+      <BreakingNewsBar breakingArticles={FEATURED_NEWS} />
+
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
         <HeroSection articles={FEATURED_NEWS} />
