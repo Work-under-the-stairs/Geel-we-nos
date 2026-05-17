@@ -11,11 +11,11 @@ import {
 
 const CATEGORY_ICONS = {
   'تعليم وثقافة':       <BookOpen   size={16} />,
-  'اقتصاد':             <TrendingUp size={16} />,
+  'اقتصاد':            <TrendingUp size={16} />,
   'ألهمني':            <Sparkles   size={16} />,
   'تكنولوجيا ومهارات': <Laptop      size={16} />,
   'بودكاست':           <Mic        size={16} />,
-  'صحة':                <HeartPulse size={16} />,
+  'صحة':               <HeartPulse size={16} />,
 }
 
 export default function Navbar() {
@@ -27,108 +27,75 @@ export default function Navbar() {
 
       {/* ======= ROW 1 ======= */}
       <div className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex  items-center justify-between min-h-[90px] md:min-h-[140px] py-4 gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex items-center justify-between h-[90px] md:h-[120px] relative">
 
-          {/* أقصى اليمين — اللوجو فقط */}
-          <div className="flex items-center z-10 shrink-0">
-            <Link to="/" className="flex items-center justify-center">
-              <img
-                src={logo}
-                alt="جيل ونص"
-                className="h-16 sm:h-16 md:h-20 w-auto object-contain"
-              />
+          {/* يسار — Menu + Search (زر القائمة يظهر دائماً في كل الشاشات الآن) */}
+          <div className="flex items-center gap-2.5 z-10">
+            <button
+              onClick={() => setMenuOpen(p => !p)}
+              aria-label="القائمة"
+              className="w-10 h-10 rounded-xl border border-gray-200 bg-white
+                         flex items-center justify-center text-primary
+                         hover:bg-primary hover:text-white hover:border-primary
+                         transition-all duration-200"
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+
+            <button
+              onClick={() => setSearchOpen(p => !p)}
+              aria-label="بحث"
+              className="w-10 h-10 rounded-xl border border-gray-200 bg-white
+                         flex items-center justify-center text-primary
+                         hover:bg-primary hover:text-white hover:border-primary
+                         transition-all duration-200"
+            >
+              <Search size={19} />
+            </button>
+          </div>
+
+          {/* وسط — Logo (متجاوب الحجم لتجنب التداخل على الموبايل) */}
+          <Link
+            to="/"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+          >
+            <img
+              src={logo}
+              alt="جيل ونص"
+              className="h-14 sm:h-16 md:h-20 w-auto object-contain"
+            />
+          </Link>
+
+          {/* يمين — Buttons (تم استعادة الحجم والديزاين الأصلي بالكامل، وتختفي فقط في الشاشات الأصغر من sm) */}
+          <div className="hidden sm:flex items-center gap-2.5 z-10">
+            <Link
+              to="/login"
+              className="text-md font-extrabold text-primary
+                         px-5 py-2.5 rounded-xl
+                         border-2 border-primary
+                         hover:bg-primary hover:text-white
+                         transition-all duration-200"
+            >
+              تسجيل الدخول
+            </Link>
+
+            <Link
+              to="/register"
+              className="text-md font-extrabold text-white
+                         px-5 py-2.5 rounded-xl
+                         bg-secondary
+                         shadow-[0_4px_12px_rgba(252,105,85,0.35)]
+                         hover:bg-secondary/85
+                         hover:-translate-y-px
+                         transition-all duration-200"
+            >
+              إنشاء حساب ✦
             </Link>
           </div>
-
-          {/* منتصف الشاشة — بيانات مجلس الإدارة والتحرير */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 text-center flex-1 px-4">
-            
-            {/* رئيس مجلس الإدارة */}
-            <div className="flex flex-col items-center">
-              <span className="text-xs md:text-lg font-black text-primary mb-0.5">رئيس مجلس الإدارة</span>
-              <span className="text-sm md:text-lg font-bold text-secondary whitespace-nowrap">أ.د. هبة شاهين</span>
-            </div>
-
-            {/* فاصل عمودي يظهر في الشاشات الكبيرة فقط */}
-            <div className="hidden md:block h-8 w-px bg-gray-200" />
-
-            {/* المشرف العام */}
-            <div className="flex flex-col items-center">
-              <span className="text-xs md:text-lg font-black text-primary mb-0.5">المشرف العام</span>
-              <span className="text-sm md:text-lg font-bold text-secondary whitespace-nowrap">د. مروة سعيد</span>
-            </div>
-
-            <div className="hidden md:block h-8 w-px bg-gray-200" />
-
-            {/* رئيس التحرير */}
-            <div className="flex flex-col items-center">
-              <span className="text-xs md:text-lg font-black text-primary mb-0.5">رئيس التحرير</span>
-              <span className="text-sm md:text-lg font-bold text-secondary whitespace-nowrap">أ. خلود خالد</span>
-            </div>
-
-          </div>
-
-          {/* أقصى اليسار — كل الأزرار معاً (الحساب + البحث + القائمة) */}
-          <div className="flex items-center gap-3 z-10 flex-row-reverse shrink-0">
-            
-            {/* أزرار التحكم (البحث والقائمة) */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setMenuOpen(p => !p)}
-                aria-label="القائمة"
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white
-                           flex items-center justify-center text-primary
-                           hover:bg-primary hover:text-white hover:border-primary
-                           transition-all duration-200"
-              >
-                {menuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-
-              <button
-                onClick={() => setSearchOpen(p => !p)}
-                aria-label="بحث"
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white
-                           flex items-center justify-center text-primary
-                           hover:bg-primary hover:text-white hover:border-primary
-                           transition-all duration-200"
-              >
-                <Search size={19} />
-              </button>
-            </div>
-
-            {/* أزرار الحساب الشخصي (تختفي في الشاشات الأصغر من sm) */}
-            <div className="hidden sm:flex items-center gap-2">
-              <Link
-                to="/login"
-                className="text-sm md:text-md font-extrabold text-primary
-                           px-4 py-2.5 rounded-xl
-                           border-2 border-primary
-                           hover:bg-primary hover:text-white
-                           transition-all duration-200 whitespace-nowrap"
-              >
-                تسجيل الدخول
-              </Link>
-
-              <Link
-                to="/register"
-                className="text-sm md:text-md font-extrabold text-white
-                           px-4 py-2.5 rounded-xl
-                           bg-secondary
-                           shadow-[0_4px_12px_rgba(252,105,85,0.35)]
-                           hover:bg-secondary/85
-                           hover:-translate-y-px
-                           transition-all duration-200 whitespace-nowrap"
-              >
-                إنشاء حساب ✦
-              </Link>
-            </div>
-
-          </div>
-
         </div>
       </div>
 
-      {/* ======= ROW 2 — Categories ======= */}
+      {/* ======= ROW 2 — Categories (تظهر دائماً + تدعم السكرول الأفقي المريح على الشاشات الصغيرة) ======= */}
       <div className="border-b border-gray-200 bg-white overflow-x-auto scrollbar-none">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
           <ul className="flex items-center lg:justify-between gap-6 lg:gap-0 min-w-max sm:min-w-0">
@@ -178,7 +145,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* ======= Global Menu Drawer ======= */}
+      {/* ======= Global Menu Drawer (يفتح في كل الشاشات الآن) ======= */}
       {menuOpen && (
         <div 
           className="fixed inset-0 top-[138px] sm:top-[139px] md:top-[169px] bg-black/20 backdrop-blur-sm z-40"
@@ -213,7 +180,7 @@ export default function Navbar() {
             </NavLink>
           ))}
 
-          {/* أزرار الموبايل */}
+          {/* أزرار الموبايل تظهر فقط للشاشات الأصغر من sm في حال اختفت الأزرار العلوية */}
           <div className="flex sm:hidden gap-3 mt-4 pt-4 border-t border-gray-100">
             <Link
               to="/login"
