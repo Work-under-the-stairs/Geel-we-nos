@@ -7,7 +7,7 @@ export default function InspirationalGrid({ articles = [] }) {
   if (inspireArticles.length === 0) return null
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-10">
+    <section className="max-w-7xl mx-auto  py-10">
       
       {/* ======= Section Header ======= */}
       <div className="mb-8 border-r-4 border-secondary pr-3">
