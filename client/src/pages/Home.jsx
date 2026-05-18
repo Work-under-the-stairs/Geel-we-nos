@@ -49,7 +49,7 @@ export default function Home() {
         <InspirationalGrid articles={FEATURED_NEWS}/>
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
 
 
     </main>
