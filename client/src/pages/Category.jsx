@@ -1,10 +1,11 @@
 // src/pages/Category.jsx
-import React, { useState } from 'react'; // تم إضافة useState لتتبع الهوفر
+import React from 'react'; 
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import { useParams } from 'react-router-dom';
 import { CATEGORIES } from '../constants/Categories';
 import BreakingNewsBar from '../components/ui/BreakingNewsBar'; 
-import { User } from 'lucide-react'; // استيراد أيقونة المستخدم للكاتب
+import { User } from 'lucide-react'; 
+import PopularArticles from '../components/ui/PopularArticles';
 
 import {
   FEATURED_NEWS,
@@ -13,9 +14,6 @@ import {
 export default function Category({ categoryData, latestArticles, popularArticles }) {
   const { category } = useParams(); 
   const decodedCategoryName = category ? decodeURIComponent(category) : "";
-  
-  // حالة لتخزين معرف الخبر الحالي الموقوف عليه بالماوس (للأكثر قراءة)
-  const [hoveredArticleId, setHoveredArticleId] = useState(null);
 
   const currentCategory = CATEGORIES.find(c => c.name === decodedCategoryName) || { 
     name: decodedCategoryName || "أخبار التكنولوجيا", 
@@ -95,7 +93,6 @@ export default function Category({ categoryData, latestArticles, popularArticles
                     {heroArticle.summary || heroArticle.content}
                   </p>
                   
-                  {/* بيانات الخبر تشمل الكاتب */}
                   <div className="mt-4 flex items-center gap-3 text-xs text-gray-300 font-medium">
                     <span className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-white">
                       <User size={12} />
@@ -110,7 +107,7 @@ export default function Category({ categoryData, latestArticles, popularArticles
               </a>
             )}
 
-            {/* باقي الأخبار على شكل Grid نظيف ومودرن */}
+            {/* باقي الأخبار على شكل Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {gridArticles.map((article) => (
                 <a href={`/news/${article._id || article.id}`} key={article._id || article.id} className="group flex flex-col space-y-3 bg-white rounded-xl overflow-hidden border border-gray-100 p-2 hover:shadow-md transition-all duration-300">
@@ -129,7 +126,6 @@ export default function Category({ categoryData, latestArticles, popularArticles
                       {article.summary || article.content}
                     </p>
                     
-                    {/* الكاتب والتاريخ للخبر في الـ Grid */}
                     <div className="mt-4 flex items-center justify-between text-[11px] text-gray-400 font-medium border-t border-gray-50 pt-3">
                       <span className="flex items-center gap-1 text-gray-600 font-bold">
                         <User size={11} className="text-gray-400" />
@@ -143,90 +139,10 @@ export default function Category({ categoryData, latestArticles, popularArticles
             </div>
           </div>
 
-          {/* الجانب الأيسر (30%): الأكثر قراءة */}
-          {/* الجانب الأيسر (30%): الأكثر قراءة */}
-<div className="lg:col-span-1">
-  <div className="sticky top-32 bg-gray-50/60 rounded-2xl p-6 border border-gray-100/80">
-    <h2 className="text-xl font-extrabold border-r-4 border-[var(--color-secondary)] pr-3 mb-6 text-primary">
-      الأكثر قراءة
-    </h2>
-    
-    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
-      {finalPopular.map((article, index) => {
-        const isFirst = index === 0;
-        const articleId = article._id || article.id;
-        const isHovered = hoveredArticleId === articleId;
-
-        // 1. الخبر الأول يظهر دائماً بصورته مسبقاً كما هو
-        if (isFirst) {
-          return (
-            <a href={`/news/${articleId}`} key={articleId} className="group block space-y-3 border-b border-gray-200/60 pb-5">
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100">
-                <img src={article.images?.[0] || article.image} alt={article.title} className="h-full w-full object-cover" />
-                <span className="absolute top-2 right-2 bg-[var(--color-primary)] text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg shadow-sm">
-                  1
-                </span>
-              </div>
-              <h4 className="text-base font-bold text-gray-900 group-hover:text-secondary group-hover:underline leading-snug">
-                {article.title}
-              </h4>
-              <div className="flex items-center gap-2 mt-2 text-[11px] text-gray-400">
-                <span className="font-semibold text-gray-600">{article.writer || article.author || 'المحرر'}</span>
-                <span>•</span>
-                <span>{article.viewsCount || 24} مشاهدة</span>
-              </div>
-            </a>
-          );
-        }
-
-        // 2. باقي الأخبار: عند الهوفر يفتح كرت الصورة بالداخل بشكل انسيابي ومضمون
-        return (
-          <div
-            key={articleId}
-            className="border-b border-gray-100 last:border-0 pb-3 last:pb-0"
-            onMouseEnter={() => setHoveredArticleId(articleId)}
-            onMouseLeave={() => setHoveredArticleId(null)}
-          >
-            <a 
-              href={`/news/${articleId}`} 
-              className="group flex items-start gap-4 py-2 relative"
-            >
-              <span className={`text-2xl font-black transition-colors w-8 text-center select-none ${isHovered ? 'text-[var(--color-secondary)]' : 'text-gray-200'}`}>
-                {index + 1}
-              </span>
-              <div className="space-y-1 flex-1">
-                <h4 className={`text-sm font-semibold leading-snug line-clamp-2 transition-colors ${isHovered ? 'text-[var(--color-primary)]' : 'text-gray-800'}`}>
-                  {article.title}
-                </h4>
-                
-                <div className="flex items-center gap-2 text-[10px] text-gray-400">
-                  <span className="font-medium text-gray-500">{article.writer || article.author || 'المحرر'}</span>
-                  <span>•</span>
-                  <span>{article.viewsCount || 24} مشاهدة</span>
-                </div>
-              </div>
-            </a>
-
-            {/* الحاوية المتحركة للصورة لتظهر داخل الكرت نفسه بسلاسة */}
-            <div 
-              className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
-                isHovered ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'
-              }`}
-            >
-              <div className="overflow-hidden rounded-xl aspect-[16/9] w-full bg-gray-100 shadow-inner">
-                <img 
-                  src={article.images?.[0] || article.image} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </div>
+          {/* الجانب الأيسر (30%): الأكثر قراءة باستخدام المكون الجديد */}
+          <div className="lg:col-span-1">
+            <PopularArticles articles={finalPopular} />
           </div>
-        );
-      })}
-    </div>
-  </div>
-</div>
 
         </div>
       </main>
