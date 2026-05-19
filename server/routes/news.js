@@ -1,210 +1,119 @@
 const express = require("express");
 const router = express.Router();
-const News = require("../models/News");
+const newsController = require("../controllers/newsController");
 
+// استدعاء ميدل وير الحماية (تأكدي من مطابقة المسميات عندك)
+const { protect, restrictTo } = require("../middleware/authMiddleware"); 
 const upload = require("../middleware/upload");
-const { uploadFile } = require("../helpers/cloudinary_service");
 
-// POST /api/news/add
+// ============================================================
+// 公公开 الروابط العامة (لا تحتاج تسجيل دخول)
+// ============================================================
+
+router.get("/featured", newsController.getFeatured);
+router.get("/trending", newsController.getTrending);
+router.get("/latest", newsController.getLatest);
+router.get("/grouped-by-category", newsController.getGroupedByCategory);
+
+router.get("/category/:categoryName/featured", newsController.getCategoryFeatured);
+router.get("/category/:categoryName", newsController.getCategoryNews);
+router.get("/category/:categoryName/trending", newsController.getCategoryTrending);
+
+router.get("/:id", newsController.getArticleById);
+router.post("/:id/view", newsController.trackView); // تسجيل المشاهدات
+
+// ============================================================
+// 🔐 روابط الإدارة والمنشئين (Protected & Authorized)
+// ============================================================
+
+// إضافة خبر جديد (متاح للكاتب والأدمن)
 router.post(
   "/add",
+  protect,
+  restrictTo("writer", "admin"),
   upload.fields([
     { name: "images", maxCount: 10 },
     { name: "videos", maxCount: 5 },
   ]),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
-      const {
-        title,
-        content,
-        writer,
-        category,
-        important_rate,
-      } = req.body;
+      // الـ Logic بتاع الرفع الخاص بيكِ على كلوديناري هيفضل هنا أو ننقله للكنترولر
+      const { uploadFile } = require("../helpers/cloudinary_service");
+      const News = require("../models/News");
 
       let imageUrls = [];
       let videoUrls = [];
 
-      // Upload images
-      if (req.files.images) {
+      if (req.files?.images) {
         for (const file of req.files.images) {
-          const result = await uploadFile(
-            file.buffer,
-            "news/images",
-            "image"
-          );
-
+          const result = await uploadFile(file.buffer, "news/images", "image");
           imageUrls.push(result.secure_url);
         }
       }
 
-      // Upload videos
-      if (req.files.videos) {
+      if (req.files?.videos) {
         for (const file of req.files.videos) {
-          const result = await uploadFile(
-            file.buffer,
-            "news/videos",
-            "video"
-          );
-
+          const result = await uploadFile(file.buffer, "news/videos", "video");
           videoUrls.push(result.secure_url);
         }
       }
 
       const article = await News.create({
-        title,
-        content,
-        writer,
-        category,
-        important_rate,
+        title: req.body.title,
+        content: req.body.content,
+        writer: req.user._id, // ربط تلقائي بـ ID اليوزر اللي مسجل دخول بدال ما يتبعت ف الـ body
+        category: req.body.category,
+        important_rate: req.body.important_rate,
+        isUrgent: req.body.isUrgent || false,
         images: imageUrls,
         videos: videoUrls,
       });
 
-      res.status(201).json(article);
+      res.status(201).json({ status: "success", data: article });
     } catch (err) {
-      res.status(400).json({
-        message: err.message,
-      });
+      next(err);
     }
   }
 );
 
-// GET /api/news
-router.get("/", async (req, res) => {
+// تعديل وحذف الخبر (متاح للأدمن، أو الكاتب صاحب الخبر نفسه)
+router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
   try {
-    const { category, search, page = 1, limit = 10, sort = "-date" } = req.query;
-    const filter = {};
-    if (category) filter.category = category;
-    if (search) filter.$text = { $search: search };
-
-    const news = await News.find(filter)
-      .populate("writer", "username name avatar")
-      .populate("category", "name")
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-
-    const total = await News.countDocuments(filter);
-    res.json({ total, page: Number(page), limit: Number(limit), news });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /api/news/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const article = await News.findById(req.params.id)
-      .populate("writer", "username name avatar")
-      .populate("category", "name")
-      .populate("comments.writer", "username name avatar")
-      .populate("comments.replies.writer", "username name avatar");
-
-    if (!article) return res.status(404).json({ message: "News not found" });
-    res.json(article);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-
-// PATCH /api/news/:id
-router.patch("/:id", async (req, res) => {
-  try {
+    const News = require("../models/News");
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    const allowed = ["title", "content", "images", "videos", "category", "important_rate"];
+    // تريكة حماية: لو كاتب بيعدل، نتأكد إنه صاحب الخبر، الأدمن يعدل أي حاجة
+    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to edit this article" });
+    }
+
+    const allowed = ["title", "content", "images", "videos", "category", "important_rate", "isUrgent"];
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) article[field] = req.body[field];
     });
 
     await article.save();
-    res.json(article);
+    res.json({ status: "success", data: article });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 });
 
-// DELETE /api/news/:id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
   try {
-    const article = await News.findByIdAndDelete(req.params.id);
-    if (!article) return res.status(404).json({ message: "News not found" });
-    res.json({ message: "Article deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// POST /api/news/:id/comments
-router.post("/:id/comments", async (req, res) => {
-  try {
+    const News = require("../models/News");
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    const { content, writer } = req.body;
-    article.comments.push({ content, writer });
-    await article.save();
-    res.status(201).json(article.comments[article.comments.length - 1]);
+    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to delete this article" });
+    }
+
+    await article.deleteOne();
+    res.json({ status: "success", message: "Article deleted successfully" });
   } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// DELETE /api/news/:id/comments/:commentId
-router.delete("/:id/comments/:commentId", async (req, res) => {
-  try {
-    const article = await News.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "News not found" });
-
-    const comment = article.comments.id(req.params.commentId);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
-
-    comment.deleteOne();
-    await article.save();
-    res.json({ message: "Comment deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// POST /api/news/:id/comments/:commentId/replies
-router.post("/:id/comments/:commentId/replies", async (req, res) => {
-  try {
-    const article = await News.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "News not found" });
-
-    const comment = article.comments.id(req.params.commentId);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
-
-    const { content, writer } = req.body;
-    comment.replies.push({ content, writer });
-    await article.save();
-    res.status(201).json(comment.replies[comment.replies.length - 1]);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// DELETE /api/news/:id/comments/:commentId/replies/:replyId
-router.delete("/:id/comments/:commentId/replies/:replyId", async (req, res) => {
-  try {
-    const article = await News.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "News not found" });
-
-    const comment = article.comments.id(req.params.commentId);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
-
-    const reply = comment.replies.id(req.params.replyId);
-    if (!reply) return res.status(404).json({ message: "Reply not found" });
-
-    reply.deleteOne();
-    await article.save();
-    res.json({ message: "Reply deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 

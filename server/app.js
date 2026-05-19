@@ -1,8 +1,13 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json());
 
 // ─── DB Connection ─────────────────────────────────────────────────
@@ -15,6 +20,8 @@ mongoose
 app.use("/api/news",       require("./routes/news"));
 app.use("/api/users",      require("./routes/users"));
 app.use("/api/categories", require("./routes/categories"));
+app.use("/api/news", require("./routes/commentRoutes"));
+
 
 // ─── Global error handler ──────────────────────────────────────────
 app.use((err, req, res, next) => {

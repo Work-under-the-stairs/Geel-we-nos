@@ -1,38 +1,58 @@
 import {FEATURED_NEWS} from '../data/dummyData'
-import HeroSection from '../components/ui/HeroSection'
-import TrendingRibbon from '../components/ui/TrendingRibbon'
-import MultimediaHub from '../components/ui/MultimediaHub'
-import InspirationalGrid from '../components/ui/InspirationalGrid'
-import CategoriesGrid from '../components/ui/CategoriesGrid'
+import HeroSection from '../components/ui/Home/HeroSection'
+import TrendingRibbon from '../components/ui/Home/TrendingRibbon'
+import MultimediaHub from '../components/ui/Home/MultimediaHub'
+import InspirationalGrid from '../components/ui/Home/InspirationalGrid'
+import CategoriesGrid from '../components/ui/Home/CategoriesGrid'
 import BreakingNewsBar from '../components/ui/BreakingNewsBar'
+import Loading from '../components/layout/Loading'
+import { useFeatured, useGroupedByCategory, useLatest, useTrending } from '../hooks/useArticles'
 
 export default function Home() {
+  const { data: featuredData, isLoading: loadFeatured } = useFeatured(3);
+  const { data: trendingData, isLoading: loadTrending } = useTrending(5);
+  const { data: latestData, isLoading: loadLatest } = useLatest(8);
+  const { data: groupedData, isLoading: loadGrouped } = useGroupedByCategory(4);
+
+  // بنستخرج الـ Array الفعلي من جوه الـ Response Object
+  const featured = featuredData?.data;
+  const trending = trendingData?.data;
+  const latest = latestData?.data;
+  const groupedCategories = groupedData?.data;
+
+  console.log("Featured:", featured);
+  console.log("Trending:", trending);
+  console.log("Latest:", latest);
+  console.log("Grouped by Category:", groupedCategories);
+  if (loadFeatured || loadTrending || loadLatest || loadGrouped) {
+    return <Loading />;
+  }
   return (
     <main>
       
-      <BreakingNewsBar breakingArticles={FEATURED_NEWS} />
+      <BreakingNewsBar breakingArticles={featured} />
 
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
-        <HeroSection articles={FEATURED_NEWS} />
+        <HeroSection articles={featured} />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
-        <TrendingRibbon trendingArticles={FEATURED_NEWS} />
+        <TrendingRibbon trendingArticles={trending} />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-8">
-        <CategoriesGrid articles={FEATURED_NEWS} />
+        <CategoriesGrid articles={groupedCategories} />
       </div>
 
       <div className="bg-primary text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 ">
-          <MultimediaHub multimediaArticles={FEATURED_NEWS} />
+          <MultimediaHub multimediaArticles={groupedCategories["بودكاست"]} />
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 ">
-        <InspirationalGrid articles={FEATURED_NEWS}/>
+        <InspirationalGrid articles={groupedCategories["ألهمني"]} />
       </div>
 
 

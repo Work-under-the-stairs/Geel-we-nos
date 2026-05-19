@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema(
   {
+    newsId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "News",
+      required: [true, "Comment must belong to an article (newsId)"],
+    },
     content: {
       type: String,
       required: [true, "Comment content is required"],
@@ -33,4 +38,7 @@ const commentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = commentSchema;
+// Index سريع عشان لما نفتح صفحة الخبر نجيب الكومنتات بتاعته في أجزاء من الثانية
+commentSchema.index({ newsId: 1, createdAt: -1 });
+
+module.exports = mongoose.model("Comment", commentSchema);

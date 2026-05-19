@@ -1,7 +1,7 @@
 // src/components/sections/HeroSection.jsx
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { formatDate } from '../../utils/dateFormatter'
+import { formatDate } from '../../../utils/dateFormatter'
 
 // ======= SUB-COMPONENT: Sidebar Vertical Sliding Carousel =======
 function SidebarCarousel({ sidebarArticles }) {
@@ -64,21 +64,24 @@ function SidebarCarousel({ sidebarArticles }) {
                 <img
                   src={art.images?.[0]}
                   alt={art.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                  className="w-full h-full object-cover ..."
+                  onError={(e) => { 
+                    e.target.onerror = null;
+                    e.target.src = "/default-news.png"; 
+                  }}/>
               </div>
 
               {/* Enhanced Content area with comfortable line heights */}
               <div className="flex flex-col gap-1 flex-1 min-w-0 py-0.5">
                 <span className="text-secondary font-black text-[11px] uppercase tracking-wider">
-                  {art.category}
+                  {art.category?.name || 'عام'}
                 </span>
                 <h4 className="text-primary font-extrabold text-[14px] sm:text-[15px] leading-snug 
                                line-clamp-2 group-hover:text-secondary transition-colors duration-200">
                   {art.title}
                 </h4>
                 <span className="text-slate-400 text-[12px] font-medium">
-                  {formatDate(art.date)}
+                  {formatDate(art.createdAt)}
                 </span>
               </div>
             </Link>
@@ -93,7 +96,7 @@ function SidebarCarousel({ sidebarArticles }) {
 // ======= MAIN COMPONENT =======
 export default function HeroSection({ articles = [] }) {
   const mainArticle = articles[0]
-  const sidebarArticles = articles.slice(1)
+  const sidebarArticles = articles;
 
   if (!mainArticle) return null
 
@@ -110,12 +113,15 @@ export default function HeroSection({ articles = [] }) {
           >
             {/* Background Image */}
             {mainArticle.images?.[0] ? (
-              <img
-                src={mainArticle.images[0]}
-                alt={mainArticle.title}
-                className="w-full h-full object-cover
-                           group-hover:scale-102 transition-transform duration-700 ease-out"
-              />
+            <img
+              src={articles[0]?.images?.[0]}
+              alt={articles[0]?.title}
+              className="..."
+              onError={(e) => { 
+                e.target.onerror = null;
+                e.target.src = "/default-news.png"; 
+              }}
+            />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary to-primary/60" />
             )}
@@ -129,7 +135,7 @@ export default function HeroSection({ articles = [] }) {
             <div className="absolute bottom-0 right-0 left-0 p-6 md:p-9 flex flex-col items-start gap-3">
               <span className="bg-secondary text-white text-[12px] font-black
                                px-4 py-1.5 rounded-full tracking-wide shadow-sm">
-                {mainArticle.category}
+                {mainArticle.category?.name || 'عام'}
               </span>
 
               <h1 className="text-white font-extrabold leading-snug
@@ -139,9 +145,9 @@ export default function HeroSection({ articles = [] }) {
               </h1>
 
               <div className="flex items-center gap-2 text-white/75 text-[13px] font-medium">
-                <span>{mainArticle.writer}</span>
+                <span>{mainArticle.writer?.name || "كاتب مجهول"}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40 inline-block" />
-                <span>{formatDate(mainArticle.date)}</span>
+                <span>{formatDate(mainArticle.createdAt)}</span>
               </div>
             </div>
           </Link>

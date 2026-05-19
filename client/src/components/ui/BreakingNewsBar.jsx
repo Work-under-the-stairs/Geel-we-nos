@@ -5,7 +5,7 @@ import { Flame } from 'lucide-react'
 export default function BreakingNewsBar({ breakingArticles = [] }) {
   if (breakingArticles.length === 0) return null
 
-  const latestArticles = breakingArticles.slice(0, 5)
+  const latestArticles = breakingArticles
 
   return (
     <div className="w-full bg-gradient-to-r from-orange1 via-orange3 to-orange5 text-white shadow-md relative overflow-hidden select-none py-3" dir="rtl">

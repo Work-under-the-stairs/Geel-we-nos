@@ -1,0 +1,41 @@
+// src/components/ui/Category/NewsGridList.jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { formatDate } from '../../../utils/dateFormatter';
+
+export default function NewsGridList({ extraArticles = [] }) {
+  if (extraArticles.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn" dir="rtl">
+      {extraArticles.map((art) => (
+        <Link 
+          key={art._id}
+          to={`/news/${art._id}`}
+          className="group flex flex-col bg-gray-900/10 hover:bg-gray-900/20 rounded-2xl overflow-hidden border border-white/5 p-3 transition-all duration-300 cursor-pointer"
+        >
+          {/* الصورة */}
+          <div className="aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-800 mb-3">
+            <img
+              src={art.images?.[0]}
+              alt={art.title}
+              className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+              onError={(e) => { e.target.src = "/default-news.png"; }}
+            />
+          </div>
+
+          {/* نصوص الكارت */}
+          <div className="flex flex-col gap-2 flex-1 justify-between p-1">
+            <h4 className="text-primary font-bold text-sm sm:text-base leading-snug group-hover:text-[var(--color-secondary)] transition-colors line-clamp-2">
+              {art.title}
+            </h4>
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-50 mt-2">
+              <span>{art.writer?.name || "جيل ونص"}</span>
+              <span>{formatDate(art.createdAt || art.date)}</span>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}

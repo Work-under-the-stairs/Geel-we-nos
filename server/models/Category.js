@@ -9,6 +9,12 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       maxlength: [50, "Category name cannot exceed 50 characters"],
     },
+    icon_name: {
+      type: String,
+      required: [true, "Category icon name is required"],
+      trim: true,
+      default: "Newspaper", // أيقونة افتراضية في حال مالم يتم تحديد واحدة
+    },
   },
   {
     timestamps: true,
@@ -17,7 +23,7 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-// Virtual populate — news field is derived, not stored
+// Virtual populate
 categorySchema.virtual("news", {
   ref: "News",
   localField: "_id",

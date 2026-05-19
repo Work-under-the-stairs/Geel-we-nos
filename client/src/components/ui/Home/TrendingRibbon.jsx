@@ -16,7 +16,7 @@ export default function TrendingRibbon({ trendingArticles = [] }) {
 
         {/* ======= Trending Items Loop ======= */}
         <div className="flex items-center gap-8 min-w-max">
-          {trendingArticles.slice(0, 5).map((art, idx) => (
+          {Array.isArray(trendingArticles) && trendingArticles.map((art, idx) => (
             <Link
               key={art._id}
               to={`/news/${art._id}`}

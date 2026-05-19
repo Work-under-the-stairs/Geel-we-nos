@@ -2,11 +2,20 @@
 import { Link } from 'react-router-dom'
 import { Mic, Play } from 'lucide-react'
 
-export default function MultimediaHub({ multimediaArticles = [] }) {
-  const podcastArticles = multimediaArticles.filter(a => a.category === 'بودكاست')
+// بنستقبل الـ Object كامل وبنديله اسم مستعار categoryObject جوه الـ Props
+export default function MultimediaHub({ multimediaArticles: categoryObject }) {
+  
+  // 1️⃣ استخراج مصفوفة الأخبار الفعلية بشكل آمن تماماً من جوه الأوبجكت
+  const podcastArticles = categoryObject?.articles || [];
+
+  // 2️⃣ أخذ أول 3 حلقات بودكاست فقط زي ما التصميم مستني 
+  const displayArticles = podcastArticles.slice(0, 3);
+
+  // لو مفيش أي أخبار في قسم بودكاست حالياً، الكومبونانت يختفي بهدوء من غير ما يضرب الشاشة
+  if (displayArticles.length === 0) return null;
 
   return (
-    <section className="w-full bg-primary text-white py-10 md:py-12 my-8 select-none">
+    <section className="w-full bg-primary text-white py-10 md:py-12 my-8 select-none" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
         {/* ======= Section Header ======= */}
@@ -19,7 +28,7 @@ export default function MultimediaHub({ multimediaArticles = [] }) {
 
         {/* ======= Content Grid ======= */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {podcastArticles.slice(0, 3).map((art) => (
+          {displayArticles.map((art) => (
             <Link
               key={art._id}
               to={`/news/${art._id}`}
@@ -31,6 +40,7 @@ export default function MultimediaHub({ multimediaArticles = [] }) {
                   src={art.images?.[0]}
                   alt={art.title}
                   className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                  onError={(e) => { e.target.src = "/default-podcast.png"; }} // حماية ضد الـ 404
                 />
                 {/* Glowing Audio/Video Play Button */}
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -48,7 +58,10 @@ export default function MultimediaHub({ multimediaArticles = [] }) {
                 <h3 className="font-extrabold text-[15px] sm:text-[16px] leading-snug line-clamp-2 text-white group-hover:text-secondary transition-colors">
                   {art.title}
                 </h3>
-                <span className="text-white/50 text-xs font-medium">{art.writer}</span>
+                {/* تأمين طباعة اسم الكاتب سواء كان أوبجكت بعد الـ Populate أو نص عادي */}
+                <span className="text-white/50 text-xs font-medium">
+                  {art.writer?.name || art.writer || "جيل ونص"}
+                </span>
               </div>
             </Link>
           ))}

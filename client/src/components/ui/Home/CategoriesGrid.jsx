@@ -1,13 +1,16 @@
 // src/components/sections/CategoriesGrid.jsx
 import { Link } from 'react-router-dom'
-import { formatDate } from '../../utils/dateFormatter'
+import { formatDate } from '../../../utils/dateFormatter'
 
-export default function CategoriesGrid({ articles = [] }) {
-  // Grouping articles by target categories for layout demonstration
-  const techArticles = articles.filter(a => a.category === 'تكنولوجيا ومهارات')
-  const economyArticles = articles.filter(a => a.category === 'اقتصاد')
-  const healthArticles = articles.filter(a => a.category === 'صحة')
+export default function CategoriesGrid({ articles = {} }) {
+  
+  // الاستخراج المباشر والذكي للأخبار من الأوبجكت المبعوث من الباك إند
+  // الـ articles[categoryName]?.articles بتضمن لو الاسم مش مطابق بالظبط ترجع مصفوفة فاضية بدل ما تضرب
+  const techArticles    = articles['تكنولوجيا ومهارات']?.articles || [];
+  const economyArticles = articles['اقتصاد']?.articles || [];
+  const healthArticles  = articles['صحة']?.articles || [];
 
+  // ربط الداتا مع الاستايل بالثيم المودرن
   const sectionsData = [
     { title: 'تكنولوجيا ومهارات', color: 'border-secondary', data: techArticles },
     { title: 'اقتصاد والمال', color: 'border-primary', data: economyArticles },
@@ -15,11 +18,12 @@ export default function CategoriesGrid({ articles = [] }) {
   ]
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-10">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-10" dir="rtl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         
         {sectionsData.map((sec, idx) => {
           const mainPost = sec.data[0]
+          // جلب المقالين الثاني والثالث للـ List السفلية
           const subPosts = sec.data.slice(1, 3)
 
           return (
@@ -32,20 +36,28 @@ export default function CategoriesGrid({ articles = [] }) {
               </div>
 
               {/* Main Column Article Card */}
-              {mainPost && (
+              {mainPost ? (
                 <Link to={`/news/${mainPost._id}`} className="group block flex-shrink-0 cursor-pointer">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-50 shadow-sm mb-3">
                     <img
                       src={mainPost.images?.[0]}
                       alt={mainPost.title}
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                      onError={(e) => { e.target.src = "/default-news.png"; }} // حماية ضد الـ 404
                     />
                   </div>
                   <h4 className="text-primary font-extrabold text-[16px] leading-snug group-hover:text-secondary transition-colors line-clamp-2">
                     {mainPost.title}
                   </h4>
-                  <p className="text-slate-400 text-xs font-medium mt-1.5">{formatDate(mainPost.date)}</p>
+                  {/* تأمين قراءة التاريخ من الحقل الجديد المعتمد */}
+                  <p className="text-slate-400 text-xs font-medium mt-1.5">
+                    {formatDate(mainPost.createdAt || mainPost.date)}
+                  </p>
                 </Link>
+              ) : (
+                <p className="text-xs text-slate-400 font-light py-4 text-center bg-slate-50/50 rounded-xl border border-dashed">
+                  لا توجد أخبار رئيسية في هذا القسم حالياً.
+                </p>
               )}
 
               {/* Sub Articles List (Titles Only Link) */}
@@ -55,9 +67,17 @@ export default function CategoriesGrid({ articles = [] }) {
                     <h5 className="text-primary font-bold text-[14px] leading-snug group-hover:text-secondary transition-colors line-clamp-2">
                       ✦ {sub.title}
                     </h5>
-                    <span className="text-slate-400 text-[11px] font-medium block mt-1">{formatDate(sub.date)}</span>
+                    <span className="text-slate-400 text-[11px] font-medium block mt-1">
+                      {formatDate(sub.createdAt || sub.date)}
+                    </span>
                   </Link>
                 ))}
+
+                {sec.data.length <= 1 && (
+                  <p className="text-[11px] text-slate-400 font-light text-center py-2">
+                    لا توجد مقالات فرعية أخرى.
+                  </p>
+                )}
               </div>
             </div>
           )

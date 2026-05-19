@@ -1,13 +1,18 @@
 // src/components/sections/InspirationalGrid.jsx
 import { Link } from 'react-router-dom'
 
-export default function InspirationalGrid({ articles = [] }) {
-  const inspireArticles = articles.filter(a => a.category === 'ألهمني').slice(0, 2)
+export default function InspirationalGrid({ articles: categoryObject }) {
+  // 1️⃣ استخراج مصفوفة الأخبار الفعلية بشكل آمن تماماً من جوه الأوبجكت
+  const inspireArticles = categoryObject?.articles || [];
 
-  if (inspireArticles.length === 0) return null
+  // 2️⃣ أخذ أول مقالين فقط زي ما التصميم مستني (.slice مسموحة هنا لأنها مصفوفة حقيقية ومضمونة)
+  const displayArticles = inspireArticles.slice(0, 2);
+
+  // لو مفيش أي أخبار في قسم ألهمني حالياً، الكومبونانت يختفي بهدوء من غير ما يضرب الشاشة
+  if (displayArticles.length === 0) return null;
 
   return (
-    <section className="max-w-7xl mx-auto  py-10">
+    <section className="max-w-7xl mx-auto py-10" dir="rtl">
       
       {/* ======= Section Header ======= */}
       <div className="mb-8 border-r-4 border-secondary pr-3">
@@ -18,7 +23,7 @@ export default function InspirationalGrid({ articles = [] }) {
 
       {/* ======= Cinema Aspect Grid ======= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {inspireArticles.map((art) => (
+        {displayArticles.map((art) => (
           <Link
             key={art._id}
             to={`/news/${art._id}`}
@@ -29,6 +34,7 @@ export default function InspirationalGrid({ articles = [] }) {
               src={art.images?.[0]}
               alt={art.title}
               className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
+              onError={(e) => { e.target.src = "/default-news.png"; }} // حماية ضد أي لينكات صور مكسورة
             />
             
             {/* Cinematic Gradient Mask */}
@@ -36,16 +42,19 @@ export default function InspirationalGrid({ articles = [] }) {
 
             {/* Content Floating on Top of Image */}
             <div className="absolute bottom-0 right-0 left-0 p-6 sm:p-8 flex flex-col items-start gap-2">
+              
+              {/* قراءة اسم القسم بشكل سليم لو كان جاي كـ Object أو الـ String الافتراضي */}
               <span className="bg-white text-primary text-[10px] font-black px-3 py-1 rounded-md tracking-wider uppercase">
-                {art.category}
+                {art.category?.name || "ألهمني"}
               </span>
               
               <h3 className="text-white font-extrabold text-lg sm:text-xl md:text-2xl leading-snug max-w-xl group-hover:text-secondary transition-colors duration-200 drop-shadow-sm">
                 {art.title}
               </h3>
               
+              {/* تأمين قراءة اسم الكاتب بعد الـ Populate الجديد */}
               <span className="text-white/60 text-xs font-medium mt-1">
-                بقلم {art.writer}
+                بقلم: {art.writer?.name || art.writer || "جيل ونص"}
               </span>
             </div>
           </Link>
