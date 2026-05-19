@@ -62,12 +62,12 @@ export default function Footer() {
             </h4>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
               {CATEGORIES.map((cat) => (
-                <li key={cat}>
+                <li key={cat.name}>
                   <Link
-                    to={`/section/${encodeURIComponent(cat)}`}
+                    to={`/${encodeURIComponent(cat.name)}`}
                     className="text-slate-500 hover:text-secondary font-bold text-[14px] transition-colors duration-200 block"
                   >
-                    • {cat}
+                    • {cat.name}
                   </Link>
                 </li>
               ))}

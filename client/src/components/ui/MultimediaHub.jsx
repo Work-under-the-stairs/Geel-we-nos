@@ -22,7 +22,7 @@ export default function MultimediaHub({ multimediaArticles = [] }) {
           {podcastArticles.slice(0, 3).map((art) => (
             <Link
               key={art._id}
-              to={`/article/${art._id}`}
+              to={`/news/${art._id}`}
               className="group relative flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer"
             >
               {/* Thumbnail Container with Play Overlay */}

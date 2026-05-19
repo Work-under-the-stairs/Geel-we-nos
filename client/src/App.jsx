@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Route, Routes } from 'react-router-dom';
@@ -7,6 +8,17 @@ import Category from './pages/Category';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import News from './pages/News';
+=======
+import React from 'react'
+import {Toaster} from 'react-hot-toast'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import Register from './pages/Register'
+import Login from './pages/Login'
+import Category from './pages/Category'
+import Layout from './components/layout/Layout'
+import Home from './pages/Home'
+import ArticleDetail from './pages/ArticleDetail'
+>>>>>>> 4f40e815f0d773c5d9ca9996dcf866495711796b
 
 const App = () => {
   const userData = true; // يمكنكِ لاحقاً ربط هذه القيمة بحالة تسجيل الدخول الحقيقية (Context أو Redux)

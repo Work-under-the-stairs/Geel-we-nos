@@ -32,7 +32,7 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
             {latestArticles.map((art) => (
               <Link
                 key={`first-${art._id}`}
-                to={`/article/${art._id}`}
+                to={`/news/${art._id}`}
                 className="flex items-center gap-2 hover:text-yellow-300 transition-colors duration-200"
               >
                 <span className="text-yellow-400 font-extrabold text-[15px]">✦</span>
@@ -46,7 +46,7 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
             {latestArticles.map((art) => (
               <Link
                 key={`second-${art._id}`}
-                to={`/article/${art._id}`}
+                to={`/news/${art._id}`}
                 className="flex items-center gap-2 hover:text-yellow-300 transition-colors duration-200"
               >
                 <span className="text-yellow-400 font-extrabold text-[15px]">✦</span>

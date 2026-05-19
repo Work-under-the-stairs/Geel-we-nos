@@ -2,6 +2,74 @@ const express = require("express");
 const router = express.Router();
 const News = require("../models/News");
 
+const upload = require("../middleware/upload");
+const { uploadFile } = require("../helpers/cloudinary_service");
+
+// POST /api/news/add
+router.post(
+  "/add",
+  upload.fields([
+    { name: "images", maxCount: 10 },
+    { name: "videos", maxCount: 5 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        title,
+        content,
+        writer,
+        category,
+        important_rate,
+      } = req.body;
+
+      let imageUrls = [];
+      let videoUrls = [];
+
+      // Upload images
+      if (req.files.images) {
+        for (const file of req.files.images) {
+          const result = await uploadFile(
+            file.buffer,
+            "news/images",
+            "image"
+          );
+
+          imageUrls.push(result.secure_url);
+        }
+      }
+
+      // Upload videos
+      if (req.files.videos) {
+        for (const file of req.files.videos) {
+          const result = await uploadFile(
+            file.buffer,
+            "news/videos",
+            "video"
+          );
+
+          videoUrls.push(result.secure_url);
+        }
+      }
+
+      const article = await News.create({
+        title,
+        content,
+        writer,
+        category,
+        important_rate,
+        images: imageUrls,
+        videos: videoUrls,
+      });
+
+      res.status(201).json(article);
+    } catch (err) {
+      res.status(400).json({
+        message: err.message,
+      });
+    }
+  }
+);
+
 // GET /api/news
 router.get("/", async (req, res) => {
   try {
@@ -40,16 +108,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /api/news
-router.post("/add", async (req, res) => {
-  try {
-    const { title, content, writer, images, videos, category, important_rate } = req.body;
-    const article = await News.create({ title, content, writer, images, videos, category, important_rate });
-    res.status(201).json(article);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
 
 // PATCH /api/news/:id
 router.patch("/:id", async (req, res) => {

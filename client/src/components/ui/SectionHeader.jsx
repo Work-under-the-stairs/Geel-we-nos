@@ -8,7 +8,7 @@ export default function SectionHeader({ title, categorySlug }) {
       <h2 className="text-[15px] font-extrabold text-gray-800">{title}</h2>
       {categorySlug && (
         <Link
-          to={`/section/${encodeURIComponent(categorySlug)}`}
+          to={`/${encodeURIComponent(categorySlug)}`}
           className="mr-auto text-[12px] text-secondary font-semibold
                      hover:underline"
         >

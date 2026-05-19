@@ -19,7 +19,7 @@ export default function TrendingRibbon({ trendingArticles = [] }) {
           {trendingArticles.slice(0, 5).map((art, idx) => (
             <Link
               key={art._id}
-              to={`/article/${art._id}`}
+              to={`/news/${art._id}`}
               className="flex items-center gap-3 group cursor-pointer"
             >
               {/* Massive Trend Number */}

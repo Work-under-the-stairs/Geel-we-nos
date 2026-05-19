@@ -21,7 +21,7 @@ export default function InspirationalGrid({ articles = [] }) {
         {inspireArticles.map((art) => (
           <Link
             key={art._id}
-            to={`/article/${art._id}`}
+            to={`/news/${art._id}`}
             className="relative block aspect-[16/9.5] w-full rounded-3xl overflow-hidden group shadow-sm cursor-pointer"
           >
             {/* Smooth Zoom Image Background */}
