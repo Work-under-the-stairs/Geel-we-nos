@@ -3,6 +3,11 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
+    // ✅ جديد
+    firebaseUid: {
+      type: String,
+      default: "",
+    },
     username: {
       type: String,
       required: [true, "Username is required"],
@@ -13,9 +18,10 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned in queries by default
+      required: false,      // ✅ عدّلنا من true لـ false
+      default: "",          // ✅ أضفنا default
+      select: false,
+      // ✅ شلنا minlength لأن Firebase users مش بيبعتوا password
     },
     email: {
       type: String,
@@ -48,9 +54,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
+// ✅ عدّلنا الـ pre-save بحيث يتخطى الهاش لو password فاضي
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
+  if (!this.password || this.password === "") return next(); // ✅ Firebase users
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
