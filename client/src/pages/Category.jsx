@@ -74,38 +74,40 @@ export default function Category({ categoryData, latestArticles, popularArticles
 
             {/* الخبر الرئيسي الضخم */}
             {heroArticle && (
-              <a href={`/news/${heroArticle._id || heroArticle.id}`} className="group relative block overflow-hidden rounded-2xl bg-gray-950 aspect-[16/9] shadow-md">
-                <img 
-                  src={heroArticle.images?.[0] || heroArticle.image} 
-                  alt={heroArticle.title}
-                  className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                
-                <div className="absolute bottom-0 p-6 sm:p-8 w-full">
-                  <span className="text-xs font-bold bg-[var(--color-secondary)] text-white px-3 py-1 rounded-md mb-3 inline-block shadow-sm">
-                    أهم الأخبار
-                  </span>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight group-hover:underline decoration-white/50">
-                    {heroArticle.title}
-                  </h3>
-                  <p className="text-gray-200 text-sm sm:text-base line-clamp-2 max-w-2xl font-light">
-                    {heroArticle.summary || heroArticle.content}
-                  </p>
-                  
-                  <div className="mt-4 flex items-center gap-3 text-xs text-gray-300 font-medium">
-                    <span className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-white">
-                      <User size={12} />
-                      {heroArticle.writer || heroArticle.author || 'المحرر'}
-                    </span>
-                    <span>•</span>
-                    <span>{heroArticle.date}</span>
-                    <span>•</span>
-                    <span>{heroArticle.readTime || '3 دقائق'} قراءة</span>
-                  </div>
-                </div>
-              </a>
-            )}
+  <a href={`/news/${heroArticle._id || heroArticle.id}`} className="group relative block overflow-hidden rounded-2xl bg-gray-950 aspect-[4/3] sm:aspect-[16/9] shadow-md">
+    <img 
+      src={heroArticle.images?.[0] || heroArticle.image} 
+      alt={heroArticle.title}
+      className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+    
+    <div className="absolute bottom-0 p-4 sm:p-8 w-full">
+      <span className="text-[10px] sm:text-xs font-bold bg-[var(--color-secondary)] text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-md mb-2 sm:mb-3 inline-block shadow-sm">
+        أهم الأخبار
+      </span>
+      
+      <h3 className="text-lg sm:text-3xl font-bold text-white mb-1.5 sm:mb-3 leading-tight group-hover:underline decoration-white/50 line-clamp-2">
+        {heroArticle.title}
+      </h3>
+      
+      <p className="text-gray-200 text-xs sm:text-base line-clamp-1 sm:line-clamp-2 max-w-2xl font-light">
+        {heroArticle.summary || heroArticle.content}
+      </p>
+      
+      <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-300 font-medium">
+        <span className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-white">
+          <User size={10} className="sm:w-3 sm:h-3" />
+          {heroArticle.writer || heroArticle.author || 'المحرر'}
+        </span>
+        <span>•</span>
+        <span>{heroArticle.date}</span>
+        <span className="hidden xs:inline">•</span>
+        <span className="hidden xs:inline">{heroArticle.readTime || '3 دقائق'} قراءة</span>
+      </div>
+    </div>
+  </a>
+)}
 
             {/* باقي الأخبار على شكل Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

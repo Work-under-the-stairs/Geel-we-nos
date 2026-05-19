@@ -18,7 +18,7 @@ export default function ArticleDetail() {
   const [activeMedia, setActiveMedia] = useState({ type: 'image', url: article.images?.[0] });
   const [newComment, setNewComment] = useState("");
   const [commentsList, setCommentsList] = useState(article.comments || []);
-  console.log("Article Data:", article.comments); // للتأكد من جلب البيانات بشكل صحيح
+  // console.log("Article Data:", article.comments); // للتأكد من جلب البيانات بشكل صحيح
 
   // داتا وهمية للـ Sidebar (الأكثر قراءة)
   const popularArticlesData = FEATURED_NEWS.slice(1, 7);
