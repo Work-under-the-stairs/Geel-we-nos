@@ -33,7 +33,7 @@ export default function CategoriesGrid({ articles = [] }) {
 
               {/* Main Column Article Card */}
               {mainPost && (
-                <Link to={`/article/${mainPost._id}`} className="group block flex-shrink-0 cursor-pointer">
+                <Link to={`/news/${mainPost._id}`} className="group block flex-shrink-0 cursor-pointer">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-50 shadow-sm mb-3">
                     <img
                       src={mainPost.images?.[0]}
@@ -51,7 +51,7 @@ export default function CategoriesGrid({ articles = [] }) {
               {/* Sub Articles List (Titles Only Link) */}
               <div className="flex flex-col gap-4 border-t border-slate-100 pt-4">
                 {subPosts.map(sub => (
-                  <Link key={sub._id} to={`/article/${sub._id}`} className="group block cursor-pointer">
+                  <Link key={sub._id} to={`/news/${sub._id}`} className="group block cursor-pointer">
                     <h5 className="text-primary font-bold text-[14px] leading-snug group-hover:text-secondary transition-colors line-clamp-2">
                       ✦ {sub.title}
                     </h5>

@@ -56,7 +56,7 @@ function SidebarCarousel({ sidebarArticles }) {
           {doubledArticles.map((art, idx) => (
             <Link
               key={`${art._id}-${idx}`}
-              to={`/article/${art._id}`}
+              to={`/news/${art._id}`}
               className="h-[120px] mb-4 flex items-center gap-4 bg-transparent border-b border-slate-100 pb-4 last:border-0 last:mb-0 group cursor-pointer flex-shrink-0"
             >
               {/* Enlarged Image Container */}
@@ -104,7 +104,7 @@ export default function HeroSection({ articles = [] }) {
         {/* ======= Right Side: Large Featured Main Card ======= */}
         <div className="lg:col-span-2 flex">
           <Link
-            to={`/article/${mainArticle._id}`}
+            to={`/news/${mainArticle._id}`}
             className="relative block w-full rounded-3xl overflow-hidden
                        aspect-[16/10] sm:aspect-[16/8] lg:aspect-[16/9.3] cursor-pointer group shadow-sm"
           >

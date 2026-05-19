@@ -64,7 +64,7 @@ export default function Footer() {
               {CATEGORIES.map((cat) => (
                 <li key={cat.name}>
                   <Link
-                    to={`/section/${encodeURIComponent(cat.name)}`}
+                    to={`/${encodeURIComponent(cat.name)}`}
                     className="text-slate-500 hover:text-secondary font-bold text-[14px] transition-colors duration-200 block"
                   >
                     • {cat.name}
