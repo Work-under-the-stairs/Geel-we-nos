@@ -6,20 +6,15 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const app = express(); // 2. إنشاء app أولاً
 
-// 3. الآن استخدمي الـ middleware
+const app = express();
+
 app.use(cors({
   origin: "http://localhost:5173",
   methods: ["GET", "POST", "PATCH", "DELETE"],
   credentials: true,
 }));
 
-const app = express();
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
 app.use(express.json());
 
 // ─── الفحص التلقائي لملف .env ────────────────────────────────────────
