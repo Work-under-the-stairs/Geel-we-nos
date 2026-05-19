@@ -6,7 +6,7 @@ import Login from './pages/Login'
 import Category from './pages/Category'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
-import News from './pages/News'
+import ArticleDetail from './pages/ArticleDetail'
 
 const App = () => {
   const userData = true;
@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/" element={userData? <Layout/> : <Login/>} >
           <Route index element={<Home/>}/>
           <Route path="/:category" element={<Category/>} />
-          <Route path="/news/:id" element={<News/>}/>
+          <Route path="/news/:id" element={<ArticleDetail/>}/>
 
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
