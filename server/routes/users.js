@@ -17,6 +17,32 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/register-db", async (req, res) => {
+  try {
+    const { firebaseUid, username, email, name, avatar } = req.body;
+
+    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    if (existing) {
+      return res.status(409).json({ message: "البريد الإلكتروني أو اسم المستخدم مستخدم بالفعل." });
+    }
+
+    const user = await User.create({
+      firebaseUid,
+      username,
+      email,
+      name,
+      avatar: avatar || "",
+      role: "user",
+    });
+
+    const userObj = user.toObject();
+    res.status(201).json(userObj);
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // GET /api/users/:id
 router.get("/:id", async (req, res) => {
   try {
@@ -28,6 +54,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/me/:uid", async (req, res) => {
+  try {
+    // نبحث في MongoDB عن المستخدم الذي يملك هذا الـ firebaseUid
+    const user = await User.findOne({ firebaseUid: req.params.uid });
+    
+    if (!user) {
+      return res.status(404).json({ message: "المستخدم غير موجود في قاعدة البيانات" });
+    }
+    
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 // PATCH /api/users/:id
 router.patch("/:id", async (req, res) => {
   try {
