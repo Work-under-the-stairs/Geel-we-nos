@@ -23,6 +23,8 @@ export const adminService = {
   // ============ إدارة المستخدمين ============
   getUsers: (page = 1, limit = 10, search = '', role = '') => 
     api.get(`/users?page=${page}&limit=${limit}&search=${search}&role=${role}`),
+
+  updateUser: (id, data) => api.patch(`/users/${id}`, data),
   
   deleteUser: (id) => api.delete(`/users/${id}`),
 
