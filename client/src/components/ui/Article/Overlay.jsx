@@ -3,7 +3,7 @@ import {
   Bold, Italic, Underline, Heading1, Heading2,
   List, ListOrdered, Quote, Image as ImageIcon, Video, X, Trash2,
   Upload, Flame, Loader2, Save, ChevronLeft,
-  AlignRight, AlignCenter, AlignLeft
+  AlignRight, AlignCenter, AlignLeft, Check // ← تم تجميع الـ Check هنا بالأعلى بشكل صحيح
 } from "lucide-react";
 import { EditorContent } from "@tiptap/react";
 
@@ -48,9 +48,6 @@ export function ToolbarButton({ active, onClick, children }) {
 // =============================================================
 // SIDEBAR STEPPER WITH EMBEDDED WRITER TIPS
 // =============================================================
-
-import { Check } from "lucide-react"; // استيراد أيقونة الصح لضمان ثبات التصميم
-
 export function SidebarStepper({ basicInfoRef, contentRef, mediaRef, importanceRef, publishRef, scrollToSection }) {
   const steps = [
     { title: "المعلومات الأساسية", ref: basicInfoRef },
