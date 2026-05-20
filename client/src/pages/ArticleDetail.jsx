@@ -30,7 +30,7 @@ const CommentItem = ({ comment, articleId }) => {
     if (!replyText.trim()) return;
 
     // افترضت إن الباك إند بيستقبل حقل اسمه text أو commentText (عدليها حسب الـ Schema بتاعتك)
-    submitReply({ text: replyText }, {
+    submitReply({ content: replyText }, {
       onSuccess: () => {
         setReplyText("");
         setIsReplying(false); // نقفل مربع الرد بعد النجاح
@@ -43,13 +43,13 @@ const CommentItem = ({ comment, articleId }) => {
       {/* التعليق الأساسي */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-sm text-gray-800">{comment.user?.name || comment.userName || "مستخدم"}</span>
+          <span className="font-bold text-sm text-gray-800">{comment.writer?.name || "مستخدم"}</span>
           <span className="text-[11px] text-gray-400">
             {new Date(comment.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
           </span>
         </div>
-        <p className="text-gray-600 text-sm leading-relaxed font-light">
-          {comment.text || comment.commentText}
+        <p className="text-gray-600 text-md ">
+          {comment.content}
         </p>
         
         {/* زرار الرد */}
@@ -89,13 +89,13 @@ const CommentItem = ({ comment, articleId }) => {
           {comment.replies.map((reply) => (
             <div key={reply._id} className="bg-gray-50/80 p-3 rounded-xl">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-xs text-gray-800">{reply.user?.name || reply.userName || "مستخدم"}</span>
+                <span className="font-bold text-xs text-gray-800">{reply.writer?.name || "مستخدم"}</span>
                 <span className="text-[10px] text-gray-400">
                   {new Date(reply.createdAt).toLocaleDateString('ar-EG')}
                 </span>
               </div>
-              <p className="text-gray-600 text-xs leading-relaxed font-light">
-                {reply.text || reply.commentText}
+              <p className="text-gray-600 text-md leading-relaxed font-light">
+                {reply.content}
               </p>
             </div>
           ))}
@@ -118,7 +118,10 @@ export default function ArticleDetail() {
   const { data: article, isLoading: loadArticle } = useArticle(id);
   const { data: commentsData, isLoading: loadComments } = useComments(id);
   const { data: popularArticlesData } = useTrending(5); // جلب الأكثر قراءة للسايدبار
-  
+
+  console.log("Article Data:", article); // لوج للتأكد من جلب بيانات الخبر
+  console.log("Comments Data:", commentsData); // لوج للتأكد من جلب تعليقات الخبر
+
   const { mutate: submitComment, isPending: isCommenting } = useAddComment(id);
 
   // === 2. حالات التحكم في الصفحة ===

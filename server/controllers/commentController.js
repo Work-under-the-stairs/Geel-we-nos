@@ -14,16 +14,30 @@ const Comment = require("../models/Comment");
 //   }
 // };
 exports.getCommentsByArticle = async (req, res, next) => {
-  console.log("المقال المطلوب جلب تعليقاته (ID):", req.params.articleId); // 👈 أضيفي هذا
   try {
-    const comments = await Comment.find({ newsId: req.params.articleId });
-    console.log("عدد التعليقات التي تم العثور عليها:", comments.length); // 👈 أضيفي هذا
-    
-    res.status(200).json({ status: "success", data: comments });
+    const comments = await Comment.find({ newsId: req.params.articleId })
+      .populate("writer", "name avatar")
+      .populate("replies.writer", "name avatar")
+      .sort({ createdAt: -1 }); // ترتيب التعليقات الرئيسية (الأحدث أولاً)
+
+    // ترتيب الردود داخل كل تعليق
+    const processedComments = comments.map(comment => {
+      // بنعمل نسخة من التعليق عشان نقدر نرتب الردود
+      const commentObj = comment.toObject(); 
+      
+      if (commentObj.replies && commentObj.replies.length > 0) {
+        commentObj.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      
+      return commentObj;
+    });
+
+    res.status(200).json({ status: "success", data: processedComments });
   } catch (err) {
     next(err);
   }
 };
+
 exports.addComment = async (req, res, next) => {
   try {
     const { text } = req.body; // التأكد من أن الفرونت إند يرسل 'text'
