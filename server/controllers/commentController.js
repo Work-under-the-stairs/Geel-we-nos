@@ -1,82 +1,85 @@
 const Comment = require("../models/Comment");
 
-// ============================================================
-// 💬 1. جلب تعليقات خبر معين (Get Comments)
-// ============================================================
+// 1. جلب كل الكومنتات الخاصة بمقال معين
 exports.getCommentsByArticle = async (req, res, next) => {
   try {
-    const { articleId } = req.params;
+    const comments = await Comment.find({ newsId: req.params.articleId })
+      .populate("writer", "name avatar") // جلب اسم وصورة كاتب الكومنت
+      .populate("replies.writer", "name avatar") // جلب اسم وصورة أصحاب الردود
+      .sort({ createdAt: -1 });
 
-    // بنجيب الكومنتات اللي تخص الـ newsId ده
-    const comments = await Comment.find({ newsId: articleId })
-      .populate("writer", "name avatar") // بيانات كاتب الكومنت الأساسي
-      .populate("replies.writer", "name avatar") // تريكة ممتازة: بيانات كاتب الردود برضه!
-      .sort({ createdAt: -1 }); // الأحدث أولاً من فوق
-
-    res.status(200).json({ status: "success", count: comments.length, data: comments });
-  } catch (error) {
-    next(error);
+    res.status(200).json({ status: "success", results: comments.length, data: comments });
+  } catch (err) {
+    next(err);
   }
 };
 
-// ============================================================
-// ✍️ 2. إضافة تعليق جديد (Add Comment)
-// ============================================================
+// 2. إضافة كومنت جديد
 exports.addComment = async (req, res, next) => {
   try {
-    const { articleId } = req.params;
     const { content } = req.body;
-    
-    // اليوزر هيكون جاي من الـ Auth Middleware (اليوزر اللي مسجل دخول)
-    const writerId = req.user._id; 
+    const { articleId } = req.params;
 
+    // نقوم بإنشاء الكومنت باستخدام الـ writer من الـ req.user (الذي جاء من الـ protect middleware)
     const newComment = await Comment.create({
       newsId: articleId,
       content,
-      writer: writerId,
+      writer: req.user._id, 
     });
 
-    // عمل populate سريع للكومنت الجديد قبل ما نرجعه للفرونت إند علشان يعرضه فوراً
+    // جلب بيانات الكاتب فوراً للرد بها على الفرونت إند
     await newComment.populate("writer", "name avatar");
 
     res.status(201).json({ status: "success", data: newComment });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-// ============================================================
-// ↪️ 3. إضافة رد على تعليق (Add Reply)
-// ============================================================
+// 3. إضافة رد (Reply) على كومنت
 exports.addReply = async (req, res, next) => {
   try {
-    const { commentId } = req.params; // الـ ID بتاع الكومنت الأب
     const { content } = req.body;
-    const writerId = req.user._id; // اليوزر اللي باعت الرد
+    const { commentId } = req.params;
 
-    // بنعمل تحديث للكومنت الأب ونضيف الرد جوه مصفوفة الـ replies
-    const updatedComment = await Comment.findByIdAndUpdate(
-      commentId,
-      {
-        $push: {
-          replies: {
-            content,
-            writer: writerId,
-            createdAt: new Date(),
-          },
-        },
-      },
-      { new: true, runValidators: true } // يرجع الكومنت بعد التحديث ويشغل الـ Validation
-    )
-    .populate("writer", "name avatar")
-    .populate("replies.writer", "name avatar");
-
-    if (!updatedComment) {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    res.status(201).json({ status: "success", data: updatedComment });
-  } catch (error) {
-    next(error);
+    // إضافة الرد لمصفوفة الردود
+    const reply = {
+      content,
+      writer: req.user._id, // المستخدم الحالي
+      createdAt: new Date(),
+    };
+
+    comment.replies.push(reply);
+    await comment.save();
+
+    // جلب بيانات الرد المحدثة
+    await comment.populate("replies.writer", "name avatar");
+
+    res.status(201).json({ status: "success", data: comment });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 4. حذف كومنت
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+    // التأكد من أن المستخدم هو صاحب الكومنت أو أدمن
+    if (comment.writer.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this comment" });
+    }
+
+    await comment.deleteOne();
+    res.json({ status: "success", message: "Comment deleted successfully" });
+  } catch (err) {
+    next(err);
   }
 };

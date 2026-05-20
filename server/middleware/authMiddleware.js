@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+const admin = require("firebase-admin");
 const User = require("../models/User");
 
 // 1️⃣ ميدل وير لحماية الروتس (تأكيد تسجيل الدخول)
@@ -6,7 +6,7 @@ const protect = async (req, res, next) => {
   try {
     let token;
 
-    // التأكد إذا كان التوكن مبعوث في الـ Headers بالشكل الصحيح (Bearer Token)
+    // استخراج التوكين من الهيدر (Bearer Token)
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -14,7 +14,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    // لو مفيش توكن مبعوث
+    // إذا لم يوجد توكن
     if (!token) {
       return res.status(401).json({
         status: "fail",
@@ -22,26 +22,28 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 2. التحقق من صحة التوكن (Verify Token)
-    // تأكدي إن عندك JWT_SECRET متconfig في ملف الـ .env
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "super-secret-key-geel-we-nos");
+    // التحقق من التوكين عبر Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // 3. التأكد إن اليوزر صاحب التوكن لسه موجود في الداتابيز ومتمسحش
-    const currentUser = await User.findById(decoded.id);
+    // البحث عن المستخدم في MongoDB باستخدام الـ uid القادم من Firebase
+    // تأكدي أن الـ User schema يحتوي على حقل firebaseUid
+    const currentUser = await User.findOne({ firebaseUid: decodedToken.uid });
+
     if (!currentUser) {
       return res.status(401).json({
         status: "fail",
-        message: "اليوزر صاحب هذا التوكن لم يعد موجوداً في النظام.",
+        message: "المستخدم غير موجود في النظام.",
       });
     }
 
-    // 4. تمرير بيانات المستخدم للـ Request المكمل للـ Route اللي بعده
+    // تمرير بيانات المستخدم للـ Request لاستخدامها لاحقاً في الـ Controllers
     req.user = currentUser;
     next();
   } catch (error) {
+    console.error("Auth Middleware Error:", error);
     return res.status(401).json({
       status: "fail",
-      message: "التوكن غير صحيح أو منتهي الصلاحية، يرجى تسجيل الدخول مجدداً.",
+      message: "التوكن غير صالح أو منتهي الصلاحية، يرجى تسجيل الدخول مجدداً.",
     });
   }
 };
@@ -49,8 +51,8 @@ const protect = async (req, res, next) => {
 // 2️⃣ ميدل وير للتحقق من الصلاحيات (أدمن، كاتب، إلخ)
 const restrictTo = (...roles) => {
   return (req, res, next) => {
-    // req.user جاي جاهز ومضمون من ميدل وير protect اللي بيشتغل قبله علطول
-    if (!roles.includes(req.user.role)) {
+    // req.user مضمون هنا بفضل ميدل وير protect الذي يعمل قبله
+    if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         status: "fail",
         message: "ليس لديك الصلاحية للقيام بهذا الإجراء على الموقع.",

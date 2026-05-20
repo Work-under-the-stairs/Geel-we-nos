@@ -43,17 +43,6 @@ router.post("/register-db", async (req, res) => {
   }
 });
 
-// GET /api/users/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
 router.get("/me/:uid", async (req, res) => {
   try {
     // نبحث في MongoDB عن المستخدم الذي يملك هذا الـ firebaseUid
@@ -68,6 +57,19 @@ router.get("/me/:uid", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// GET /api/users/:id
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // PATCH /api/users/:id
 router.patch("/:id", async (req, res) => {
   try {

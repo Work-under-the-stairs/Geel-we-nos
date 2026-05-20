@@ -1,10 +1,13 @@
 require("dotenv").config();
+// تهيئة Firebase Admin في بداية التطبيق لربطه بالـ Middleware
+require("./config/firebaseAdmin"); 
+
 const fs = require("fs");
 const path = require("path");
-const express = require("express"); // 1. تعريفه في البداية
+const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const ImageKit = require("imagekit");
+const { ImageKit } = require("@imagekit/nodejs");
 const crypto = require("crypto");
 
 const app = express();
@@ -22,14 +25,9 @@ app.use(express.json());
 // =========================
 
 const imagekit = new ImageKit({
-  publicKey:
-    process.env.IMAGEKIT_PUBLIC_KEY,
-
-  privateKey:
-    process.env.IMAGEKIT_PRIVATE_KEY,
-
-  urlEndpoint:
-    process.env.IMAGEKIT_URL_ENDPOINT,
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
 // =========================
@@ -40,24 +38,12 @@ app.get(
   "/api/imagekit/auth",
   (req, res) => {
     try {
-      const token =
-        req.query.token ||
-        crypto.randomUUID();
-
-      const expire =
-        req.query.expire ||
-        Math.floor(Date.now() / 1000) +
-          30 * 60;
-
-      const privateKey =
-        process.env
-          .IMAGEKIT_PRIVATE_KEY;
+      const token = req.query.token || crypto.randomUUID();
+      const expire = req.query.expire || Math.floor(Date.now() / 1000) + 30 * 60;
+      const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
 
       const signature = crypto
-        .createHmac(
-          "sha1",
-          privateKey
-        )
+        .createHmac("sha1", privateKey)
         .update(token + expire)
         .digest("hex");
 
@@ -67,19 +53,11 @@ app.get(
         signature,
       });
     } catch (error) {
-      console.error(
-        "ImageKit auth error:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "ImageKit auth failed",
-      });
+      console.error("ImageKit auth error:", error);
+      res.status(500).json({ message: "ImageKit auth failed" });
     }
   }
 );
-
 
 // ─── DB Connection ─────────────────────────────────────────────────
 mongoose
@@ -94,8 +72,7 @@ mongoose
 app.use("/api/news",       require("./routes/news"));
 app.use("/api/users",      require("./routes/users"));
 app.use("/api/categories", require("./routes/categories"));
-app.use("/api/news", require("./routes/commentRoutes"));
-
+app.use("/api/news",       require("./routes/commentRoutes"));
 
 // ─── Global error handler ──────────────────────────────────────────
 app.use((err, req, res, next) => {
