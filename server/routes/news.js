@@ -96,16 +96,16 @@ router.post(
 );
 
 // تعديل الخبر (متاح للأدمن، أو الكاتب صاحب الخبر نفسه)
-router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const News = require("../models/News");
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    // تريكة حماية: لو كاتب بيعدل، نتأكد إنه صاحب الخبر، الأدمن يعدل أي حاجة
-    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "You are not authorized to edit this article" });
-    }
+    // // تريكة حماية: لو كاتب بيعدل، نتأكد إنه صاحب الخبر، الأدمن يعدل أي حاجة
+    // if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({ message: "You are not authorized to edit this article" });
+    // }
 
     // القائمة البيضاء للحقول المسموح بتعديلها لتشمل الحقول المحدثة
     const allowed = [
