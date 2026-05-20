@@ -4,8 +4,8 @@ const path = require("path");
 const express = require("express"); // 1. تعريفه في البداية
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
-
+const ImageKit = require("imagekit");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -17,17 +17,69 @@ app.use(cors({
 
 app.use(express.json());
 
-// ─── الفحص التلقائي لملف .env ────────────────────────────────────────
-const envPath = path.join(__dirname, ".env");
-if (!fs.existsSync(envPath)) {
-  const defaultEnvContent = `PORT=5000
-MONGO_URI=mongodb://jeelwenos_db_user:g4q43UFfbSYTgrus@ac-wkbjlsw-shard-00-00.iylvrbz.mongodb.net:27017,ac-wkbjlsw-shard-00-01.iylvrbz.mongodb.net:27017,ac-wkbjlsw-shard-00-02.iylvrbz.mongodb.net:27017/?ssl=true&replicaSet=atlas-o7vt8j-shard-0&authSource=admin&appName=jeelwenos
-CLOUDINARY_CLOUD_NAME=dtjgjznfi
-CLOUDINARY_API_KEY=213111789736113
-CLOUDINARY_API_SECRET=oGqqfd4cu38kSyx8sdZNJLwPq8o\n`;
-  fs.writeFileSync(envPath, defaultEnvContent, "utf8");
-  console.log("⚠️ ملف .env تم إنشاؤه تلقائياً!");
-}
+// =========================
+// IMAGEKIT CONFIG
+// =========================
+
+const imagekit = new ImageKit({
+  publicKey:
+    process.env.IMAGEKIT_PUBLIC_KEY,
+
+  privateKey:
+    process.env.IMAGEKIT_PRIVATE_KEY,
+
+  urlEndpoint:
+    process.env.IMAGEKIT_URL_ENDPOINT,
+});
+
+// =========================
+// IMAGEKIT AUTH ROUTE
+// =========================
+
+app.get(
+  "/api/imagekit/auth",
+  (req, res) => {
+    try {
+      const token =
+        req.query.token ||
+        crypto.randomUUID();
+
+      const expire =
+        req.query.expire ||
+        Math.floor(Date.now() / 1000) +
+          30 * 60;
+
+      const privateKey =
+        process.env
+          .IMAGEKIT_PRIVATE_KEY;
+
+      const signature = crypto
+        .createHmac(
+          "sha1",
+          privateKey
+        )
+        .update(token + expire)
+        .digest("hex");
+
+      res.json({
+        token,
+        expire,
+        signature,
+      });
+    } catch (error) {
+      console.error(
+        "ImageKit auth error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "ImageKit auth failed",
+      });
+    }
+  }
+);
+
 
 // ─── DB Connection ─────────────────────────────────────────────────
 mongoose
