@@ -10,6 +10,7 @@ import ArticleDetail from './pages/ArticleDetail'
 import AdminDashboard from './pages/AdminDashboard'
 import AddArticle from './pages/AddArticle'
 import { isAuthenticated,isAdmin } from './utils/auth';
+import EditArticle from './pages/EditArticle'
 
 const App = () => {
   const userData = isAuthenticated(); // يمكنكِ لاحقاً ربط هذه القيمة بحالة تسجيل الدخول الحقيقية (Context أو Redux)
@@ -29,6 +30,7 @@ const App = () => {
         </Route>
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />
+        <Route path="/edit/article/:id" element={isAdmin() ? <EditArticle/> : <Navigate to="/" replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
