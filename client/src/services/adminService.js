@@ -25,4 +25,10 @@ export const adminService = {
     api.get(`/users?page=${page}&limit=${limit}&search=${search}&role=${role}`),
   
   deleteUser: (id) => api.delete(`/users/${id}`),
+
+  
+  getCategories: () => api.get('/categories'), 
+  createCategory: (data) => api.post('/categories', data),
+  updateCategory: (id, data) => api.patch(`/categories/${id}`, data),
+  deleteCategory: (id) => api.delete(`/categories/${id}`),
 }

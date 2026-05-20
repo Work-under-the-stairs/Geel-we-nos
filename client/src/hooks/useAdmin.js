@@ -90,3 +90,45 @@ export const useAdminUsers = (filters = { page: 1, limit: 10, search: '', role: 
     staleTime: 1000 * 60 * 2,
   });
 };
+
+export const useCategories = () => {
+  return useQuery({
+    queryKey: ['admin', 'categories'],
+    queryFn: () => adminService.getCategories().then(res => res.data),
+    staleTime: 1000 * 60 * 10,
+  });
+};
+
+export const useAddCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => adminService.createCategory(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard });
+    },
+  });
+};
+
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    // 👇 التعديل ده مهم عشان React Query V5 بياخد Object واحد
+    mutationFn: ({ id, data }) => adminService.updateCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard });
+    },
+  });
+};
+
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => adminService.deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard });
+    },
+  });
+};

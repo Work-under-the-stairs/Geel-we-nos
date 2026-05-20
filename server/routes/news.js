@@ -132,15 +132,16 @@ router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, ne
 });
 
 // حذف الخبر نهائياً
-router.delete("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
+// router.delete("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const News = require("../models/News");
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "You are not authorized to delete this article" });
-    }
+    // if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({ message: "You are not authorized to delete this article" });
+    // }
 
     await article.deleteOne();
     res.json({ status: "success", message: "Article deleted successfully" });

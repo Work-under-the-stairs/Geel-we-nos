@@ -181,6 +181,34 @@ exports.getDashboardSummary = async (req, res) => {
     ]);
     const totalViews = totalViewsResult.length > 0 ? totalViewsResult[0].totalViews : 0;
 
+    const categoryStats = await News.aggregate([
+    {
+        $lookup: {
+        from: "categories", // 👈 اسم الـ Collection بتاع الأقسام في الداتابيز (غالباً بيكون categories)
+        localField: "category",
+        foreignField: "_id",
+        as: "catInfo"
+        }
+    },
+    { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
+    {
+        $group: {
+        _id: "$catInfo.name", // 👈 لو اسم القسم عندك متسجل في حقل title بدل name، غيريها لـ $catInfo.title
+        count: { $sum: 1 }
+        }
+    },
+    { $sort: { count: -1 } } // ترتيب من الأكبر للأصغر
+    ]);
+
+    // 2. تظبيط الألوان والنسبة المئوية للفرونت اند
+    const colors = ["bg-[#FF6347]", "bg-[#2E8B57]", "bg-[#4682B4]", "bg-[#DAA520]", "bg-[#BA55D3]", "bg-[#A9A9A9]"];
+    const categoryDistribution = categoryStats.map((item, index) => ({
+    name: item._id || "غير مصنف",
+    count: item.count,
+    percentage: totalNews > 0 ? Math.round((item.count / totalNews) * 100) : 0,
+    color: colors[index % colors.length]
+    }));
+
     res.json({
       data: {
         topStats: [
@@ -207,7 +235,7 @@ exports.getDashboardSummary = async (req, res) => {
           views: news.views || 0,
           image: (news.images && news.images.length > 0) ? news.images[0] : "https://via.placeholder.com/150"
         })),
-        categoryDistribution: [],
+        categoryDistribution: categoryDistribution,
         quickStats: [] 
       }
     });

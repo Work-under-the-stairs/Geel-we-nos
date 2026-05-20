@@ -20,10 +20,10 @@ export default function Home() {
   const latest = latestData || [];
   const groupedCategories = groupedData || {};
 
-  console.log("Featured:", featured);
-  console.log("Trending:", trending);
-  console.log("Latest:", latest);
-  console.log("Grouped by Category:", groupedCategories);
+  // console.log("Featured:", featured);
+  // console.log("Trending:", trending);
+  // console.log("Latest:", latest);
+  // console.log("Grouped by Category:", groupedCategories);
 
   if (loadFeatured || loadTrending || loadLatest || loadGrouped) {
     return <Loading />;

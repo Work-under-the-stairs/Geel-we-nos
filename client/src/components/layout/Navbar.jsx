@@ -1,10 +1,9 @@
-// src/components/layout/Navbar.jsx
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { CATEGORIES } from '../../constants/Categories'
+import { data, Link, NavLink } from 'react-router-dom'
 import logo from '/images/logo.jpeg'
 import { Search, Menu, X, Home } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
+import { useCategories } from '../../hooks/useAdmin' // 👈 استدعاء الهوك
 
 const NavIcon = ({ name, size = 16, className = "" }) => {
   const IconComponent = LucideIcons[name]
@@ -17,7 +16,9 @@ const NavIcon = ({ name, size = 16, className = "" }) => {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-
+  
+  // 👈 استدعاء الداتا من الداتابيز
+  const { data: categories = [], isLoading } = useCategories()
   return (
     // تم تحويل الحاوية الرئيسية لتأخذ حيز الصف الأول الثابت منعاً لتداخل العناصر تحته
     <header className="w-full select-none pt-[90px] md:pt-[120px]" dir="rtl">
@@ -96,13 +97,13 @@ export default function Navbar() {
               </NavLink>
             </li>
 
-            {CATEGORIES.map(cat => (
-              <li key={cat.name}>
+            {categories?.data?.map(cat => (
+              <li key={cat._id || cat.name}>
                 <NavLink
                   to={`/${encodeURIComponent(cat.name)}`}
                   className={({ isActive }) =>
                     `flex items-center gap-1.5 text-md font-bold py-4 px-1 whitespace-nowrap border-b-2 -mb-px transition-all duration-200
-                     ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'}`
+                      ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'}`
                   }
                 >
                   <NavIcon name={cat.icon_name} size={16} />
@@ -171,14 +172,14 @@ export default function Navbar() {
             الرئيسية
           </NavLink>
 
-          {CATEGORIES.map(cat => (
+          {categories?.data?.map(cat => (
             <NavLink
-              key={cat.name}
+              key={cat._id || cat.name}
               to={`/${encodeURIComponent(cat.name)}`}
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 text-[14px] font-bold px-4 py-3.5 rounded-xl transition-all duration-200
-                 ${isActive ? 'bg-secondary/10 text-secondary' : 'text-slate-600 hover:bg-gray-50 hover:text-primary'}`
+                  ${isActive ? 'bg-secondary/10 text-secondary' : 'text-slate-600 hover:bg-gray-50 hover:text-primary'}`
               }
             >
               <span className="text-gray-400"><NavIcon name={cat.icon_name} size={16} /></span>
