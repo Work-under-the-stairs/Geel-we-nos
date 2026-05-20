@@ -11,7 +11,8 @@ const isAdmin = require("../middleware/isAdmin");
 
 // الـ GET Requests
 // 1. جلب كل المستخدمين للوحة التحكم (للأدمن فقط)
-router.get("/", isAdmin, userController.getUsers);
+// router.get("/", isAdmin, userController.getUsers);
+router.get("/", userController.getUsers);
 
 // 2. جلب بيانات المستخدم نفسه عن طريق Firebase UID (لأي مستخدم مسجل الدخول)
 router.get("/me/:uid", userController.getUserByFirebaseUid);
