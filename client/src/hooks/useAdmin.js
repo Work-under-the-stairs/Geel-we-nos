@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { adminService } from '../services/adminService'
 
 // ============================================================
@@ -6,16 +6,14 @@ import { adminService } from '../services/adminService'
 // ============================================================
 export const ADMIN_KEYS = {
   dashboard:       ['admin', 'dashboard'],
+  // عملنا Base Key للمقالات عشان نستخدمه في الـ Invalidate
+  articlesBase:    ['admin', 'articles'], 
   articles:        (filters) => ['admin', 'articles', filters],
   article:         (id)      => ['admin', 'article', id],
-  users:           (page)    => ['admin', 'users', page],
+  
+  usersBase:       ['admin', 'users'],
+  users:           (filters) => ['admin', 'users', filters],
 }
-
-// ============================================================
-// الـ response shapes (بافتراض إن الباك اند بيرجع { data: ... })
-// لو الباك اند بيرجع الداتا مباشرة في res.data، غيري res.data.data لـ res.data
-// ============================================================
-
 
 // ============ لوحة التحكم (الرئيسية) ============
 
@@ -23,19 +21,18 @@ export const useDashboardSummary = () =>
   useQuery({
     queryKey: ADMIN_KEYS.dashboard,
     queryFn:  () => adminService.getDashboardSummary()
-                    .then(res => res.data.data), // ← object مجمع فيه كل إحصائيات الداشبورد
-    staleTime: 1000 * 60 * 5, // 5 دقايق عشان الإحصائيات مش بتتغير كل ثانية
+                    .then(res => res.data.data), 
+    staleTime: 1000 * 60 * 5, 
   })
 
-
-// ============ إدارة المقالات (Queries) ============
+// ============ إدارة المقالات (Queries & Mutations) ============
 
 export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '' }) =>
   useQuery({
     queryKey: ADMIN_KEYS.articles(filters),
     queryFn:  () => adminService.getArticles(filters.page, filters.limit, filters.search, filters.status)
-                    .then(res => res.data), // ← بنرجع data كاملة عشان بيكون فيها page و totalPages للجدول
-    keepPreviousData: true, // مهم جداً عشان الجدول ميعملش فلاش (Loading) لما تقلبي بين الصفحات
+                    .then(res => res.data),
+    placeholderData: keepPreviousData, // 👈 التعديل ليتوافق مع V5
     staleTime: 1000 * 60 * 2,
   })
 
@@ -44,21 +41,16 @@ export const useAdminArticle = (id) =>
     queryKey: ADMIN_KEYS.article(id),
     queryFn:  () => adminService.getArticleById(id)
                     .then(res => res.data.data),
-    enabled:  !!id, // مش هيعمل ريكويست إلا لو فيه ID
+    enabled:  !!id, 
     staleTime: 1000 * 60 * 5,
   })
 
-
-// ============ إدارة المقالات (Mutations) ============
-
 export const useCreateArticle = () => {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: (data) => adminService.createArticle(data),
     onSuccess: () => {
-      // بنعمل invalidate لقائمة المقالات والداشبورد عشان الأرقام تتحدث فوراً
-      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articles._def }) // بيمسح أي كاش يخص المقالات
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articlesBase }) // 👈 التعديل الصح للـ Invalidate
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard })
     },
   })
@@ -66,13 +58,11 @@ export const useCreateArticle = () => {
 
 export const useUpdateArticle = (id) => {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: (data) => adminService.updateArticle(id, data),
     onSuccess: () => {
-      // تحديث المقال نفسه والقائمة
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.article(id) })
-      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articles._def })
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articlesBase })
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard })
     },
   })
@@ -80,13 +70,23 @@ export const useUpdateArticle = (id) => {
 
 export const useDeleteArticle = () => {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: (id) => adminService.deleteArticle(id),
     onSuccess: () => {
-      // تحديث القائمة والداشبورد بعد الحذف
-      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articles._def })
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articlesBase })
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard })
     },
   })
 }
+
+// ============ إدارة المستخدمين ============
+
+export const useAdminUsers = (filters = { page: 1, limit: 10, search: '', role: '' }) => {
+  return useQuery({
+    queryKey: ADMIN_KEYS.users(filters),
+    queryFn: () => adminService.getUsers(filters.page, filters.limit, filters.search, filters.role)
+                    .then(res => res.data),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 2,
+  });
+};
