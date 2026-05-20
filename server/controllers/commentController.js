@@ -1,33 +1,42 @@
 const Comment = require("../models/Comment");
 
 // 1. جلب كل الكومنتات الخاصة بمقال معين
-exports.getCommentsByArticle = async (req, res, next) => {
-  try {
-    const comments = await Comment.find({ newsId: req.params.articleId })
-      .populate("writer", "name avatar") // جلب اسم وصورة كاتب الكومنت
-      .populate("replies.writer", "name avatar") // جلب اسم وصورة أصحاب الردود
-      .sort({ createdAt: -1 });
+// exports.getCommentsByArticle = async (req, res, next) => {
+//   try {
+//     const comments = await Comment.find({ newsId: req.params.articleId })
+//       .populate("writer", "name avatar") // جلب اسم وصورة كاتب الكومنت
+//       .populate("replies.writer", "name avatar") // جلب اسم وصورة أصحاب الردود
+//       .sort({ createdAt: -1 });
 
-    res.status(200).json({ status: "success", results: comments.length, data: comments });
+//     res.status(200).json({ status: "success", results: comments.length, data: comments });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+exports.getCommentsByArticle = async (req, res, next) => {
+  console.log("المقال المطلوب جلب تعليقاته (ID):", req.params.articleId); // 👈 أضيفي هذا
+  try {
+    const comments = await Comment.find({ newsId: req.params.articleId });
+    console.log("عدد التعليقات التي تم العثور عليها:", comments.length); // 👈 أضيفي هذا
+    
+    res.status(200).json({ status: "success", data: comments });
   } catch (err) {
     next(err);
   }
 };
-
-// 2. إضافة كومنت جديد
 exports.addComment = async (req, res, next) => {
   try {
-    const { content } = req.body;
+    const { text } = req.body; // التأكد من أن الفرونت إند يرسل 'text'
     const { articleId } = req.params;
 
-    // نقوم بإنشاء الكومنت باستخدام الـ writer من الـ req.user (الذي جاء من الـ protect middleware)
+    // توحيد اسم الحقل ليكون newsId ليتطابق مع getCommentsByArticle
     const newComment = await Comment.create({
-      newsId: articleId,
-      content,
-      writer: req.user._id, 
+      newsId: articleId, // 👈 التعديل هنا
+      writer: req.user._id,
+      content: text      // 👈 تخزين النص القادم في حقل الـ content
     });
 
-    // جلب بيانات الكاتب فوراً للرد بها على الفرونت إند
+    // جلب بيانات الكاتب لعرضها فوراً في الفرونت إند
     await newComment.populate("writer", "name avatar");
 
     res.status(201).json({ status: "success", data: newComment });
@@ -35,6 +44,27 @@ exports.addComment = async (req, res, next) => {
     next(err);
   }
 };
+// 2. إضافة كومنت جديد
+// exports.addComment = async (req, res, next) => {
+//   try {
+//     const { content } = req.body;
+//     const { articleId } = req.params;
+
+//     // نقوم بإنشاء الكومنت باستخدام الـ writer من الـ req.user (الذي جاء من الـ protect middleware)
+//     const newComment = await Comment.create({
+//       newsId: articleId,
+//       content,
+//       writer: req.user._id, 
+//     });
+
+//     // جلب بيانات الكاتب فوراً للرد بها على الفرونت إند
+//     await newComment.populate("writer", "name avatar");
+
+//     res.status(201).json({ status: "success", data: newComment });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 // 3. إضافة رد (Reply) على كومنت
 exports.addReply = async (req, res, next) => {
