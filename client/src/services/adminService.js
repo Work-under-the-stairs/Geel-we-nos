@@ -2,7 +2,7 @@ import api from './api'
 
 export const adminService = {
   // ============ لوحة التحكم (الرئيسية) ============
-  getDashboardSummary: () => api.get('/admin/dashboard'),
+  getDashboardSummary: () => api.get('/users/dashboard'),
 
   // ============ إدارة المقالات (CRUD) ============
   getArticles: (page = 1, limit = 10, search = '', status = '') => 
