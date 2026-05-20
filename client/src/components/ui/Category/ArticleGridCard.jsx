@@ -3,7 +3,7 @@ import React from 'react';
 import { User } from 'lucide-react';
 import { stripHtml } from '../../../utils/textUtils';
 
-export default function ArticleGridCard({ article }) {
+export default function  ArticleGridCard({ article }) {
   if (!article) return null;
 
   return (

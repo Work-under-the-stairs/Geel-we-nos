@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import BreakingNewsBar from '../components/ui/BreakingNewsBar';
@@ -11,23 +11,31 @@ import {
   useCategoryNewsInfinite,
 } from '../hooks/useArticles';
 import { useCategories } from '../hooks/useAdmin';
+import { useEffect } from 'react';
 
 export default function Category() {
   const { category } = useParams();
+  const navigate = useNavigate();
   const catName = category ? decodeURIComponent(category) : '';
 
   // 1. جلب الأقسام من الداتابيز
   const { data: allCategories, isLoading: isCatLoading } = useCategories();
-  
-  // 2. البحث عن القسم الحالي (معالجة الاحتمالات سواء الداتا جوا data أو المصفوفة مباشرة)
   const categoriesList = allCategories?.data || (Array.isArray(allCategories) ? allCategories : []);
   
-  const currentCategory = categoriesList.find(
-    c => c.name === catName || c._id === catName
-  ) || { name: catName, icon_name: 'Newspaper', description: 'أخبار متنوعة في هذا القسم' };
+  // 2. تحديد القسم الحالي (سيكون null في حالة التحميل أو عدم العثور عليه)
+  const currentCategory = !isCatLoading 
+    ? categoriesList.find(c => c.name === catName || c._id === catName) 
+    : null;
 
-  // 3. تأخير تنفيذ الـ Hooks لحد ما نتأكد إننا عرفنا اسم القسم
-  const canFetch = !!currentCategory.name && !isCatLoading;
+  // 3. التحقق من وجود القسم والتحويل للهوم في حال عدم وجوده
+  useEffect(() => {
+    if (!isCatLoading && !currentCategory) {
+      navigate('/', { replace: true });
+    }
+  }, [currentCategory, isCatLoading, navigate]);
+
+  // 4. الـ Hooks للبيانات (يتم تفعيلها فقط عند التأكد من وجود القسم)
+  const canFetch = !!currentCategory;
 
   const { data: heroArticle, isLoading: loadHero } = useCategoryFeatured(
     canFetch ? currentCategory.name : null
@@ -45,14 +53,15 @@ export default function Category() {
     isLoading: loadNews,
   } = useCategoryNewsInfinite(canFetch ? currentCategory.name : null);
 
-  // 4. استخراج الداتا
+  // 5. استخراج الداتا
   const allArticles = infiniteData?.pages?.flatMap(page => page.data) ?? [];
   const gridArticles = allArticles.filter(art => art._id !== heroArticle?._id);
 
-  if (isCatLoading) {
+  // 6. عرض الـ Loader أثناء التحميل أو قبل التحقق من وجود القسم
+  if (isCatLoading || !currentCategory) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin text-primary" size={40} />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-[var(--color-primary)]" size={40} />
       </div>
     );
   }
