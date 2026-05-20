@@ -95,9 +95,26 @@ export default function Navbar() {
 
         <div className="flex-1 p-4 flex flex-col gap-2">
           {isAuth && (
-            <div className="p-4 bg-gray-50 rounded-xl mb-4">
-              <p className="font-bold text-sm">أهلاً، {username}</p>
-              {isUserAdmin && <Link to="/admin" className="block text-xs text-primary font-bold mt-1">لوحة تحكم الأدمن</Link>}
+            <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm mb-6 mx-2">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-black text-sm">
+                  {username?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">مرحباً بك،</p>
+                  <p className="font-bold text-sm text-slate-800">{username}</p>
+                </div>
+              </div>
+
+              {isUserAdmin && (
+                <Link 
+                  to="/admin" 
+                  className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-[var(--color-primary)]/20 active:scale-[0.98]"
+                >
+                  <LayoutDashboard size={14} />
+                  <span>لوحة تحكم الأدمن</span>
+                </Link>
+              )}
             </div>
           )}
           
