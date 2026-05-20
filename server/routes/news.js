@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const newsController = require("../controllers/newsController");
 
-// استدعاء ميدل وير الحماية (تأكدي من مطابقة المسميات عندك)
+// استدعاء ميدل وير الحماية والرفع
 const { protect, restrictTo } = require("../middleware/authMiddleware"); 
 const upload = require("../middleware/upload");
 
 // ============================================================
-// 公公开 الروابط العامة (لا تحتاج تسجيل دخول)
+// 🌍 الروابط العامة (لا تحتاج تسجيل دخول)
 // ============================================================
 
 router.get("/featured", newsController.getFeatured);
@@ -26,25 +26,24 @@ router.post("/:id/view", newsController.trackView); // تسجيل المشاهد
 // 🔐 روابط الإدارة والمنشئين (Protected & Authorized)
 // ============================================================
 
-// إضافة خبر جديد (متاح للكاتب والأدمن)
+// إضافة خبر جديد (تم إزالة التحقق من الصلاحيات والتوكن)
 router.post(
   "/add",
-  protect,
-  restrictTo("writer", "admin"),
   upload.fields([
     { name: "images", maxCount: 10 },
     { name: "videos", maxCount: 5 },
   ]),
   async (req, res, next) => {
     try {
-      // الـ Logic بتاع الرفع الخاص بيكِ على كلوديناري هيفضل هنا أو ننقله للكنترولر
-      const { uploadFile } = require("../helpers/cloudinary_service");
       const News = require("../models/News");
 
-      let imageUrls = [];
-      let videoUrls = [];
+      // 1. التقاط الروابط المباشرة المرسلة من الفرونت إند
+      let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+      let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
 
+      // 2. إذا تم إرسال ملفات بصيغة binary/form-data، يتم رفعها احتياطياً إلى كلاوديناري
       if (req.files?.images) {
+        const { uploadFile } = require("../helpers/cloudinary_service");
         for (const file of req.files.images) {
           const result = await uploadFile(file.buffer, "news/images", "image");
           imageUrls.push(result.secure_url);
@@ -52,21 +51,41 @@ router.post(
       }
 
       if (req.files?.videos) {
+        const { uploadFile } = require("../helpers/cloudinary_service");
         for (const file of req.files.videos) {
           const result = await uploadFile(file.buffer, "news/videos", "video");
           videoUrls.push(result.secure_url);
         }
       }
 
+      // 3. معالجة الهاشتاجات بأمان لتجنب توقف السيرفر
+      let hashtags = [];
+      if (req.body.hashtags) {
+        if (Array.isArray(req.body.hashtags)) {
+          hashtags = req.body.hashtags;
+        } else {
+          try {
+            hashtags = JSON.parse(req.body.hashtags);
+          } catch (e) {
+            // إذا فشل التحليل (مثلا نص عادي مفصول بفواصل)، يتم وضعه داخل مصفوفة أو تنظيفه
+            hashtags = typeof req.body.hashtags === 'string' ? req.body.hashtags.split(',').map(h => h.trim()) : [];
+          }
+        }
+      }
+
+      // 4. إنشاء وحفظ وثيقة الخبر الجديدة
       const article = await News.create({
         title: req.body.title,
         content: req.body.content,
-        writer: req.user._id, // ربط تلقائي بـ ID اليوزر اللي مسجل دخول بدال ما يتبعت ف الـ body
+        // تم استبدال req.user._id بـ استقبال الـ ID من الفرونت إند مباشرة (اختياري)
+        // writer: req.body.writer || null, 
         category: req.body.category,
         important_rate: req.body.important_rate,
         isUrgent: req.body.isUrgent || false,
         images: imageUrls,
         videos: videoUrls,
+        hashtags: hashtags,
+        status: req.body.status || "draft", 
       });
 
       res.status(201).json({ status: "success", data: article });
@@ -76,7 +95,7 @@ router.post(
   }
 );
 
-// تعديل وحذف الخبر (متاح للأدمن، أو الكاتب صاحب الخبر نفسه)
+// تعديل الخبر (متاح للأدمن، أو الكاتب صاحب الخبر نفسه)
 router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
   try {
     const News = require("../models/News");
@@ -88,7 +107,19 @@ router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, ne
       return res.status(403).json({ message: "You are not authorized to edit this article" });
     }
 
-    const allowed = ["title", "content", "images", "videos", "category", "important_rate", "isUrgent"];
+    // القائمة البيضاء للحقول المسموح بتعديلها لتشمل الحقول المحدثة
+    const allowed = [
+      "title", 
+      "content", 
+      "images", 
+      "videos", 
+      "category", 
+      "important_rate", 
+      "isUrgent",
+      "hashtags",
+      "status"
+    ];
+
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) article[field] = req.body[field];
     });
@@ -100,6 +131,7 @@ router.patch("/:id", protect, restrictTo("writer", "admin"), async (req, res, ne
   }
 });
 
+// حذف الخبر نهائياً
 router.delete("/:id", protect, restrictTo("writer", "admin"), async (req, res, next) => {
   try {
     const News = require("../models/News");
