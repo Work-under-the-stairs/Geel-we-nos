@@ -1,18 +1,6 @@
 const Comment = require("../models/Comment");
 
-// 1. جلب كل الكومنتات الخاصة بمقال معين
-// exports.getCommentsByArticle = async (req, res, next) => {
-//   try {
-//     const comments = await Comment.find({ newsId: req.params.articleId })
-//       .populate("writer", "name avatar") // جلب اسم وصورة كاتب الكومنت
-//       .populate("replies.writer", "name avatar") // جلب اسم وصورة أصحاب الردود
-//       .sort({ createdAt: -1 });
 
-//     res.status(200).json({ status: "success", results: comments.length, data: comments });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 exports.getCommentsByArticle = async (req, res, next) => {
   try {
     const comments = await Comment.find({ newsId: req.params.articleId })

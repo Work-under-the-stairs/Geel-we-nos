@@ -1,7 +1,9 @@
 const User = require("../models/User");
 const News = require("../models/News");
 
-// جلب كل المستخدمين (مع الفلترة والبحث)
+// ==========================================
+// 1. جلب كل المستخدمين (للأدمن)
+// ==========================================
 exports.getUsers = async (req, res) => {
   try {
     const { page = 1, limit = 20, search = "", role = "" } = req.query;
@@ -37,7 +39,9 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// تسجيل مستخدم جديد من Firebase
+// ==========================================
+// 2. تسجيل مستخدم جديد من Firebase
+// ==========================================
 exports.registerDb = async (req, res) => {
   try {
     const { firebaseUid, username, email, name, avatar } = req.body;
@@ -64,7 +68,9 @@ exports.registerDb = async (req, res) => {
   }
 };
 
-// إضافة مستخدم يدوي (عن طريق الأدمن)
+// ==========================================
+// 3. إضافة مستخدم يدوياً (للأدمن)
+// ==========================================
 exports.addUser = async (req, res) => {
   try {
     const { username, password, email, name, avatar, role } = req.body;
@@ -77,9 +83,16 @@ exports.addUser = async (req, res) => {
   }
 };
 
-// جلب مستخدم عن طريق Firebase UID
+// ==========================================
+// 4. جلب مستخدم عن طريق Firebase UID
+// ==========================================
 exports.getUserByFirebaseUid = async (req, res) => {
   try {
+    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
+    if (req.user.role !== "admin" && req.user.firebaseUid !== req.params.uid) {
+      return res.status(403).json({ message: "غير مصرح لك بعرض بيانات هذا المستخدم." });
+    }
+
     const user = await User.findOne({ firebaseUid: req.params.uid });
     
     if (!user) {
@@ -92,9 +105,16 @@ exports.getUserByFirebaseUid = async (req, res) => {
   }
 };
 
-// جلب مستخدم عن طريق الـ ID (MongoDB ID)
+// ==========================================
+// 5. جلب مستخدم عن طريق MongoDB ID
+// ==========================================
 exports.getUserById = async (req, res) => {
   try {
+    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
+    if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
+      return res.status(403).json({ message: "غير مصرح لك بعرض بيانات هذا المستخدم." });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
@@ -103,17 +123,34 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// تحديث بيانات المستخدم
+// ==========================================
+// 6. تحديث بيانات المستخدم
+// ==========================================
 exports.updateUser = async (req, res) => {
   try {
+    // 🛡️ حماية 1: مسموح للأدمن أو لصاحب الحساب نفسه فقط
+    if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
+      return res.status(403).json({ message: "غير مصرح لك بتعديل بيانات هذا المستخدم." });
+    }
+
     const allowed = ["name", "avatar", "email", "role"];
     const updates = {};
-    allowed.forEach((f) => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+    
+    allowed.forEach((f) => { 
+      if (req.body[f] !== undefined) {
+        // 🛡️ حماية 2: لو اللي بيعدل مش أدمن وبيحاول يعدل الرتبة، نتجاهله
+        if (f === "role" && req.user.role !== "admin") {
+          return; 
+        }
+        updates[f] = req.body[f]; 
+      } 
+    });
 
     const user = await User.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     });
+    
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
@@ -121,9 +158,16 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// تحديث كلمة المرور
+// ==========================================
+// 7. تحديث كلمة المرور
+// ==========================================
 exports.updatePassword = async (req, res) => {
   try {
+    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
+    if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
+      return res.status(403).json({ message: "غير مصرح لك بتعديل كلمة مرور هذا المستخدم." });
+    }
+
     const user = await User.findById(req.params.id).select("+password");
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -139,7 +183,9 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// حذف مستخدم
+// ==========================================
+// 8. حذف مستخدم (للأدمن)
+// ==========================================
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -150,17 +196,20 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+// ==========================================
+// 9. ملخص لوحة التحكم (للأدمن)
+// ==========================================
 exports.getDashboardSummary = async (req, res) => {
   try {
     const [totalNews, totalUsers, recentNews, topViewedNews] = await Promise.all([
       News.countDocuments(),
       User.countDocuments(),
       
-      // جلب أحدث 5 أخبار مع اسم القسم
+      // جلب أحدث 5 أخبار مع اسم القسم والحالة (status)
       News.find()
         .sort("-createdAt")
         .limit(5)
-        .populate("category", "name") // 👈 بنجيب اسم القسم
+        .populate("category", "name")
         .select("title images category views createdAt status"),
         
       // جلب أكثر 5 أخبار مشاهدة
@@ -182,31 +231,31 @@ exports.getDashboardSummary = async (req, res) => {
     const totalViews = totalViewsResult.length > 0 ? totalViewsResult[0].totalViews : 0;
 
     const categoryStats = await News.aggregate([
-    {
+      {
         $lookup: {
-        from: "categories", // 👈 اسم الـ Collection بتاع الأقسام في الداتابيز (غالباً بيكون categories)
-        localField: "category",
-        foreignField: "_id",
-        as: "catInfo"
+          from: "categories", 
+          localField: "category",
+          foreignField: "_id",
+          as: "catInfo"
         }
-    },
-    { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
-    {
+      },
+      { $unwind: { path: "$catInfo", preserveNullAndEmptyArrays: true } },
+      {
         $group: {
-        _id: "$catInfo.name", // 👈 لو اسم القسم عندك متسجل في حقل title بدل name، غيريها لـ $catInfo.title
-        count: { $sum: 1 }
+          _id: "$catInfo.name", 
+          count: { $sum: 1 }
         }
-    },
-    { $sort: { count: -1 } } // ترتيب من الأكبر للأصغر
+      },
+      { $sort: { count: -1 } } 
     ]);
 
-    // 2. تظبيط الألوان والنسبة المئوية للفرونت اند
+    // تظبيط الألوان والنسبة المئوية للفرونت اند
     const colors = ["bg-[#FF6347]", "bg-[#2E8B57]", "bg-[#4682B4]", "bg-[#DAA520]", "bg-[#BA55D3]", "bg-[#A9A9A9]"];
     const categoryDistribution = categoryStats.map((item, index) => ({
-    name: item._id || "غير مصنف",
-    count: item.count,
-    percentage: totalNews > 0 ? Math.round((item.count / totalNews) * 100) : 0,
-    color: colors[index % colors.length]
+      name: item._id || "غير مصنف",
+      count: item.count,
+      percentage: totalNews > 0 ? Math.round((item.count / totalNews) * 100) : 0,
+      color: colors[index % colors.length]
     }));
 
     res.json({
@@ -220,12 +269,10 @@ exports.getDashboardSummary = async (req, res) => {
         recentArticles: recentNews.map(news => ({
           id: news._id,
           title: news.title,
-          // 👈 بناخد أول صورة في المصفوفة، لو مفيش بنحط صورة افتراضية
           image: (news.images && news.images.length > 0) ? news.images[0] : "https://via.placeholder.com/150",
-          // 👈 بنعرض اسم القسم لو موجود
           category: news.category ? news.category.name : "غير مصنف", 
           date: new Date(news.createdAt).toLocaleDateString('ar-EG'),
-          status: news.status,
+          status: news.status, // 👈 الحالة بتتبعت هنا بشكل سليم عشان التلوين في الفرونت
           views: news.views || 0,
           statusColor: "bg-green-50 text-green-600"
         })),

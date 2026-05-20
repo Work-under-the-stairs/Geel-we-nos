@@ -45,7 +45,7 @@ export default function PopularArticles({ articles }) {
                 </h4>
                 <div className="flex items-center gap-2 mt-2 text-[11px] text-gray-400">
                   <span className="font-semibold text-gray-600">
-                    {article.writer?.name || article.writer || article.author || 'المحرر'}
+                    {article.writer?.name ||  'جيل ونص'}
                   </span>
                   <span>•</span>
                   <span>{article.views || article.viewsCount || 0} مشاهدة</span>
@@ -76,7 +76,7 @@ export default function PopularArticles({ articles }) {
                   
                   <div className="flex items-center gap-2 text-[10px] text-gray-400">
                     <span className="font-medium text-gray-500">
-                      {article.writer?.name || article.writer || article.author || 'المحرر'}
+                      {article.writer?.name || 'جيل ونص'}
                     </span>
                     <span>•</span>
                     <span>{article.views || article.viewsCount || 0} مشاهدة</span>

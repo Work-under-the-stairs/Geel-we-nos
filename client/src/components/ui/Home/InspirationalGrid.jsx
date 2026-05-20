@@ -54,7 +54,7 @@ export default function InspirationalGrid({ articles: categoryObject }) {
               
               {/* تأمين قراءة اسم الكاتب بعد الـ Populate الجديد */}
               <span className="text-white/60 text-xs font-medium mt-1">
-                بقلم: {art.writer?.name || art.writer || "جيل ونص"}
+                بقلم: {art.writer?.name || "جيل ونص"}
               </span>
             </div>
           </Link>

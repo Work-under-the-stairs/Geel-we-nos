@@ -31,7 +31,7 @@ export default function CategoryHeroCard({ article }) {
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-300 font-medium">
           <span className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-white">
             <User size={10} className="sm:w-3 sm:h-3" />
-            {article.writer?.name || 'المحرر'}
+            {article.writer?.name || 'جيل ونص'}
           </span>
           <span>•</span>
           <span>{new Date(article.createdAt || article.date).toLocaleDateString('ar-EG')}</span>
