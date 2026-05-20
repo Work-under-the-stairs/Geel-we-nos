@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 import {
   Bold, Italic, Underline, Heading1, Heading2,
@@ -20,7 +20,6 @@ import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
 // =============================================================
 // UPLOAD PROGRESS OVERLAY
 // =============================================================
-
 function UploadOverlay({ progress, label }) {
   return (
     <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl gap-3">
@@ -40,7 +39,6 @@ function UploadOverlay({ progress, label }) {
 // =============================================================
 // TOOLBAR BUTTON
 // =============================================================
-
 function ToolbarButton({ active, onClick, children }) {
   return (
     <button
@@ -60,7 +58,6 @@ function ToolbarButton({ active, onClick, children }) {
 // =============================================================
 // MAIN COMPONENT
 // =============================================================
-
 export default function AddArticle() {
 
   // ── Basic fields ─────────────────────────────────────────────
@@ -71,22 +68,23 @@ export default function AddArticle() {
   const [hashtags, setHashtags]     = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
 
-  // ── Featured image ───────────────────────────────────────────
-  const [featuredImage, setFeaturedImage]         = useState(null);
-  const [featuredProgress, setFeaturedProgress]   = useState(0);
+  // ── Media States ─────────────────────────────────────────────
+  const [featuredImage, setFeaturedImage]         = useState(null); 
   const [featuredUploading, setFeaturedUploading] = useState(false);
+  const [featuredProgress, setFeaturedProgress]   = useState(0);
 
-  // ── Gallery ──────────────────────────────────────────────────
-  const [gallery, setGallery]                   = useState([]);
+  const [gallery, setGallery]                   = useState([]); 
   const [galleryUploading, setGalleryUploading] = useState(false);
   const [galleryProgress, setGalleryProgress]   = useState(0);
 
-  // ── Video (media section) ────────────────────────────────────
-  const [videoPreview, setVideoPreview]       = useState(null);
+  const [videoPreview, setVideoPreview]       = useState(null); 
   const [videoUploading, setVideoUploading]   = useState(false);
   const [videoProgress, setVideoProgress]     = useState(0);
 
-  // ── Editor inline uploads ────────────────────────────────────
+  // ── Editor Inline Media Tracking ──
+  const [editorMediaList, setEditorMediaList] = useState([]);
+
+  // ── Editor inline uploads status ─────────────────────────────
   const [editorUploading, setEditorUploading]     = useState(false);
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress]       = useState(0);
@@ -101,13 +99,35 @@ export default function AddArticle() {
   const scrollToSection = (ref) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  // ── دالة الحذف الآمنة والمنقحة ──────────────────────
+  const deleteMediaFromServer = async (fileId) => {
+    if (!fileId) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/imagekit/delete/${fileId}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        console.log(`✅ تم حذف الملف من ImageKit للمعرف: ${fileId}`);
+      } else {
+        console.warn("⚠️ تنبيه من السيرفر أثناء محاولة الحذف السحابي:", data.message || "خطأ غير معروف");
+      }
+    } catch (err) {
+      console.error("❌ خطأ في الاتصال بمسار الحذف الخاص بالسيرفر:", err.message);
+    }
+  };
+
   // ── Tiptap editor ─────────────────────────────────────────────
   const editor = useEditor({
     extensions: [
       StarterKit,
       UnderlineExtension,
       Link.configure({ openOnClick: false }),
-      Image,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'editor-uploaded-img',
+        },
+      }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: "<h2>ابدأ بكتابة المقال...</h2>",
@@ -117,31 +137,99 @@ export default function AddArticle() {
           "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
       },
     },
+    // =========================================================
+    // مراقبة المحتوى المحدث وتجنب الحذف العشوائي للفيديوهات
+    // =========================================================
+    onUpdate: ({ editor }) => {
+      const currentHTML = editor.getHTML();
+      
+      setEditorMediaList((prevList) => {
+        const remainingMedia = [];
+        
+        prevList.forEach((media) => {
+          const cleanUrl = media.url.split('?')[0]; 
+          const isUrlPresent = currentHTML.includes(cleanUrl);
+          const isIdPresent = media.fileId ? currentHTML.includes(media.fileId) : false;
+
+          if (isUrlPresent || isIdPresent) {
+            remainingMedia.push(media);
+          } else {
+            console.log(`[تتبع الميديا] تم حذف عنصر من داخل المحرر، جاري إزالته سحابياً: ${media.fileId}`);
+            deleteMediaFromServer(media.fileId);
+          }
+        });
+        
+        return remainingMedia;
+      });
+    }
   });
 
-  // ── Upload: Featured image ────────────────────────────────────
+  // ── دالة الإلغاء الكلي وتنظيف جميع الخوادم ─────────────────────────
+  const handleCancel = async () => {
+    const confirmCancel = window.confirm("هل أنت متأكد من إلغاء المقال؟ سيتم حذف جميع الصور والفيديوهات التي قمت برفعها فوراً لتوفير المساحة سحابياً.");
+    if (!confirmCancel) return;
+
+    const deletePromises = [];
+    if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
+    if (videoPreview?.fileId) deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
+    gallery.forEach((item) => {
+      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId));
+    });
+    editorMediaList.forEach((item) => {
+      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId));
+    });
+
+    await Promise.all(deletePromises);
+
+    setFeaturedImage(null);
+    setVideoPreview(null);
+    setGallery([]);
+    setEditorMediaList([]);
+    setTitle("");
+    setCategory("");
+    setHashtags([]);
+    setImportance(5);
+    setIsUrgent(false);
+    editor?.commands.setContent("<h2>ابدأ بكتابة المقال...</h2>");
+    
+    alert("تم إلغاء المقال وتفريغ مساحات التخزين السحابية بنجاح.");
+  };
+
+  // ── معالجة عمليات حذف العناصر الفردية للواجهة الخارجية ──────────────
+  const handleRemoveFeatured = async () => {
+    if (featuredImage?.fileId) await deleteMediaFromServer(featuredImage.fileId);
+    setFeaturedImage(null);
+  };
+
+  const handleRemoveVideo = async () => {
+    if (videoPreview?.fileId) await deleteMediaFromServer(videoPreview.fileId);
+    setVideoPreview(null);
+  };
+
+  const handleRemoveGalleryItem = async (indexToRemove) => {
+    const item = gallery[indexToRemove];
+    if (item?.fileId) await deleteMediaFromServer(item.fileId);
+    setGallery((prev) => prev.filter((_, i) => i !== indexToRemove));
+  };
+
+  // ── معالجات الرفع وحفظ البيانات الواردة ────────────────────────────
   const handleFeaturedImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFeaturedUploading(true);
     setFeaturedProgress(0);
     try {
-      const url = await uploadToImageKit(
-        file,
-        IK_FOLDERS.featured,
-        (pct) => setFeaturedProgress(pct)
-      );
-      setFeaturedImage(url);
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.featured, (pct) => setFeaturedProgress(pct));
+      setFeaturedImage(mediaData);
     } catch (err) {
-      console.error("Featured image upload failed:", err);
-      alert("فشل رفع الصورة، حاول مجدداً");
+      console.error(err);
+      alert("فشل رفع الصورة");
     } finally {
       setFeaturedUploading(false);
       e.target.value = "";
     }
   };
 
-  // ── Upload: Gallery ───────────────────────────────────────────
   const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -150,17 +238,13 @@ export default function AddArticle() {
     const uploaded = [];
     for (let i = 0; i < files.length; i++) {
       try {
-        const url = await uploadToImageKit(
-          files[i],
-          IK_FOLDERS.gallery,
-          (pct) => {
-            const base = (i / files.length) * 100;
-            setGalleryProgress(Math.round(base + pct / files.length));
-          }
-        );
-        uploaded.push(url);
+        const mediaData = await uploadToImageKit(files[i], IK_FOLDERS.gallery, (pct) => {
+          const base = (i / files.length) * 100;
+          setGalleryProgress(Math.round(base + pct / files.length));
+        });
+        uploaded.push(mediaData);
       } catch (err) {
-        console.error(`Gallery upload failed for file ${i}:`, err);
+        console.error(err);
       }
     }
     setGallery((prev) => [...prev, ...uploaded]);
@@ -168,29 +252,23 @@ export default function AddArticle() {
     e.target.value = "";
   };
 
-  // ── Upload: Video (media section) ─────────────────────────────
   const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setVideoUploading(true);
     setVideoProgress(0);
     try {
-      const url = await uploadToImageKit(
-        file,
-        IK_FOLDERS.video,
-        (pct) => setVideoProgress(pct)
-      );
-      setVideoPreview(url);
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.video, (pct) => setVideoProgress(pct));
+      setVideoPreview(mediaData);
     } catch (err) {
-      console.error("Video upload failed:", err);
-      alert("فشل رفع الفيديو، حاول مجدداً");
+      console.error(err);
+      alert("فشل رفع الفيديو");
     } finally {
       setVideoUploading(false);
       e.target.value = "";
     }
   };
 
-  // ── Upload: Image → Tiptap editor ─────────────────────────────
   const addImageToEditor = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -198,29 +276,17 @@ export default function AddArticle() {
     setEditorUploadLabel("جاري رفع الصورة...");
     setEditorProgress(0);
     try {
-      const url = await uploadToImageKit(
-        file,
-        IK_FOLDERS.editor,
-        (pct) => setEditorProgress(pct)
-      );
-      
-      // FIX: Secure transactional view assignment to fix RangeError mismatch
-      const { view } = editor;
-      const { state } = view;
-      const node = state.schema.nodes.image.create({ src: url });
-      const transaction = state.tr.replaceSelectionWith(node);
-      view.dispatch(transaction);
-      editor.commands.focus();
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, (pct) => setEditorProgress(pct));
+      editor.chain().focus().setImage({ src: mediaData.url }).run();
+      setEditorMediaList((prev) => [...prev, mediaData]);
     } catch (err) {
-      console.error("Editor image upload failed:", err);
-      alert("فشل رفع الصورة في المحرر");
+      alert("فشل رفع الصورة للمحرر");
     } finally {
       setEditorUploading(false);
       e.target.value = "";
     }
   };
 
-  // ── Upload: Video → Tiptap editor ─────────────────────────────
   const addVideoToEditor = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -228,27 +294,19 @@ export default function AddArticle() {
     setEditorUploadLabel("جاري رفع الفيديو...");
     setEditorProgress(0);
     try {
-      const url = await uploadToImageKit(
-        file,
-        IK_FOLDERS.video,
-        (pct) => setEditorProgress(pct)
-      );
-      
-      // FIX: Apply a clean insert content block execution schema instead of explicit chain injection
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.video, (pct) => setEditorProgress(pct));
       editor.commands.focus();
-      editor.commands.insertContent(
-        `<video controls playsinline class="rounded-2xl my-4 w-full" src="${url}"></video>`
-      );
+      editor.commands.insertContent(`<video controls playsinline data-fileid="${mediaData.fileId}" id="${mediaData.fileId}" class="rounded-2xl my-4 w-full" src="${mediaData.url}"></video>`);
+      setEditorMediaList((prev) => [...prev, mediaData]);
     } catch (err) {
-      console.error("Editor video upload failed:", err);
-      alert("فشل رفع الفيديو في المحرر");
+      alert("فشل رفع الفيديو للمحرر");
     } finally {
       setEditorUploading(false);
       e.target.value = "";
     }
   };
 
-  // ── Hashtags ──────────────────────────────────────────────────
+  // ── الهاشتاجات ───────────────────────────────────────────────
   const handleHashtagKeyDown = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -260,19 +318,10 @@ export default function AddArticle() {
     setHashtagInput("");
   };
 
-  const removeHashtag = (tag) =>
-    setHashtags((prev) => prev.filter((t) => t !== tag));
-
-  // =============================================================
-  // RENDER
-  // =============================================================
+  const removeHashtag = (tag) => setHashtags((prev) => prev.filter((t) => t !== tag));
 
   return (
-    <div
-      dir="rtl"
-      className="min-h-screen bg-[#f5f7fb] p-3 sm:p-6"
-      style={{ fontFamily: "Tajawal, sans-serif" }}
-    >
+    <div dir="rtl" className="min-h-screen bg-[#f5f7fb] p-3 sm:p-6" style={{ fontFamily: "Tajawal, sans-serif" }}>
       <style>{`
         .ProseMirror h1 { font-size:28px; font-weight:800; margin-bottom:18px; }
         @media(min-width:768px){ .ProseMirror h1 { font-size:32px; } }
@@ -281,24 +330,18 @@ export default function AddArticle() {
         .ProseMirror p  { margin-bottom:14px; }
         .ProseMirror ul { list-style:disc;    padding-right:20px; }
         .ProseMirror ol { list-style:decimal; padding-right:20px; }
-        .ProseMirror blockquote {
-          border-right:4px solid var(--color-primary);
-          padding:14px; background:#f8fafc;
-          border-radius:12px; margin:16px 0;
-        }
+        .ProseMirror blockquote { border-right:4px solid var(--color-primary); padding:14px; background:#f8fafc; border-radius:12px; margin:16px 0; }
         .ProseMirror img   { border-radius:18px; margin:18px 0; width:100%; }
         .ProseMirror video { border-radius:18px; margin:18px 0; width:100%; }
       `}</style>
 
       <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4 sm:gap-6 items-start">
-
-        {/* ══ SIDEBAR ══════════════════════════════════════════ */}
+        {/* SIDEBAR */}
         <div className="w-full xl:sticky xl:top-5 z-10">
           <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="bg-primary p-4 sm:p-6 text-white">
               <h2 className="text-xl sm:text-2xl font-black">المراحل</h2>
             </div>
-
             <div className="p-4 sm:p-5 flex flex-row xl:flex-col gap-3 overflow-x-auto xl:overflow-x-visible scrollbar-none snap-x">
               {[
                 { title: "المعلومات الأساسية", ref: basicInfoRef  },
@@ -308,146 +351,73 @@ export default function AddArticle() {
                 { title: "مراجعة ونشر",        ref: publishRef    },
               ].map((item, index) => (
                 <button
-                  key={index}
-                  type="button"
-                  onClick={() => scrollToSection(item.ref)}
+                  key={index} type="button" onClick={() => scrollToSection(item.ref)}
                   className="min-w-[170px] sm:min-w-[200px] xl:w-full text-right rounded-xl sm:rounded-2xl border border-slate-200 p-3 sm:p-4 hover:border-primary hover:bg-primary/5 transition snap-center shrink-0"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-bold text-xs sm:text-sm text-slate-800 line-clamp-1 xl:line-clamp-none">
-                      {item.title}
-                    </h3>
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs sm:text-sm font-bold shrink-0">
-                      {index + 1}
-                    </div>
+                    <h3 className="font-bold text-xs sm:text-sm text-slate-800 line-clamp-1">{item.title}</h3>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs sm:text-sm font-bold shrink-0">{index + 1}</div>
                   </div>
                 </button>
               ))}
             </div>
-
-            <div className="hidden sm:block p-5 border-t border-slate-100 xl:border-t-0">
-              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
-                <h3 className="text-sm font-black text-orange-600 mb-3">نصائح لكتابة مقال مميز</h3>
-                <ul className="space-y-2 text-sm text-slate-600">
-                  <li>✔ استخدم عنوان جذاب وواضح</li>
-                  <li>✔ أضف صورة بارزة عالية الجودة</li>
-                  <li>✔ قسم المقال بعناوين فرعية</li>
-                  <li>✔ راجع المقال قبل النشر</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* ══ MAIN ═════════════════════════════════════════════ */}
+        {/* MAIN FORM */}
         <div className="space-y-4 sm:space-y-6 w-full min-w-0">
-
-          {/* HEADER */}
-          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm flex items-center justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800">إضافة مقال جديد</h1>
-              <p className="text-sm sm:text-base text-slate-500 mt-1">أنشئ محتوى جديد</p>
+              <p className="text-sm text-slate-500 mt-1">أنشئ محتوى غني وجديد</p>
             </div>
-            <button type="button" className="w-full sm:w-auto h-12 px-5 rounded-2xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 transition text-sm sm:text-base font-medium">
-              <Eye size={18} /> معاينة المقال
-            </button>
           </div>
 
-          {/* ── BASIC INFO ──────────────────────────────────── */}
-          <div
-            ref={basicInfoRef}
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm scroll-mt-20 xl:scroll-mt-24"
-          >
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800 mb-4 sm:mb-6">
-              المعلومات الأساسية
-            </h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+          {/* SECTION 1: BASIC INFO */}
+          <div ref={basicInfoRef} className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm scroll-mt-24">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-800 mb-4">المعلومات الأساسية</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-bold text-slate-700">عنوان المقال</label>
-                <input
-                  type="text"
-                  placeholder="أدخل عنوان المقال"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl border border-slate-200 px-4 sm:px-5 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <input type="text" placeholder="أدخل عنوان المقال" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full h-12 sm:h-14 rounded-xl border border-slate-200 px-4 focus:outline-none focus:ring-2 focus:ring-primary" />
               </div>
               <div>
                 <label className="block mb-2 text-sm font-bold text-slate-700">التصنيف</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl border border-slate-200 px-4 sm:px-5 bg-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                >
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full h-12 sm:h-14 rounded-xl border border-slate-200 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-primary">
                   <option value="">اختر التصنيف</option>
                   <option>تقنية</option>
                   <option>رياضة</option>
                   <option>اقتصاد</option>
-                  <option>أخبار</option>
                 </select>
               </div>
             </div>
 
-            {/* HASHTAGS */}
             <div className="mt-4">
-              <label className="block mb-3 text-sm font-bold text-slate-700">الهاشتاجات</label>
-              <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2 focus-within:ring-2 focus-within:ring-primary">
+              <label className="block mb-2 text-sm font-bold text-slate-700">الهاشتاجات</label>
+              <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
                 {hashtags.map((tag, i) => (
                   <div key={i} className="h-10 px-4 rounded-xl bg-secondary text-white flex items-center gap-2 text-sm font-medium">
                     <span>{tag}</span>
-                    <button type="button" onClick={() => removeHashtag(tag)} className="hover:opacity-70">
-                      <X size={14} />
-                    </button>
+                    <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
                   </div>
                 ))}
-                <input
-                  type="text"
-                  value={hashtagInput}
-                  onChange={(e) => setHashtagInput(e.target.value)}
-                  onKeyDown={handleHashtagKeyDown}
-                  placeholder="اكتب هاشتاج واضغط Enter"
-                  className="flex-1 min-w-[180px] h-10 outline-none text-sm"
-                />
+                <input type="text" value={hashtagInput} onChange={(e) => setHashtagInput(e.target.value)} onKeyDown={handleHashtagKeyDown} placeholder="اكتب هاشتاج واضغط Enter" className="flex-1 min-w-[180px] h-10 outline-none text-sm" />
               </div>
             </div>
 
-            {/* FEATURED IMAGE */}
-            <div className="mt-6 sm:mt-8">
-              <label className="block mb-3 text-sm font-bold text-slate-700">الصورة البارزة</label>
+            <div className="mt-6">
+              <label className="block mb-2 text-sm font-bold text-slate-700">الصورة البارزة</label>
               <div className="relative rounded-2xl sm:rounded-3xl border border-dashed border-slate-300 overflow-hidden bg-slate-50">
-
-                {featuredUploading && (
-                  <UploadOverlay progress={featuredProgress} label="جاري رفع الصورة البارزة..." />
-                )}
-
-                {featuredImage ? (
+                {featuredUploading && <UploadOverlay progress={featuredProgress} label="جاري رفع الصورة البارزة..." />}
+                {featuredImage?.url ? (
                   <div className="relative">
-                    <img
-                      src={featuredImage}
-                      alt=""
-                      className="w-full h-[220px] sm:h-[350px] object-cover"
-                    />
-                    <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded-lg max-w-[60%] truncate">
-                      {featuredImage}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFeaturedImage(null)}
-                      className="absolute top-3 left-3 sm:top-4 sm:left-4 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <img src={featuredImage.url} alt="" className="w-full h-[220px] sm:h-[350px] object-cover" />
+                    <button type="button" onClick={handleRemoveFeatured} className="absolute top-3 left-3 w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition"><Trash2 size={18} /></button>
                   </div>
                 ) : (
                   <div className="h-[220px] sm:h-[350px] flex flex-col items-center justify-center p-4">
-                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3 sm:mb-4">
-                      <Upload size={35} />
-                    </div>
-                    <h3 className="font-bold text-sm sm:text-base text-slate-700 mb-2 text-center">
-                      رفع صورة المقال
-                    </h3>
-                    <label className="h-10 sm:h-12 px-5 sm:px-6 rounded-xl sm:rounded-2xl bg-primary text-white flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-medium hover:opacity-95 transition">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3"><Upload size={30} /></div>
+                    <label className="h-11 px-5 rounded-xl bg-primary text-white flex items-center gap-2 cursor-pointer text-sm font-medium">
                       <Upload size={16} /> رفع صورة
                       <input type="file" hidden accept="image/*" onChange={handleFeaturedImage} />
                     </label>
@@ -457,15 +427,12 @@ export default function AddArticle() {
             </div>
           </div>
 
-          {/* ── EDITOR ──────────────────────────────────────── */}
-          <div
-            ref={contentRef}
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm scroll-mt-20 xl:scroll-mt-24"
-          >
-            {/* TOOLBAR */}
-            <div className="p-3 sm:p-4 border-b border-slate-200 flex flex-wrap gap-1.5 sm:gap-2 bg-slate-50 max-h-[180px] overflow-y-auto">
-              <ToolbarButton active={editor?.isActive("bold")}      onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={17} /></ToolbarButton>
-              <ToolbarButton active={editor?.isActive("italic")}    onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={17} /></ToolbarButton>
+          {/* SECTION 2: EDITOR */}
+          <div ref={contentRef} className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm scroll-mt-24 relative">
+            {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
+            <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50">
+              <ToolbarButton active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={17} /></ToolbarButton>
+              <ToolbarButton active={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={17} /></ToolbarButton>
               <ToolbarButton active={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={17} /></ToolbarButton>
               <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}><Heading1 size={17} /></ToolbarButton>
               <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={17} /></ToolbarButton>
@@ -475,119 +442,57 @@ export default function AddArticle() {
               <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
               <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
               <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
-              <ToolbarButton
-                onClick={() => {
-                  const url = prompt("ضع الرابط");
-                  if (url) editor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-                }}
-              >
-                <LinkIcon size={17} />
-              </ToolbarButton>
-
-              {/* IMAGE → editor */}
-              <label className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
-                {editorUploading && editorUploadLabel.includes("صورة")
-                  ? <Loader2 size={17} className="animate-spin text-primary" />
-                  : <ImageIcon size={17} />
-                }
+              
+              <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
+                <ImageIcon size={17} />
                 <input type="file" hidden accept="image/*" onChange={addImageToEditor} />
               </label>
 
-              {/* VIDEO → editor */}
-              <label className="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
-                {editorUploading && editorUploadLabel.includes("فيديو")
-                  ? <Loader2 size={17} className="animate-spin text-primary" />
-                  : <Video size={17} />
-                }
+              <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
+                <Video size={17} />
                 <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
               </label>
             </div>
-
-            {/* editor upload progress bar */}
-            {editorUploading && (
-              <div className="bg-primary/5 px-4 py-2 flex items-center gap-3 border-b border-slate-200">
-                <Loader2 size={16} className="animate-spin text-primary shrink-0" />
-                <span className="text-sm text-primary font-medium">{editorUploadLabel}</span>
-                <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-200"
-                    style={{ width: `${editorProgress}%` }}
-                  />
-                </div>
-                <span className="text-xs text-slate-500 shrink-0">{editorProgress}%</span>
-              </div>
-            )}
-
             <EditorContent editor={editor} />
           </div>
 
-          {/* ── MEDIA ════════════════════════════════════════─ */}
-          <div
-            ref={mediaRef}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 scroll-mt-20 xl:scroll-mt-24"
-          >
-            {/* VIDEO */}
-            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-              <h3 className="text-lg sm:text-xl font-black mb-4 sm:mb-5 text-slate-800">إضافة فيديو</h3>
-              <div className="relative border-2 border-dashed border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-center bg-slate-50">
-                {videoUploading && <UploadOverlay progress={videoProgress} label="جاري رفع الفيديو..." />}
-                {videoPreview ? (
+          {/* SECTION 3: MEDIA (GALLERY & VIDEO) */}
+          <div ref={mediaRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4 scroll-mt-24">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <h3 className="text-lg font-black mb-3 text-slate-800">إضافة فيديو خارجي</h3>
+              <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50">
+                {videoUploading && <UploadOverlay progress={videoProgress} label="جاري الرفع..." />}
+                {videoPreview?.url ? (
                   <div className="relative">
-                    <video
-                      src={videoPreview}
-                      controls
-                      className="rounded-xl sm:rounded-2xl w-full max-h-[250px] object-cover"
-                    />
-                    <div className="mt-2 text-[10px] text-slate-400 break-all text-right px-1">
-                      {videoPreview}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setVideoPreview(null)}
-                      className="absolute top-2 left-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md"
-                    >
-                      <X size={16} />
-                    </button>
+                    <video src={videoPreview.url} controls className="rounded-xl w-full max-h-[200px] object-cover" />
+                    <button type="button" onClick={handleRemoveVideo} className="absolute top-2 left-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center"><X size={16} /></button>
                   </div>
                 ) : (
-                  <div className="py-4">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center mb-3 sm:mb-4">
-                      <Video size={28} />
-                    </div>
-                    <label className="h-10 sm:h-12 px-4 sm:px-5 rounded-xl sm:rounded-2xl bg-primary text-white inline-flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-medium">
-                      <Upload size={16} /> اختر فيديو
-                      <input type="file" hidden accept="video/*" onChange={handleVideoUpload} />
+                  <div className="py-2">
+                    <Video size={24} className="mx-auto text-primary mb-2" />
+                    <label className="h-10 px-4 rounded-xl bg-primary text-white inline-flex items-center gap-2 cursor-pointer text-xs font-medium">
+                      اختر فيديو <input type="file" hidden accept="video/*" onChange={handleVideoUpload} />
                     </label>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* GALLERY */}
-            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-              <h3 className="text-lg sm:text-xl font-black mb-4 sm:mb-5 text-slate-800">معرض الصور</h3>
-              <div className="relative border-2 border-dashed border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-center bg-slate-50">
-                {galleryUploading && <UploadOverlay progress={galleryProgress} label="جاري رفع الصور..." />}
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-secondary/10 text-secondary mx-auto flex items-center justify-center mb-3 sm:mb-4">
-                  <ImageIcon size={28} />
-                </div>
-                <label className="h-10 sm:h-12 px-4 sm:px-5 rounded-xl sm:rounded-2xl bg-secondary text-white inline-flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-medium">
-                  <Upload size={16} /> اختر صور
-                  <input type="file" hidden multiple accept="image/*" onChange={handleGalleryUpload} />
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <h3 className="text-lg font-black mb-3 text-slate-800">معرض صور إضافية</h3>
+              <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50">
+                {galleryUploading && <UploadOverlay progress={galleryProgress} label="جاري الرفع..." />}
+                <ImageIcon size={24} className="mx-auto text-secondary mb-2" />
+                <label className="h-10 px-4 rounded-xl bg-secondary text-white inline-flex items-center gap-2 cursor-pointer text-xs font-medium">
+                  اختر صور <input type="file" hidden multiple accept="image/*" onChange={handleGalleryUpload} />
                 </label>
               </div>
               {gallery.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-4 sm:mt-5">
+                <div className="grid grid-cols-3 gap-2 mt-3">
                   {gallery.map((img, index) => (
-                    <div key={index} className="relative rounded-xl sm:rounded-2xl overflow-hidden group">
-                      <img src={img} alt="" className="w-full h-24 sm:h-32 object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setGallery((prev) => prev.filter((_, i) => i !== index))}
-                        className="absolute top-1.5 left-1.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow"
-                      >
-                        <X size={14} />
-                      </button>
+                    <div key={index} className="relative rounded-xl overflow-hidden">
+                      <img src={img.url} alt="" className="w-full h-20 object-cover" />
+                      <button type="button" onClick={() => handleRemoveGalleryItem(index)} className="absolute top-1 left-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center"><X size={12} /></button>
                     </div>
                   ))}
                 </div>
@@ -595,66 +500,37 @@ export default function AddArticle() {
             </div>
           </div>
 
-          {/* ── IMPORTANCE ──────────────────────────────────── */}
-          <div
-            ref={importanceRef}
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm scroll-mt-20 xl:scroll-mt-24"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-800">أهمية المقال</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">تحكم في أولوية ظهور المقال</p>
-              </div>
-              <div
-                className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center text-white shadow-lg self-center shrink-0 ${
-                  importance >= 8 ? "bg-red-500" : importance >= 5 ? "bg-secondary" : "bg-primary"
-                }`}
-              >
-                <span className="text-2xl sm:text-3xl font-black">{importance}</span>
-                <span className="text-xs sm:text-sm">/10</span>
-              </div>
+          {/* SECTION 4: IMPORTANCE */}
+          <div ref={importanceRef} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm scroll-mt-24">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black text-slate-800">أهمية المقال وتثبيته</h2>
+              <div className="h-12 px-4 rounded-xl bg-secondary text-white flex items-center justify-center font-bold">{importance} / 10</div>
             </div>
-            <input
-              type="range" min="1" max="10" value={importance}
-              onChange={(e) => setImportance(Number(e.target.value))}
-              className="w-full h-2 sm:h-3 rounded-full accent-[var(--color-secondary)] cursor-pointer"
-            />
-            <div className="flex justify-between mt-3 text-xs sm:text-sm text-slate-400 px-1">
-              {[1,2,3,4,5,6,7,8,9,10].map((n) => <span key={n}>{n}</span>)}
-            </div>
-            <label className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl sm:rounded-3xl border border-secondary/20 bg-secondary/10 p-4 sm:p-5 cursor-pointer gap-4">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-3xl bg-secondary text-white flex items-center justify-center shrink-0">
-                  <Flame size={28} />
-                </div>
+            <input type="range" min="1" max="10" value={importance} onChange={(e) => setImportance(Number(e.target.value))} className="w-full accent-[var(--color-secondary)]" />
+            
+            <label className="mt-4 flex items-center justify-between rounded-xl bg-secondary/10 p-4 cursor-pointer">
+              <div className="flex items-center gap-3">
+                <Flame size={20} className="text-secondary" />
                 <div>
-                  <h3 className="text-lg sm:text-xl font-black text-secondary">عاجل</h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">إظهار المقال كخبر عاجل</p>
+                  <h3 className="font-bold text-secondary text-sm">تمييز كخبر عاجل</h3>
                 </div>
               </div>
-              <input
-                type="checkbox" checked={isUrgent}
-                onChange={(e) => setIsUrgent(e.target.checked)}
-                className="w-5 h-5 sm:w-6 sm:h-6 accent-[var(--color-secondary)] self-end sm:self-auto"
-              />
+              <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="w-5 h-5 accent-[var(--color-secondary)]" />
             </label>
           </div>
 
-          {/* ── FOOTER / PUBLISH ────────────────────────────── */}
-          <div
-            ref={publishRef}
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 scroll-mt-20 xl:scroll-mt-24"
-          >
-            <div className="grid grid-cols-2 sm:flex gap-2.5 sm:gap-3">
-              <button type="button" className="h-11 sm:h-12 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-slate-50 transition text-xs sm:text-sm font-medium text-slate-700">
-                <Save size={16} /> حفظ كمسودة
+          {/* SECTION 5: ACTIONS */}
+          <div ref={publishRef} className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 scroll-mt-24">
+            <div className="flex gap-2">
+              <button type="button" className="h-12 px-5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 transition text-sm font-medium text-slate-700">
+                <Save size={16} /> حفظ المسودة
               </button>
-              <button type="button" className="h-11 sm:h-12 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-red-200 text-red-500 hover:bg-red-50 transition text-xs sm:text-sm font-medium">
-                إلغاء
+              <button type="button" onClick={handleCancel} className="h-12 px-5 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition text-sm font-medium">
+                إلغاء المقال بالكامل
               </button>
             </div>
-            <button type="button" className="h-11 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-secondary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition text-sm sm:text-base">
-              نشر المقال <ChevronLeft size={18} />
+            <button type="button" className="h-12 px-6 rounded-xl bg-secondary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition text-sm">
+              نشر الآن <ChevronLeft size={18} />
             </button>
           </div>
 
