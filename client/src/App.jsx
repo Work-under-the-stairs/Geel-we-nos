@@ -9,10 +9,10 @@ import Home from './pages/Home'
 import ArticleDetail from './pages/ArticleDetail'
 import AdminDashboard from './pages/AdminDashboard'
 import AddArticle from './pages/AddArticle'
-
+import { isAuthenticated,isAdmin } from './utils/auth';
 
 const App = () => {
-  const userData = true; // يمكنكِ لاحقاً ربط هذه القيمة بحالة تسجيل الدخول الحقيقية (Context أو Redux)
+  const userData = isAuthenticated(); // يمكنكِ لاحقاً ربط هذه القيمة بحالة تسجيل الدخول الحقيقية (Context أو Redux)
 
   return (
     <>
@@ -22,13 +22,13 @@ const App = () => {
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={userData? <Layout/> : <Login/>} >
+        <Route path="/" element={<Layout/>} >
           <Route index element={<Home/>}/>
           <Route path="/:category" element={<Category/>} />
           <Route path="/news/:id" element={<ArticleDetail/>}/>
         </Route>
-        <Route path="/admin" element={<AdminDashboard/>} />
-        <Route path="/add/article" element={<AddArticle/>} />
+        <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
+        <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Login/>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import { data, Link, NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import logo from '/images/logo.jpeg'
-import { Search, Menu, X, Home } from 'lucide-react'
+import { Search, Menu, X, Home, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
-import { useCategories } from '../../hooks/useAdmin' // 👈 استدعاء الهوك
+import { useCategories } from '../../hooks/useAdmin'
+import { isAuthenticated, getUsername, isAdmin, logout } from '../../utils/auth'
 
 const NavIcon = ({ name, size = 16, className = "" }) => {
   const IconComponent = LucideIcons[name]
-  if (!IconComponent) {
-    return <LucideIcons.Newspaper size={size} className={className} />
-  }
+  if (!IconComponent) return <LucideIcons.Newspaper size={size} className={className} />
   return <IconComponent size={size} className={className} />
 }
 
@@ -17,97 +16,68 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   
-  // 👈 استدعاء الداتا من الداتابيز
-  const { data: categories = [], isLoading } = useCategories()
-  return (
-    // تم تحويل الحاوية الرئيسية لتأخذ حيز الصف الأول الثابت منعاً لتداخل العناصر تحته
-    <header className="w-full select-none pt-[90px] md:pt-[120px]" dir="rtl">
+  const { data: categories = [] } = useCategories()
+  
+  const isAuth = isAuthenticated();
+  const username = getUsername();
+  const isUserAdmin = isAdmin();
 
-      {/* ======= ROW 1 (تم تحويله إلى fixed لضمان الثبات الكامل) ======= */}
+  return (
+    <header className="w-full select-none pt-[90px] md:pt-[120px]" dir="rtl">
+      
+      {/* ======= ROW 1 ======= */}
       <div className="fixed top-0 left-0 z-50 w-full bg-main-bg border-b border-gray-200 shadow-sm h-[90px] md:h-[120px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex flex-row-reverse items-center justify-between h-full relative">
 
-          {/* يمين — الأزرار */}
           <div className="hidden sm:flex items-center gap-2.5 z-10">
-            <Link
-              to="/login"
-              className="text-md font-extrabold text-primary px-5 py-2.5 rounded-xl border-2 border-primary hover:bg-primary hover:text-white transition-all duration-200"
-            >
-              تسجيل الدخول
-            </Link>
-
-            <Link
-              to="/register"
-              className="text-md font-extrabold text-white px-5 py-2.5 rounded-xl bg-secondary shadow-[0_4px_12px_rgba(252,105,85,0.35)] hover:bg-secondary/85 hover:-translate-y-px transition-all duration-200"
-            >
-              إنشاء حساب ✦
-            </Link>
+            {isAuth ? (
+              <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
+                <span className="font-bold text-sm text-slate-700">أهلاً، {username}</span>
+                {isUserAdmin && (
+                  <Link to="/admin" className="text-xs font-bold bg-slate-800 text-white px-3 py-2 rounded-lg flex items-center gap-1 hover:bg-slate-900 transition-all">
+                    <LayoutDashboard size={14} /> لوحة التحكم
+                  </Link>
+                )}
+                <button onClick={logout} className="text-red-500 hover:text-red-600 transition-colors p-1 cursor-pointer">
+                  <LogOut size={18}  />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login" className="text-md font-extrabold text-primary px-5 py-2.5 rounded-xl border-2 border-primary hover:bg-primary hover:text-white transition-all duration-200">
+                  تسجيل الدخول
+                </Link>
+                <Link to="/register" className="text-md font-extrabold text-white px-5 py-2.5 rounded-xl bg-secondary shadow-[0_4px_12px_rgba(252,105,85,0.35)] hover:bg-secondary/85 transition-all">
+                  إنشاء حساب ✦
+                </Link>
+              </>
+            )}
           </div>
 
-          {/* وسط — اللوجو */}
-          <Link
-            to="/"
-            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
-          >
-            <img
-              src={logo}
-              alt="جيل ونص"
-              className="h-14 sm:h-16 md:h-20 w-auto object-contain"
-            />
+          <Link to="/" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+            <img src={logo} alt="جيل ونص" className="h-14 sm:h-16 md:h-20 w-auto object-contain" />
           </Link>
 
-          {/* يسار — القائمة والبحث */}
           <div className="flex items-center gap-2.5 z-10">
-            <button
-              onClick={() => setMenuOpen(p => !p)}
-              aria-label="القائمة"
-              className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
-            >
+            <button onClick={() => setMenuOpen(p => !p)} className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all">
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-
-            <button
-              onClick={() => setSearchOpen(p => !p)}
-              aria-label="بحث"
-              className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
-            >
+            <button onClick={() => setSearchOpen(p => !p)} className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all">
               <Search size={19} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ======= ROW 2 — صف التبويبات (يتحرك طبيعياً ويختفي عند النزول) ======= */}
+      {/* ======= ROW 2 (التبويبات) ======= */}
       <div className="border-b border-gray-200 bg-white overflow-x-auto scrollbar-none relative z-30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
-          <ul className="flex items-center lg:justify-between gap-6 lg:gap-0 min-w-max sm:min-w-0">
-            
-            {/* تبويبة الرئيسية */}
-            <li>
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 text-md font-bold py-4 px-1 whitespace-nowrap border-b-2 -mb-px transition-all duration-200
-                   ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'}`
-                }
-              >
-                <Home size={16} />
-                الرئيسية
-              </NavLink>
-            </li>
-
+          <ul className="flex items-center lg:justify-between gap-6 min-w-max sm:min-w-0">
+            <li><NavLink to="/" end className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}><Home size={16} /> الرئيسية</NavLink></li>
             {categories?.data?.map(cat => (
               <li key={cat._id || cat.name}>
-                <NavLink
-                  to={`/${encodeURIComponent(cat.name)}`}
-                  className={({ isActive }) =>
-                    `flex items-center gap-1.5 text-md font-bold py-4 px-1 whitespace-nowrap border-b-2 -mb-px transition-all duration-200
-                      ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'}`
-                  }
-                >
-                  <NavIcon name={cat.icon_name} size={16} />
-                  {cat.name}
+                <NavLink to={`/${encodeURIComponent(cat.name)}`} className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}>
+                  <NavIcon name={cat.icon_name} /> {cat.name}
                 </NavLink>
               </li>
             ))}
@@ -115,97 +85,41 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* ======= شريط البحث ======= */}
-      {searchOpen && (
-        <div className="fixed top-[90px] md:top-[120px] left-0 w-full border-b border-gray-200 bg-main-bg z-40 shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-3">
-            <div className="relative">
-              <Search size={17} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="search"
-                autoFocus
-                placeholder="ابحث في جيل ونص..."
-                className="w-full bg-white border border-gray-200 rounded-xl pr-10 pl-4 py-2.5 text-[14px] text-gray-800 placeholder:text-gray-400 outline-none focus:border-primary transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======= خلفية معتمة السايد بار ======= */}
-      {menuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
-
-      {/* ======= السايد بار الجانبي الثابت ======= */}
-      <div 
-        className={`fixed top-0 right-0 h-full w-[280px] sm:w-[320px] bg-white shadow-2xl z-50 
-          transition-transform duration-300 ease-in-out transform flex flex-col
-          ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
-      >
+      {/* ======= السايد بار (Sidebar) ======= */}
+      {menuOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setMenuOpen(false)} />}
+      <div className={`fixed top-0 right-0 h-full w-[280px] bg-white shadow-2xl z-50 transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
           <span className="font-extrabold text-primary text-lg">القائمة</span>
-          <button 
-            onClick={() => setMenuOpen(false)}
-            className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-primary"
-          >
-            <X size={18} />
-          </button>
+          <button onClick={() => setMenuOpen(false)} className="p-2 text-gray-500"><X size={18} /></button>
         </div>
 
-        <div className="flex-1 p-4 flex flex-col gap-1.5 overflow-y-auto">
-          <p className="text-xs font-bold text-gray-400 px-3 mb-1">تصفح الموقع</p>
+        <div className="flex-1 p-4 flex flex-col gap-2">
+          {isAuth && (
+            <div className="p-4 bg-gray-50 rounded-xl mb-4">
+              <p className="font-bold text-sm">أهلاً، {username}</p>
+              {isUserAdmin && <Link to="/admin" className="block text-xs text-primary font-bold mt-1">لوحة تحكم الأدمن</Link>}
+            </div>
+          )}
           
-          <NavLink
-            to="/"
-            end
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-[14px] font-bold px-4 py-3.5 rounded-xl transition-all duration-200
-               ${isActive ? 'bg-secondary/10 text-secondary' : 'text-slate-600 hover:bg-gray-50 hover:text-primary'}`
-            }
-          >
-            <span className="text-gray-400"><Home size={16} /></span>
-            الرئيسية
-          </NavLink>
-
+          <NavLink to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50"><Home size={16} /> الرئيسية</NavLink>
           {categories?.data?.map(cat => (
-            <NavLink
-              key={cat._id || cat.name}
-              to={`/${encodeURIComponent(cat.name)}`}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 text-[14px] font-bold px-4 py-3.5 rounded-xl transition-all duration-200
-                  ${isActive ? 'bg-secondary/10 text-secondary' : 'text-slate-600 hover:bg-gray-50 hover:text-primary'}`
-              }
-            >
-              <span className="text-gray-400"><NavIcon name={cat.icon_name} size={16} /></span>
-              {cat.name}
+            <NavLink key={cat._id} to={`/${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50">
+              <NavIcon name={cat.icon_name} /> {cat.name}
             </NavLink>
           ))}
 
-          <div className="flex flex-col gap-2.5 mt-auto pt-4 border-t border-gray-100">
-            <Link
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-              className="w-full text-center text-md font-extrabold text-primary py-2.5 rounded-xl border-2 border-primary hover:bg-primary hover:text-white transition-colors"
-            >
-              تسجيل الدخول
-            </Link>
-            <Link
-              to="/register"
-              onClick={() => setMenuOpen(false)}
-              className="w-full text-center text-md font-extrabold text-white bg-secondary py-2.5 rounded-xl shadow-[0_4px_12px_rgba(252,105,85,0.35)]"
-            >
-              إنشاء حساب
-            </Link>
+          <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
+            {isAuth ? (
+              <button onClick={logout} className="w-full text-center font-bold text-red-500 py-3 rounded-xl border border-red-100 hover:bg-red-50">خروج</button>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="w-full text-center font-bold text-primary py-3 rounded-xl border border-primary hover:bg-primary hover:text-white">تسجيل الدخول</Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="w-full text-center font-bold text-white bg-secondary py-3 rounded-xl">إنشاء حساب</Link>
+              </>
+            )}
           </div>
         </div>
       </div>
-
     </header>
   )
 }

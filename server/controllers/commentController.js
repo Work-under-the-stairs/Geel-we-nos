@@ -40,14 +40,14 @@ exports.getCommentsByArticle = async (req, res, next) => {
 
 exports.addComment = async (req, res, next) => {
   try {
-    const { text } = req.body; // التأكد من أن الفرونت إند يرسل 'text'
+    const { content } = req.body; // التأكد من أن الفرونت إند يرسل 'text'
     const { articleId } = req.params;
 
     // توحيد اسم الحقل ليكون newsId ليتطابق مع getCommentsByArticle
     const newComment = await Comment.create({
       newsId: articleId, // 👈 التعديل هنا
       writer: req.user._id,
-      content: text      // 👈 تخزين النص القادم في حقل الـ content
+      content: content      // 👈 تخزين النص القادم في حقل الـ content
     });
 
     // جلب بيانات الكاتب لعرضها فوراً في الفرونت إند
