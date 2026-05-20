@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, FileText, PlusCircle, Folder, MessageSquare, Users, BarChart2, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import { getUserData, logout } from '../../../utils/auth';
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveTab }) {
   const sidebarLinks = [
     { name: "الرئيسية", icon: Home, active: true },
@@ -48,8 +48,8 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, se
         })}
       </nav>
 
-      <div className="p-4 border-t border-[#134E5E]">
-        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/10 transition-all">
+      <div className="p-4 border-t border-[#134E5E] cursor-pointer">
+        <a onClick={logout} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/10 transition-all">
           <LogOut size={18} />
           <span>تسجيل الخروج</span>
         </a>
