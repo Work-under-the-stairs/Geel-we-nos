@@ -136,3 +136,15 @@ export const useDeleteCategory = () => {
     },
   });
 };
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => adminService.deleteUser(id),
+    onSuccess: () => {
+      // بنعمل تحديث لجدول المستخدمين وللوحة التحكم عشان العداد يقل
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.usersBase });
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard });
+    },
+  });
+};

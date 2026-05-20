@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-
+const { protect, restrictTo } = require("../middleware/authMiddleware"); 
 // استدعاء الميدلويرز
 const isAdmin = require("../middleware/isAdmin");
 
@@ -49,6 +49,6 @@ router.patch("/:id/password", userController.updatePassword);
 // ==========================================
 
 // 1. حذف مستخدم (للأدمن فقط)
-router.delete("/:id", isAdmin, userController.deleteUser);
+router.delete("/:id", userController.deleteUser);
 
 module.exports = router;
