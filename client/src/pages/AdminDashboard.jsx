@@ -68,7 +68,6 @@ export default function AdminDashboard() {
 
     switch (activeTab) {
       case "التصنيفات":
-        console.log("Categories Data:", categoriesData);
         return (
           <CategoriesTable 
             categories={categoriesData.data|| []} 

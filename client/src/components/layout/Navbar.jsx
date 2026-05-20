@@ -19,7 +19,6 @@ export default function Navbar() {
   
   // 👈 استدعاء الداتا من الداتابيز
   const { data: categories = [], isLoading } = useCategories()
-  console.log("Fetched Categories:", categories) // 👈 لوج للتأكد من جلب البيانات
   return (
     // تم تحويل الحاوية الرئيسية لتأخذ حيز الصف الأول الثابت منعاً لتداخل العناصر تحته
     <header className="w-full select-none pt-[90px] md:pt-[120px]" dir="rtl">
