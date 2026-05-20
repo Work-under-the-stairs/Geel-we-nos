@@ -6,6 +6,7 @@ import { articleService } from '../services/articleService'
 // QUERY KEYS
 // ============================================================
 export const KEYS = {
+  categories:          ()              => ['categories'], // ← مفتاح الأقسام العامة
   featured:            (limit)         => ['featured', limit],
   trending:            (limit)         => ['trending', limit],
   latest:              (limit)         => ['latest', limit],
@@ -20,12 +21,23 @@ export const KEYS = {
 // ============================================================
 // الـ response shapes الثابتة بعد ما شفنا الـ network:
 //
-// featured  → res.data.data         = object واحد
-// trending  → res.data.data         = array
-// categoryNews → res.data.data      = array
-//               res.data.page       = number
+// categories   → res.data.data         = array من الأقسام
+// featured     → res.data.data         = object واحد
+// trending     → res.data.data         = array
+// categoryNews → res.data.data         = array
+//               res.data.page         = number
 //               res.data.totalPages = number
 // ============================================================
+
+// ============ الأقسام العامة ============
+
+export const useCategories = () =>
+  useQuery({
+    queryKey: KEYS.categories(),
+    queryFn:  () => articleService.getAllCategories()
+                    .then(res => res.data.data), // ← مصفوفة تحتوي على كل الأقسام
+    staleTime: 1000 * 60 * 30, // 30 دقيقة لأن الأقسام نادراً ما تتغير
+  })
 
 // ============ الصفحة الرئيسية ============
 

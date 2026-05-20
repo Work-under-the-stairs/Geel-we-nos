@@ -16,10 +16,24 @@ const newsSchema = new mongoose.Schema(
     writer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Writer is required"],
+      required: [false, "Writer is required"],
     },
+    // مصفوفات النصوص لاستقبال روابط الـ Front-end (ImageKit) أو روابط الميديا المباشرة
     images: [{ type: String, trim: true }],
     videos: [{ type: String, trim: true }],
+    
+    // قائمة الهاشتاجات المضافة للمقال
+    hashtags: [{ type: String, trim: true }],
+    
+    // حالة المقال: منشور أو مسودة
+    status: {
+      type: String,
+      enum: {
+        values: ["draft", "published"],
+        message: "Status must be either 'draft' or 'published'",
+      },
+      default: "draft",
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -44,10 +58,10 @@ const newsSchema = new mongoose.Schema(
 );
 
 // 🚀 تحسين الـ Indexes لأعلى أداء في الصفحة الرئيسية والأقسام
-newsSchema.index({ category: 1, createdAt: -1 }); // لجلب أحدث أخبار قسم معين بسرعة
-newsSchema.index({ isUrgent: -1, createdAt: -1 }); // لشريط عاجل (الأحدث أولاً)
-newsSchema.index({ views: -1 }); // للأكثر قراءة (Trending)
-newsSchema.index({ important_rate: -1, createdAt: -1 }); // للأخبار المميزة
-newsSchema.index({ title: "text", content: "text" }); // محرك البحث الخاص بالموقع
+newsSchema.index({ category: 1, createdAt: -1 }); 
+newsSchema.index({ isUrgent: -1, createdAt: -1 }); 
+newsSchema.index({ views: -1 }); 
+newsSchema.index({ important_rate: -1, createdAt: -1 }); 
+newsSchema.index({ title: "text", content: "text", hashtags: "text" }); // تم تضمين الهاشتاجات في محرك البحث
 
 module.exports = mongoose.model("News", newsSchema);

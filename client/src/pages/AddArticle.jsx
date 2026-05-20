@@ -1,9 +1,8 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 
 import {
   Bold, Italic, Underline, Heading1, Heading2,
-  List, ListOrdered, Quote, Link as LinkIcon,
-  Image as ImageIcon, Video, Eye, X, Trash2,
+  List, ListOrdered, Quote, Image as ImageIcon, Video, X, Trash2,
   Save, ChevronLeft, Upload, AlignRight,
   AlignCenter, AlignLeft, Flame, Loader2,
 } from "lucide-react";
@@ -15,7 +14,12 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 
+import toast from "react-hot-toast"; 
 import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
+
+// ── استيراد هوكس الـ React Query ──────────────────
+import { useCreateArticle } from "../hooks/useAdmin"; 
+import { useCategories } from "../hooks/useArticles"; // ← استيراد هوك جلب الأقسام الجديد
 
 // =============================================================
 // UPLOAD PROGRESS OVERLAY
@@ -59,10 +63,13 @@ function ToolbarButton({ active, onClick, children }) {
 // MAIN COMPONENT
 // =============================================================
 export default function AddArticle() {
+  // تفعيل هوكس جلب وإنشاء البيانات
+  const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories(); // ← تشغيل هوك الأقسام
+  const createArticleMutation = useCreateArticle();
 
   // ── Basic fields ─────────────────────────────────────────────
   const [title, setTitle]           = useState("");
-  const [category, setCategory]     = useState("");
+  const [category, setCategory]     = useState(""); 
   const [importance, setImportance] = useState(5);
   const [isUrgent, setIsUrgent]     = useState(false);
   const [hashtags, setHashtags]     = useState([]);
@@ -99,7 +106,7 @@ export default function AddArticle() {
   const scrollToSection = (ref) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  // ── دالة الحذف الآمنة والمنقحة ──────────────────────
+  // ── دالة الحذف السحابي ──────────────────────────────
   const deleteMediaFromServer = async (fileId) => {
     if (!fileId) return;
     try {
@@ -109,8 +116,6 @@ export default function AddArticle() {
       const data = await response.json();
       if (response.ok && data.success) {
         console.log(`✅ تم حذف الملف من ImageKit للمعرف: ${fileId}`);
-      } else {
-        console.warn("⚠️ تنبيه من السيرفر أثناء محاولة الحذف السحابي:", data.message || "خطأ غير معروف");
       }
     } catch (err) {
       console.error("❌ خطأ في الاتصال بمسار الحذف الخاص بالسيرفر:", err.message);
@@ -123,29 +128,19 @@ export default function AddArticle() {
       StarterKit,
       UnderlineExtension,
       Link.configure({ openOnClick: false }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'editor-uploaded-img',
-        },
-      }),
+      Image.configure({ HTMLAttributes: { class: 'editor-uploaded-img' } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: "<h2>ابدأ بكتابة المقال...</h2>",
     editorProps: {
       attributes: {
-        class:
-          "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
+        class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
       },
     },
-    // =========================================================
-    // مراقبة المحتوى المحدث وتجنب الحذف العشوائي للفيديوهات
-    // =========================================================
     onUpdate: ({ editor }) => {
       const currentHTML = editor.getHTML();
-      
       setEditorMediaList((prevList) => {
         const remainingMedia = [];
-        
         prevList.forEach((media) => {
           const cleanUrl = media.url.split('?')[0]; 
           const isUrlPresent = currentHTML.includes(cleanUrl);
@@ -154,33 +149,68 @@ export default function AddArticle() {
           if (isUrlPresent || isIdPresent) {
             remainingMedia.push(media);
           } else {
-            console.log(`[تتبع الميديا] تم حذف عنصر من داخل المحرر، جاري إزالته سحابياً: ${media.fileId}`);
             deleteMediaFromServer(media.fileId);
           }
         });
-        
         return remainingMedia;
       });
     }
   });
 
-  // ── دالة الإلغاء الكلي وتنظيف جميع الخوادم ─────────────────────────
-  const handleCancel = async () => {
-    const confirmCancel = window.confirm("هل أنت متأكد من إلغاء المقال؟ سيتم حذف جميع الصور والفيديوهات التي قمت برفعها فوراً لتوفير المساحة سحابياً.");
-    if (!confirmCancel) return;
+  // ── تجميع البيانات وإرسالها للباك إند (Submit Handler) ───────────────
+  const handleSubmitArticle = (targetStatus) => {
+    if (!title.trim()) {
+      toast.error("برجاء إدخال عنوان المقال أولاً");
+      scrollToSection(basicInfoRef);
+      return;
+    }
+    if (!category) {
+      toast.error("برجاء اختيار قسم للمقال");
+      scrollToSection(basicInfoRef);
+      return;
+    }
+    
+    const contentHTML = editor?.getHTML() || "";
+    if (!contentHTML || contentHTML === "<h2>ابدأ بكتابة المقال...</h2>") {
+      toast.error("محتوى المقال فارغ!");
+      scrollToSection(contentRef);
+      return;
+    }
 
-    const deletePromises = [];
-    if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
-    if (videoPreview?.fileId) deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
-    gallery.forEach((item) => {
-      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId));
+    const allImages = [];
+    if (featuredImage?.url) allImages.push(featuredImage.url);
+    gallery.forEach(img => { if (img.url) allImages.push(img.url); });
+
+    const allVideos = [];
+    if (videoPreview?.url) allVideos.push(videoPreview.url);
+
+    const articlePayload = {
+      title: title.trim(),
+      content: contentHTML,
+      category: category, 
+      important_rate: importance,
+      isUrgent: isUrgent,
+      images: allImages,
+      videos: allVideos,
+      hashtags: hashtags,
+      status: targetStatus 
+    };
+
+    toast.loading("جاري حفظ البيانات وتجهيز المقال...", { id: "submit-toast" });
+
+    createArticleMutation.mutate(articlePayload, {
+      onSuccess: () => {
+        toast.success(targetStatus === "published" ? "تم نشر المقال بنجاح! 🚀" : "تم حفظ المقال كمسودة بنجاح 💾", { id: "submit-toast" });
+        clearFormFields();
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error(error?.response?.data?.message || "حدث خطأ أثناء الاتصال بالسيرفر للمزامنة", { id: "submit-toast" });
+      }
     });
-    editorMediaList.forEach((item) => {
-      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId));
-    });
+  };
 
-    await Promise.all(deletePromises);
-
+  const clearFormFields = () => {
     setFeaturedImage(null);
     setVideoPreview(null);
     setGallery([]);
@@ -191,28 +221,58 @@ export default function AddArticle() {
     setImportance(5);
     setIsUrgent(false);
     editor?.commands.setContent("<h2>ابدأ بكتابة المقال...</h2>");
-    
-    alert("تم إلغاء المقال وتفريغ مساحات التخزين السحابية بنجاح.");
   };
 
-  // ── معالجة عمليات حذف العناصر الفردية للواجهة الخارجية ──────────────
+  const executeCancelAndCleanup = async () => {
+    const deletePromises = [];
+    if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
+    if (videoPreview?.fileId) deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
+    gallery.forEach((item) => { if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); });
+    editorMediaList.forEach((item) => { if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); });
+
+    await Promise.all(deletePromises);
+    clearFormFields();
+    
+    toast.dismiss();
+    setTimeout(() => {
+      toast.success("تم إلغاء المقال وتفريغ مساحات التخزين بنجاح.", { id: "cancel-success-toast", duration: 3000 });
+    }, 100);
+  };
+
+  const handleCancel = () => {
+    toast.dismiss();
+    toast((t) => (
+      <div className="flex flex-col gap-3 p-1" style={{ direction: "rtl" }}>
+        <p className="text-sm font-bold text-slate-800 leading-relaxed">
+          هل أنت متأكد من إلغاء المقال؟ سيتم حذف جميع الصور والفيديوهات المرفوعة لتوفير المساحة سحابياً.
+        </p>
+        <div className="flex justify-end gap-2 mt-1">
+          <button onClick={async () => await executeCancelAndCleanup()} className="h-9 px-4 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition">نعم، إلغاء وحذف</button>
+          <button onClick={() => toast.dismiss(t.id)} className="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition">تراجع</button>
+        </div>
+      </div>
+    ), { id: "confirm-cancel-toast", duration: Infinity, position: "top-center" });
+  };
+
   const handleRemoveFeatured = async () => {
     if (featuredImage?.fileId) await deleteMediaFromServer(featuredImage.fileId);
     setFeaturedImage(null);
+    toast.success("تم حذف الصورة البارزة", { id: "remove-featured" });
   };
 
   const handleRemoveVideo = async () => {
     if (videoPreview?.fileId) await deleteMediaFromServer(videoPreview.fileId);
     setVideoPreview(null);
+    toast.success("تم حذف الفيديو الخارجي", { id: "remove-video" });
   };
 
   const handleRemoveGalleryItem = async (indexToRemove) => {
     const item = gallery[indexToRemove];
     if (item?.fileId) await deleteMediaFromServer(item.fileId);
     setGallery((prev) => prev.filter((_, i) => i !== indexToRemove));
+    toast.success("تم إزالة الصورة من المعرض", { id: `remove-gallery-${indexToRemove}` });
   };
 
-  // ── معالجات الرفع وحفظ البيانات الواردة ────────────────────────────
   const handleFeaturedImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -221,9 +281,9 @@ export default function AddArticle() {
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.featured, (pct) => setFeaturedProgress(pct));
       setFeaturedImage(mediaData);
+      toast.success("تم رفع الصورة البارزة بنجاح!", { id: "upload-featured-success" });
     } catch (err) {
-      console.error(err);
-      alert("فشل رفع الصورة");
+      toast.error("فشل رفع الصورة البارزة", { id: "upload-featured-error" });
     } finally {
       setFeaturedUploading(false);
       e.target.value = "";
@@ -243,11 +303,14 @@ export default function AddArticle() {
           setGalleryProgress(Math.round(base + pct / files.length));
         });
         uploaded.push(mediaData);
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) { console.error(err); }
     }
-    setGallery((prev) => [...prev, ...uploaded]);
+    if(uploaded.length > 0) {
+      setGallery((prev) => [...prev, ...uploaded]);
+      toast.success(`تم رفع ${uploaded.length} صور بنجاح!`, { id: "upload-gallery-success" });
+    } else {
+      toast.error("فشل رفع صور المعرض", { id: "upload-gallery-error" });
+    }
     setGalleryUploading(false);
     e.target.value = "";
   };
@@ -260,9 +323,9 @@ export default function AddArticle() {
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.video, (pct) => setVideoProgress(pct));
       setVideoPreview(mediaData);
+      toast.success("تم رفع الفيديو بنجاح!", { id: "upload-video-success" });
     } catch (err) {
-      console.error(err);
-      alert("فشل رفع الفيديو");
+      toast.error("فشل رفع الفيديو", { id: "upload-video-error" });
     } finally {
       setVideoUploading(false);
       e.target.value = "";
@@ -273,14 +336,17 @@ export default function AddArticle() {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     setEditorUploading(true);
-    setEditorUploadLabel("جاري رفع الصورة...");
+    setEditorUploadLabel("جاري رفع الصورة للمحرر...");
     setEditorProgress(0);
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, (pct) => setEditorProgress(pct));
-      editor.chain().focus().setImage({ src: mediaData.url }).run();
-      setEditorMediaList((prev) => [...prev, mediaData]);
+      if (mediaData?.url) {
+        editor.chain().focus().setImage({ src: mediaData.url }).run();
+        setEditorMediaList((prev) => [...prev, mediaData]);
+        toast.success("تم إدراج الصورة داخل المحرر", { id: "editor-img-success" });
+      }
     } catch (err) {
-      alert("فشل رفع الصورة للمحرر");
+      toast.error("فشل رفع الصورة للمحرر", { id: "editor-img-error" });
     } finally {
       setEditorUploading(false);
       e.target.value = "";
@@ -291,22 +357,26 @@ export default function AddArticle() {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     setEditorUploading(true);
-    setEditorUploadLabel("جاري رفع الفيديو...");
+    setEditorUploadLabel("جاري رفع الفيديو للمحرر...");
     setEditorProgress(0);
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.video, (pct) => setEditorProgress(pct));
-      editor.commands.focus();
-      editor.commands.insertContent(`<video controls playsinline data-fileid="${mediaData.fileId}" id="${mediaData.fileId}" class="rounded-2xl my-4 w-full" src="${mediaData.url}"></video>`);
-      setEditorMediaList((prev) => [...prev, mediaData]);
+      if (mediaData?.url) {
+        editor.commands.focus();
+        editor.commands.insertContent(
+          `<video controls playsinline data-fileid="${mediaData.fileId}" id="${mediaData.fileId}" class="rounded-2xl my-4 w-full" src="${mediaData.url}"></video>`
+        );
+        setEditorMediaList((prev) => [...prev, mediaData]);
+        toast.success("تم إدراج الفيديو داخل المحرر", { id: "editor-video-success" });
+      }
     } catch (err) {
-      alert("فشل رفع الفيديو للمحرر");
+      toast.error("فشل رفع الفيديو للمحرر", { id: "editor-video-error" });
     } finally {
       setEditorUploading(false);
       e.target.value = "";
     }
   };
 
-  // ── الهاشتاجات ───────────────────────────────────────────────
   const handleHashtagKeyDown = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -334,6 +404,15 @@ export default function AddArticle() {
         .ProseMirror img   { border-radius:18px; margin:18px 0; width:100%; }
         .ProseMirror video { border-radius:18px; margin:18px 0; width:100%; }
       `}</style>
+
+      {createArticleMutation.isPending && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-[9999] flex items-center justify-center pointer-events-auto">
+          <div className="bg-white p-5 rounded-2xl shadow-xl flex items-center gap-3">
+            <Loader2 className="animate-spin text-secondary" size={24} />
+            <span className="text-sm font-bold text-slate-800">جاري مزامنة المقال مع السيرفر السحابي...</span>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4 sm:gap-6 items-start">
         {/* SIDEBAR */}
@@ -383,11 +462,26 @@ export default function AddArticle() {
               </div>
               <div>
                 <label className="block mb-2 text-sm font-bold text-slate-700">التصنيف</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full h-12 sm:h-14 rounded-xl border border-slate-200 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-primary">
-                  <option value="">اختر التصنيف</option>
-                  <option>تقنية</option>
-                  <option>رياضة</option>
-                  <option>اقتصاد</option>
+                <select 
+                  value={category} 
+                  onChange={(e) => setCategory(e.target.value)} 
+                  disabled={isCatsLoading || isCatsError}
+                  className="w-full h-12 sm:h-14 rounded-xl border border-slate-200 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-slate-100 disabled:cursor-not-allowed"
+                >
+                  {isCatsLoading ? (
+                    <option>جاري تحميل الأقسام...</option>
+                  ) : isCatsError ? (
+                    <option>خطأ في جلب الأقسام من السيرفر</option>
+                  ) : (
+                    <>
+                      <option value="">اختر التصنيف</option>
+                      {categories?.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -429,34 +523,49 @@ export default function AddArticle() {
 
           {/* SECTION 2: EDITOR */}
           <div ref={contentRef} className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm scroll-mt-24 relative">
-            {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
-            <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50">
-              <ToolbarButton active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold size={17} /></ToolbarButton>
-              <ToolbarButton active={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic size={17} /></ToolbarButton>
-              <ToolbarButton active={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()}><Underline size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}><Heading1 size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().toggleBlockquote().run()}><Quote size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
-              <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
-              
-              <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
-                <ImageIcon size={17} />
-                <input type="file" hidden accept="image/*" onChange={addImageToEditor} />
-              </label>
+  {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
+  
+  <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50">
+    {/* زر النص العريض - Bold */}
+    <ToolbarButton active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}>
+      <Bold size={17} />
+    </ToolbarButton>
+    
+    {/* زر النص المائل - Italic (تم تصحيح الأيقونة والأمر) */}
+    <ToolbarButton active={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()}>
+      <Italic size={17} />
+    </ToolbarButton>
+    
+    {/* زر التسطير - Underline (تمت إضافته وتفعيله بشكل منفصل وصحيح) */}
+    <ToolbarButton active={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()}>
+      <Underline size={17} />
+    </ToolbarButton>
+    
+    {/* باقي أزرار شريط الأدوات كما هي */}
+    <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}><Heading1 size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().toggleBlockquote().run()}><Quote size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
+    <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
+    
+    <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
+      <ImageIcon size={17} />
+      <input type="file" hidden accept="image/*" onChange={addImageToEditor} />
+    </label>
 
-              <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
-                <Video size={17} />
-                <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
-              </label>
-            </div>
-            <EditorContent editor={editor} />
-          </div>
+    <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-primary hover:text-primary transition flex items-center justify-center cursor-pointer shrink-0">
+      <Video size={17} />
+      <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
+    </label>
+  </div>
+  
+  <EditorContent editor={editor} />
+</div>
 
-          {/* SECTION 3: MEDIA (GALLERY & VIDEO) */}
+          {/* SECTION 3: MEDIA */}
           <div ref={mediaRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4 scroll-mt-24">
             <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
               <h3 className="text-lg font-black mb-3 text-slate-800">إضافة فيديو خارجي</h3>
@@ -511,9 +620,7 @@ export default function AddArticle() {
             <label className="mt-4 flex items-center justify-between rounded-xl bg-secondary/10 p-4 cursor-pointer">
               <div className="flex items-center gap-3">
                 <Flame size={20} className="text-secondary" />
-                <div>
-                  <h3 className="font-bold text-secondary text-sm">تمييز كخبر عاجل</h3>
-                </div>
+                <div><h3 className="font-bold text-secondary text-sm">تمييز كخبر عاجل</h3></div>
               </div>
               <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="w-5 h-5 accent-[var(--color-secondary)]" />
             </label>
@@ -522,14 +629,22 @@ export default function AddArticle() {
           {/* SECTION 5: ACTIONS */}
           <div ref={publishRef} className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 scroll-mt-24">
             <div className="flex gap-2">
-              <button type="button" className="h-12 px-5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 transition text-sm font-medium text-slate-700">
+              <button 
+                type="button" 
+                onClick={() => handleSubmitArticle("draft")}
+                className="h-12 px-5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 transition text-sm font-medium text-slate-700"
+              >
                 <Save size={16} /> حفظ المسودة
               </button>
               <button type="button" onClick={handleCancel} className="h-12 px-5 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition text-sm font-medium">
                 إلغاء المقال بالكامل
               </button>
             </div>
-            <button type="button" className="h-12 px-6 rounded-xl bg-secondary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition text-sm">
+            <button 
+              type="button" 
+              onClick={() => handleSubmitArticle("published")}
+              className="h-12 px-6 rounded-xl bg-secondary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition text-sm"
+            >
               نشر الآن <ChevronLeft size={18} />
             </button>
           </div>
