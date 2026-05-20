@@ -1,7 +1,7 @@
 const CONFIG = {
   publicKey: import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY,
   urlEndpoint: import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT,
-  useUnsignedUpload:false,
+  useUnsignedUpload: false,
   authEndpoint: "http://localhost:5000/api/imagekit/auth"
 };
 
@@ -11,13 +11,11 @@ const CONFIG = {
  * @param {File} file
  * @param {string} folder
  * @param {(progress:number)=>void} onProgress
- * @returns {Promise<string>}
+ * @returns {Promise<{url: string, fileId: string}>}
  */
-
 export async function uploadToImageKit(file, folder = "/articles", onProgress) {
   try {
     if (!file) throw new Error("No file selected");
-
 
     const authRes = await fetch(CONFIG.authEndpoint);
     if (!authRes.ok) throw new Error("Failed to fetch ImageKit auth params");
@@ -26,11 +24,11 @@ export async function uploadToImageKit(file, folder = "/articles", onProgress) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("fileName", `${Date.now()}-${file.name}`);
-    formData.append("publicKey", CONFIG.publicKey || ""); // Ensure this isn't undefined
+    formData.append("publicKey", CONFIG.publicKey || ""); 
     formData.append("folder", folder);
     formData.append("useUniqueFileName", "true");
     formData.append("token", authParams.token);
-    formData.append("expire", authParams.expire.toString()); // Ensure it's passed as a clear string
+    formData.append("expire", authParams.expire.toString()); 
     formData.append("signature", authParams.signature);
 
     return await new Promise((resolve, reject) => {
@@ -47,7 +45,11 @@ export async function uploadToImageKit(file, folder = "/articles", onProgress) {
         try {
           const response = JSON.parse(xhr.responseText);
           if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(response.url);
+            // هنا التعديل: إرجاع الرابط ومعرف الملف للاستخدام في الحذف لاحقاً
+            resolve({
+              url: response.url,
+              fileId: response.fileId
+            });
           } else {
             console.error("ImageKit Native Error Payload:", response);
             reject(new Error(response.message || "Upload failed"));
@@ -69,7 +71,6 @@ export async function uploadToImageKit(file, folder = "/articles", onProgress) {
 /**
  * Upload folders
  */
-
 export const IK_FOLDERS = {
   featured: "/articles/featured",
   gallery: "/articles/gallery",
