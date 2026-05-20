@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const News = require("../models/News");
 
 // جلب كل المستخدمين (مع الفلترة والبحث)
 exports.getUsers = async (req, res) => {
@@ -144,6 +145,72 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getDashboardSummary = async (req, res) => {
+  try {
+    const [totalNews, totalUsers, recentNews, topViewedNews] = await Promise.all([
+      News.countDocuments(),
+      User.countDocuments(),
+      
+      // جلب أحدث 5 أخبار مع اسم القسم
+      News.find()
+        .sort("-createdAt")
+        .limit(5)
+        .populate("category", "name") // 👈 بنجيب اسم القسم
+        .select("title images category views createdAt"),
+        
+      // جلب أكثر 5 أخبار مشاهدة
+      News.find()
+        .sort("-views")
+        .limit(5)
+        .select("title images views")
+    ]);
+
+    // حساب المقالات اللي اتضافت النهاردة
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayNews = await News.countDocuments({ createdAt: { $gte: today } });
+
+    // حساب إجمالي المشاهدات لكل الأخبار
+    const totalViewsResult = await News.aggregate([
+      { $group: { _id: null, totalViews: { $sum: "$views" } } }
+    ]);
+    const totalViews = totalViewsResult.length > 0 ? totalViewsResult[0].totalViews : 0;
+
+    res.json({
+      data: {
+        topStats: [
+          { title: "المقالات", value: totalNews, sub: "إجمالي المقالات" },
+          { title: "المشاهدات", value: totalViews, sub: "إجمالي المشاهدات" }, 
+          { title: "المستخدمين", value: totalUsers, sub: "نشط" },
+          { title: "المقالات اليوم", value: todayNews, sub: "من أمس" },
+        ],
+        recentArticles: recentNews.map(news => ({
+          id: news._id,
+          title: news.title,
+          // 👈 بناخد أول صورة في المصفوفة، لو مفيش بنحط صورة افتراضية
+          image: (news.images && news.images.length > 0) ? news.images[0] : "https://via.placeholder.com/150",
+          // 👈 بنعرض اسم القسم لو موجود
+          category: news.category ? news.category.name : "غير مصنف", 
+          date: new Date(news.createdAt).toLocaleDateString('ar-EG'),
+          status: "منشور", // قيمة ثابتة لأن مفيش حقل للحالة في السكيما
+          views: news.views || 0,
+          statusColor: "bg-green-50 text-green-600"
+        })),
+        topViewed: topViewedNews.map((news, i) => ({
+          rank: i + 1,
+          title: news.title,
+          views: news.views || 0,
+          image: (news.images && news.images.length > 0) ? news.images[0] : "https://via.placeholder.com/150"
+        })),
+        categoryDistribution: [],
+        quickStats: [] 
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

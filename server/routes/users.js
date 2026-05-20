@@ -16,7 +16,9 @@ router.get("/", isAdmin, userController.getUsers);
 // 2. جلب بيانات المستخدم نفسه عن طريق Firebase UID (لأي مستخدم مسجل الدخول)
 router.get("/me/:uid", userController.getUserByFirebaseUid);
 
-// 3. جلب بيانات مستخدم محدد (للأدمن فقط عشان الخصوصية)
+router.get("/dashboard", userController.getDashboardSummary);
+
+// 3. جلب بيانات مستخدم محدد
 router.get("/:id", isAdmin, userController.getUserById);
 
 // ==========================================
