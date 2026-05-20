@@ -33,6 +33,7 @@ exports.getTrending = async (req, res, next) => {
       .limit(limit)
       .select("title images views category createdAt") // سحب الحقول المطلوبة فقط للـ Sidebar
       .populate("category", "name icon_name");
+      
 
     res.status(200).json({ status: "success", data: trendingNews });
   } catch (error) {
@@ -220,5 +221,119 @@ exports.trackView = async (req, res, next) => {
     res.status(200).json({ status: "success", message: "View tracked successfully" });
   } catch (error) {
     next(error);
+  }
+};
+
+
+exports.createNews = async (req, res, next) => {
+  try {
+    // 1. التقاط الروابط المباشرة المرسلة من الفرونت إند
+    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+    let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
+
+    // 2. إذا تم إرسال ملفات بصيغة binary/form-data، يتم رفعها إلى كلاوديناري
+    if (req.files?.images) {
+      for (const file of req.files.images) {
+        const result = await uploadFile(file.buffer, "news/images", "image");
+        imageUrls.push(result.secure_url);
+      }
+    }
+
+    if (req.files?.videos) {
+      for (const file of req.files.videos) {
+        const result = await uploadFile(file.buffer, "news/videos", "video");
+        videoUrls.push(result.secure_url);
+      }
+    }
+
+    // 3. معالجة الهاشتاجات بأمان لتجنب توقف السيرفر
+    let hashtags = [];
+    if (req.body.hashtags) {
+      if (Array.isArray(req.body.hashtags)) {
+        hashtags = req.body.hashtags;
+      } else {
+        try {
+          hashtags = JSON.parse(req.body.hashtags);
+        } catch (e) {
+          hashtags = typeof req.body.hashtags === 'string' ? req.body.hashtags.split(',').map(h => h.trim()) : [];
+        }
+      }
+    }
+
+    // 4. إنشاء وحفظ وثيقة الخبر الجديدة
+    const article = await News.create({
+      title: req.body.title,
+      content: req.body.content,
+      // 🛡️ حماية: ربط المقال بـ ID المستخدم مسجل الدخول من التوكن (أكثر أماناً من الفرونت)
+      writer: req.user._id, 
+      category: req.body.category,
+      important_rate: req.body.important_rate,
+      isUrgent: req.body.isUrgent || false,
+      images: imageUrls,
+      videos: videoUrls,
+      hashtags: hashtags,
+      status: req.body.status || "draft", 
+    });
+
+    res.status(201).json({ status: "success", data: article });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ==========================================
+// 2. تعديل الخبر
+// ==========================================
+exports.updateNews = async (req, res, next) => {
+  try {
+    const article = await News.findById(req.params.id);
+    if (!article) return res.status(404).json({ message: "News not found" });
+
+    // 🛡️ حماية: لو اللي بيعدل كاتب، نتأكد إنه صاحب الخبر (الأدمن يعدل أي حاجة)
+    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to edit this article" });
+    }
+
+    // القائمة البيضاء للحقول المسموح بتعديلها
+    const allowed = [
+      "title", 
+      "content", 
+      "images", 
+      "videos", 
+      "category", 
+      "important_rate", 
+      "isUrgent",
+      "hashtags",
+      "status"
+    ];
+
+    allowed.forEach((field) => {
+      if (req.body[field] !== undefined) article[field] = req.body[field];
+    });
+
+    await article.save();
+    res.json({ status: "success", data: article });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ==========================================
+// 3. حذف الخبر
+// ==========================================
+exports.deleteNews = async (req, res, next) => {
+  try {
+    const article = await News.findById(req.params.id);
+    if (!article) return res.status(404).json({ message: "News not found" });
+
+    // 🛡️ حماية: لو اللي بيحذف كاتب، نتأكد إنه صاحب الخبر
+    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to delete this article" });
+    }
+
+    await article.deleteOne();
+    res.json({ status: "success", message: "Article deleted successfully" });
+  } catch (err) {
+    next(err);
   }
 };

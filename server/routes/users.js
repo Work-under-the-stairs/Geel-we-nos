@@ -2,9 +2,6 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 const { protect, restrictTo } = require("../middleware/authMiddleware"); 
-// استدعاء الميدلويرز
-const isAdmin = require("../middleware/isAdmin");
-
 // ==========================================
 // User Routes
 // ==========================================
@@ -12,26 +9,24 @@ const isAdmin = require("../middleware/isAdmin");
 // الـ GET Requests
 // 1. جلب كل المستخدمين للوحة التحكم (للأدمن فقط)
 // router.get("/", isAdmin, userController.getUsers);
-router.get("/", userController.getUsers);
+router.get("/", protect, restrictTo("admin"), userController.getUsers);
 
 // 2. جلب بيانات المستخدم نفسه عن طريق Firebase UID (لأي مستخدم مسجل الدخول)
-router.get("/me/:uid", userController.getUserByFirebaseUid);
+router.get("/me/:uid",protect, userController.getUserByFirebaseUid);
 
-router.get("/dashboard", userController.getDashboardSummary);
+router.get("/dashboard",protect, restrictTo("admin"),userController.getDashboardSummary);
 
-// 3. جلب بيانات مستخدم محدد
-router.get("/:id", isAdmin, userController.getUserById);
+router.get("/:id",protect, userController.getUserById);
 
 // ==========================================
 // الـ POST Requests
 // ==========================================
 
 // 1. تسجيل مستخدم جديد بعد Firebase 
-// (بدون ميدلوير لأن المستخدم لسه بيعمل الحساب ومعهوش صلاحيات)
 router.post("/register-db", userController.registerDb);
 
 // 2. إضافة مستخدم يدوياً من لوحة التحكم (للأدمن فقط)
-router.post("/add", isAdmin, userController.addUser);
+router.post("/add", protect, restrictTo("admin"), userController.addUser);
 
 // ==========================================
 // الـ PATCH Requests (التحديثات)
@@ -39,16 +34,16 @@ router.post("/add", isAdmin, userController.addUser);
 
 // 1. تحديث بيانات المستخدم (لأي مستخدم مسجل الدخول)
 // ملاحظة: لو عايزة الأدمن بس هو اللي يعدل بيانات الناس، ضيفي isAdmin هنا كمان
-router.patch("/:id", userController.updateUser);
+router.patch("/:id", protect, userController.updateUser);
 
 // 2. تحديث كلمة المرور (للمستخدم نفسه)
-router.patch("/:id/password", userController.updatePassword);
+router.patch("/:id/password", protect, userController.updatePassword);
 
 // ==========================================
 // الـ DELETE Requests
 // ==========================================
 
 // 1. حذف مستخدم (للأدمن فقط)
-router.delete("/:id", userController.deleteUser);
+router.delete("/:id", protect, restrictTo("admin"), userController.deleteUser);
 
 module.exports = router;

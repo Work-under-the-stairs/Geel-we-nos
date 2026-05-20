@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../../utils/dateFormatter'
+import { stripHtml } from '../../../utils/textUtils';
 
 // ======= SUB-COMPONENT: Sidebar Vertical Sliding Carousel =======
 function SidebarCarousel({ sidebarArticles }) {
@@ -114,7 +115,7 @@ export default function HeroSection({ articles = [] }) {
             {/* Background Image */}
             {mainArticle.images?.[0] ? (
             <img
-              src={articles[0]?.images?.[0]}
+              src={articles[0]?.images?.[0] || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E"}
               alt={articles[0]?.title}
               className="..."
               onError={(e) => { 
@@ -143,9 +144,11 @@ export default function HeroSection({ articles = [] }) {
                              max-w-2xl drop-shadow-md">
                 {mainArticle.title}
               </h1>
-
+              <p className="text-gray-500 text-sm mt-2 line-clamp-2 font-light flex-1">
+                {stripHtml(mainArticle.content)}
+              </p>
               <div className="flex items-center gap-2 text-white/75 text-[13px] font-medium">
-                <span>{mainArticle.writer?.name || "كاتب مجهول"}</span>
+                <span>{mainArticle.writer?.name || "جيل ونص"}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40 inline-block" />
                 <span>{formatDate(mainArticle.createdAt)}</span>
               </div>

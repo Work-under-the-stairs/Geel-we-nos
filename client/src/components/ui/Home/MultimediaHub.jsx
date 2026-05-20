@@ -60,7 +60,7 @@ export default function MultimediaHub({ multimediaArticles: categoryObject }) {
                 </h3>
                 {/* تأمين طباعة اسم الكاتب سواء كان أوبجكت بعد الـ Populate أو نص عادي */}
                 <span className="text-white/50 text-xs font-medium">
-                  {art.writer?.name || art.writer || "جيل ونص"}
+                  {art.writer?.name || "جيل ونص"}
                 </span>
               </div>
             </Link>

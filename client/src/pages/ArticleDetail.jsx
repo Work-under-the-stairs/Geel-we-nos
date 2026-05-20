@@ -95,7 +95,7 @@ export default function ArticleDetail() {
               <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-gray-500 border-y border-gray-100 py-3">
                 <span className="flex items-center gap-1.5 font-semibold text-gray-700">
                   <User size={16} className="text-[var(--color-secondary)]" />
-                  {article.writer?.name || article.author || "المحرر"}
+                  {article.writer?.name || "جيل ونص"}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar size={16} />
@@ -146,18 +146,24 @@ export default function ArticleDetail() {
               </div>
             )}
 
-            {/* 3. متن الخبر
-            <div 
-              style={{ fontFamily: "'Cairo', sans-serif" }}
-              className="text-lg text-gray-800 leading-relaxed font-normal whitespace-pre-line space-y-4"
-            >
-              {article.content}
-            </div> */}
             <div 
               style={{ fontFamily: "'Cairo', sans-serif" }}
               className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
+
+            {article.hashtags && article.hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
+                {article.hashtags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="text-[16px] font-bold text-slate-500 bg-slate-50 hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-300 px-3 py-1 rounded-full border border-slate-200 cursor-pointer"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <hr className="border-gray-100 my-8" />
 

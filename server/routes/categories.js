@@ -36,7 +36,7 @@ router.get("/:id", async (req, res, next) => {
 
 // POST /api/categories - إضافة قسم جديد (أدمن فقط)
 // router.post("/", protect, restrictTo("admin"), async (req, res, next) => {
-router.post("/", async (req, res, next) => {
+router.post("/", protect, restrictTo("admin"),async (req, res, next) => {
   try {
     const { name, icon_name } = req.body;
     const category = await Category.create({ name, icon_name });
@@ -48,7 +48,7 @@ router.post("/", async (req, res, next) => {
 
 // PATCH /api/categories/:id - تعديل قسم (أدمن فقط)
 // router.patch("/:id", protect, restrictTo("admin"), async (req, res, next) => {
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", protect, restrictTo("admin"), async (req, res, next) => {
   try {
     const { name, icon_name } = req.body;
     const category = await Category.findByIdAndUpdate(
@@ -65,7 +65,7 @@ router.patch("/:id", async (req, res, next) => {
 
 // DELETE /api/categories/:id - حذف قسم (أدمن فقط)
 // router.delete("/:id", protect, restrictTo("admin"), async (req, res, next) => {
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", protect, restrictTo("admin"), async (req, res, next) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ message: "Category not found" });
