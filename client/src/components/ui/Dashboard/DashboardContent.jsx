@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Eye, Edit, Trash2, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-
+import { useNavigate } from 'react-router-dom';
 export default function DashboardContent({ 
   recentArticles = [], 
   topViewed = [], 
@@ -9,7 +9,7 @@ export default function DashboardContent({
   onDeleteArticle, 
   isDeletingArticle 
 }) {
-  
+  const navigate = useNavigate();
   // دالة الحذف باستخدام React Hot Toast
   const handleDelete = (id) => {
     toast((t) => (
@@ -144,9 +144,14 @@ export default function DashboardContent({
                             <button className="p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors" title="عرض">
                               <Eye size={16} />
                             </button>
-                            <button className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors" title="تعديل">
-                              <Edit size={16} />
-                            </button>
+                             <button
+                            onClick={() => {
+                              navigate(`/edit/article/${art.id}`);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100"
+                          >
+                            <Edit size={14} />
+                          </button>
                             <button 
                               onClick={() => handleDelete(art.id)}
                               disabled={isDeletingArticle}

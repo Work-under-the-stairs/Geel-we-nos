@@ -56,11 +56,11 @@ export const useCreateArticle = () => {
   })
 }
 
-export const useUpdateArticle = (id) => {
+export const useUpdateArticle = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data) => adminService.updateArticle(id, data),
-    onSuccess: () => {
+    mutationFn: ({ id, data }) => adminService.updateArticle(id, data),
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.article(id) })
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.articlesBase })
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard })
