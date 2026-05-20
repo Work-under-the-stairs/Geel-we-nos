@@ -1,23 +1,29 @@
 import React, { useState } from "react";
-import { FileText, Eye, Users, BarChart2 } from "lucide-react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { FileText, Eye, Users, BarChart2, Menu, Plus } from "lucide-react";
 import Sidebar from "../components/ui/Dashboard/Sidebar";
-import TopNav from "../components/ui/Dashboard/TopNav";
 import StatCards from "../components/ui/Dashboard/StatCards";
 import DashboardContent from "../components/ui/Dashboard/DashboardContent";
 import UsersTable from "../components/ui/Dashboard/UsersTable";
 import CategoriesTable from "../components/ui/Dashboard/CategoriesTable";
+import { getUserData } from "../utils/auth"; // 👈 استدعاء دالة جلب بيانات اليوزر
 import { 
   useDashboardSummary, 
   useCategories, 
   useAddCategory, 
   useUpdateCategory, 
   useDeleteCategory,
-  useDeleteArticle // 👈 استدعينا هوك حذف المقال هنا
+  useDeleteArticle 
 } from "../hooks/useAdmin";
+import AddArticle from "./AddArticle";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("الرئيسية");
+
+  // جلب بيانات اليوزر من الـ localStorage (المخزنة عند تسجيل الدخول)
+  const userData = getUserData();
 
   // ==========================================
   // 1. هوكس الإحصائيات (الرئيسية) والمقالات
@@ -48,7 +54,6 @@ export default function AdminDashboard() {
 
   // دالة عرض المحتوى
   const renderContent = () => {
-    // حالة تحميل الرئيسية فقط
     if (isDashboardLoading && activeTab === "الرئيسية") {
       return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
@@ -67,13 +72,21 @@ export default function AdminDashboard() {
     }
 
     switch (activeTab) {
+      case "المقالات":
+        return (
+          <DashboardContent/>
+        );
+      case "إضافة مقال":
+        return (
+          // <Navigate to="/add/article" />
+          <AddArticle />
+        );
       case "التصنيفات":
         return (
           <CategoriesTable 
-            categories={categoriesData.data|| []} 
+            categories={categoriesData?.data || []} 
             isLoading={isCategoriesLoading}
             onAddCategory={(data) => addCategory(data)}
-            // في React Query V5 بنبعت الـ id والداتا في Object واحد لو الـ Mutation بياخد أكتر من باراميتر
             onEditCategory={(id, data) => updateCategory({ id, data })} 
             onDeleteCategory={(id) => deleteCategory(id)}
           />
@@ -90,7 +103,6 @@ export default function AdminDashboard() {
               topViewed={dashboardData?.topViewed || []} 
               categoryDistribution={dashboardData?.categoryDistribution || []} 
               quickStats={dashboardData?.quickStats || []} 
-              // 👈 نمرر دالة وحالة الحذف بالبروبس للكومبوننت
               onDeleteArticle={deleteArticle}
               isDeletingArticle={isDeletingArticle}
             />
@@ -107,18 +119,44 @@ export default function AdminDashboard() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
+      
       <div className="flex-1 lg:mr-64 min-w-0 flex flex-col min-h-screen">
-        <TopNav setIsSidebarOpen={setIsSidebarOpen} />
         <main className="p-4 lg:p-8 space-y-6 flex-1">
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <span>مرحباً بك، محمد السيد</span>
-                <span className="animate-bounce">👋</span>
-              </h2>
-              <p className="text-sm text-slate-400 mt-1">إليك ملخصاً لأداء موقعك اليوم</p>
+          
+          {/* ================= البار العلوي (الترحيب وزر الإضافة) ================= */}
+          <div className="bg-[var(--color-primary)] p-6 rounded-2xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            
+            {/* الجزء الأيمن: زر القائمة المخفي + رسالة الترحيب */}
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden p-2.5 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all duration-300 backdrop-blur-sm"
+                aria-label="فتح القائمة"
+              >
+                <Menu size={22} />
+              </button>
+
+              <div>
+                <h2 className="text-xl font-bold text-white flex flex-wrap items-center gap-2">
+                  <span>مرحباً بك، {userData?.name || "مدير النظام"}</span>
+                  <span className="animate-bounce">👋</span>
+                </h2>
+                <p className="text-sm text-white/80 mt-1 font-medium">إليك ملخصاً لأداء موقعك اليوم</p>
+              </div>
             </div>
+
+            {/* الجزء الأيسر: زر إضافة مقال */}
+            {/* استخدمي <Link to="/add-article"> لو عندك راوت، أو سيبيها <button> لو بتفتحي Modal */}
+            <button
+              // onClick={() => navigate("/add/article")}
+              onClick={() => setActiveTab("إضافة مقال")}
+             className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/90 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-transform hover:-translate-y-0.5 shadow-[0_4px_12px_rgba(252,105,85,0.3)] w-full sm:w-auto justify-center">
+              <Plus size={18} />
+              <span>إضافة مقال جديد</span>
+            </button>
+
           </div>
+
           {renderContent()}
         </main>
       </div>

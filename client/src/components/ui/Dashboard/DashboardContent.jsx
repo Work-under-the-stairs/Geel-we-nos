@@ -1,26 +1,71 @@
 import React from 'react';
-import { FileText, Eye, Edit, Trash2, MoreVertical, TrendingUp } from 'lucide-react';
+import { FileText, Eye, Edit, Trash2, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function DashboardContent({ 
-  recentArticles, 
-  topViewed, 
+  recentArticles = [], 
+  topViewed = [], 
   categoryDistribution = [], 
-  quickStats,
   onDeleteArticle, 
   isDeletingArticle 
 }) {
   
-  // دالة الحذف الموحدة
+  // دالة الحذف باستخدام React Hot Toast
   const handleDelete = (id) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.")) {
-      onDeleteArticle(id);
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-3" dir="rtl">
+        <div className="flex items-center gap-2 text-slate-800">
+          <AlertTriangle className="text-red-500" size={20} />
+          <p className="font-bold text-sm">هل أنت متأكد من حذف هذا المقال؟</p>
+        </div>
+        <p className="text-xs text-slate-500">لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.</p>
+        <div className="flex gap-2 justify-end mt-2">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              onDeleteArticle(id);
+            }}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors"
+          >
+            تأكيد الحذف
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold transition-colors"
+          >
+            تراجع
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: 'top-center',
+    });
   };
 
-  // حساب إجمالي المقالات ديناميكياً
+  // تحديد حالة المقال
+  const getStatusBadge = (status) => {
+    const safeStatus = String(status || '').toLowerCase().trim();
+    const isDraft = safeStatus === 'draft' || safeStatus === 'مسودة';
+
+    return {
+      text: isDraft ? 'مسودة' : 'منشور',
+      colorClass: isDraft 
+        ? 'bg-amber-50 text-amber-600 border border-amber-200' 
+        : 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+    };
+  };
+
+  // 👈 دالة مساعدة لاستخراج اللون كـ Hex Code من كلاس الباك اند
+  const extractHexColor = (colorString) => {
+    if (!colorString) return '#cbd5e1'; // رمادي افتراضي
+    const match = colorString.match(/\[(.*?)\]/);
+    return match ? match[1] : '#cbd5e1';
+  };
+
   const totalArticlesCount = categoryDistribution.reduce((acc, curr) => acc + curr.count, 0);
 
-  // دالة رسم الدايرة
+  // دالة رسم الدايرة الملونة
   const generateConicGradient = () => {
     if (!categoryDistribution || categoryDistribution.length === 0) {
       return 'conic-gradient(#f1f5f9 0% 100%)';
@@ -28,7 +73,7 @@ export default function DashboardContent({
     
     let cumulative = 0;
     const stops = categoryDistribution.map(cat => {
-      const hexColor = cat.color.match(/\[(.*?)\]/)?.[1] || '#cbd5e1'; 
+      const hexColor = extractHexColor(cat.color); // 👈 استخدام الدالة الجديدة
       const start = cumulative;
       cumulative += cat.percentage;
       return `${hexColor} ${start}% ${cumulative}%`;
@@ -42,158 +87,177 @@ export default function DashboardContent({
   };
 
   return (
-    <>
-      {/* Middle Row */}
+    <div className="space-y-6">
+      {/* ================= الصف الأول: آخر المقالات + الأكثر مشاهدة ================= */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Articles */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 xl:col-span-2 flex flex-col justify-between">
+        
+        {/* جدول آخر المقالات */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 xl:col-span-2 flex flex-col justify-between shadow-sm">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <FileText size={18} className="text-slate-400" />
+                <FileText size={18} className="text-primary" />
                 <span>آخر المقالات</span>
               </h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-right border-collapse min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-slate-100 text-xs font-bold text-slate-400">
+                  <tr className="border-b-2 border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
                     <th className="pb-3 font-semibold">المقال</th>
                     <th className="pb-3 font-semibold">التصنيف</th>
                     <th className="pb-3 font-semibold">التاريخ</th>
-                    <th className="pb-3 font-semibold">الحالة</th>
-                    <th className="pb-3 font-semibold">المشاهدات</th>
+                    <th className="pb-3 font-semibold text-center">الحالة</th>
+                    <th className="pb-3 font-semibold text-center">المشاهدات</th>
                     <th className="pb-3 font-semibold text-left pl-2">العمليات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-sm">
-                  {recentArticles.map((art, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 transition-all group">
-                      <td className="py-3.5">
-                        <div className="flex items-center gap-3">
-                          <img src={art.image} alt={art.title} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
-                          <div className="min-w-0">
-                            <h3 className="font-semibold text-slate-800 truncate max-w-[220px]">{art.title}</h3>
-                            <p className="text-xs text-slate-400 mt-1">بواسطة الإدارة</p>
+                  {recentArticles.length > 0 ? recentArticles.map((art, idx) => {
+                    const statusBadge = getStatusBadge(art.status);
+
+                    return (
+                      <tr key={idx} className="hover:bg-slate-50/80 transition-colors group">
+                        <td className="py-4">
+                          <div className="flex items-center gap-3">
+                            <img src={art.image} alt={art.title} className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100" />
+                            <div className="min-w-0">
+                              <h3 className="font-semibold text-slate-800 truncate max-w-[220px] group-hover:text-primary transition-colors">{art.title}</h3>
+                              <p className="text-[11px] text-slate-400 mt-1 font-medium">بواسطة الإدارة</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 text-slate-500 text-xs">{art.category}</td>
-                      <td className="py-3.5 text-slate-400 text-xs">{art.date}</td>
-                      <td className="py-3.5">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${art.statusColor}`}>{art.status}</span>
-                      </td>
-                      <td className="py-3.5 font-semibold text-slate-700 text-xs">{art.views}</td>
-                      <td className="py-3.5 text-left pl-2">
-                        <div className="flex items-center justify-end gap-1">
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100"><Eye size={14} /></button>
-                          <button className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100"><Edit size={14} /></button>
-                          <button 
-                            onClick={() => handleDelete(art.id)}
-                            disabled={isDeletingArticle}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-slate-100 disabled:opacity-50"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                          <button className="p-1.5 text-slate-400 hover:text-slate-600 rounded-md"><MoreVertical size={14} /></button>
-                        </div>
-                      </td>
+                        </td>
+                        <td className="py-4">
+                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-medium">
+                            {art.category}
+                          </span>
+                        </td>
+                        <td className="py-4 text-slate-500 text-xs font-medium">{art.date}</td>
+                        <td className="py-4 text-center">
+                          <span className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${statusBadge.colorClass}`}>
+                            {statusBadge.text}
+                          </span>
+                        </td>
+                        <td className="py-4 font-bold text-slate-700 text-xs text-center">{art.views}</td>
+                        <td className="py-4 text-left pl-2">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button className="p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors" title="عرض">
+                              <Eye size={16} />
+                            </button>
+                            <button className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors" title="تعديل">
+                              <Edit size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(art.id)}
+                              disabled={isDeletingArticle}
+                              className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors cursor-pointer"
+                              title="حذف"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan="6" className="py-8 text-center text-slate-400">لا توجد مقالات مضافة حتى الآن.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
-          <button className="w-full mt-5 py-3 bg-[var(--color-primary)] text-white hover:bg-[var(--color-secondary)] font-semibold text-sm rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md">
-            عرض جميع المقالات
-          </button>
         </div>
 
-        {/* Top Viewed */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <TrendingUp size={18} className="text-slate-400" />
-                <span>أكثر المقالات مشاهدة</span>
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {topViewed.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group cursor-pointer">
-                  <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${idx === 0 ? "bg-red-50 text-red-600" : idx === 1 ? "bg-orange-50 text-orange-600" : "bg-slate-100 text-slate-500"}`}>
-                    {item.rank}
-                  </span>
-                  <img src={item.image} alt={item.title} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#FF6B4A] transition-colors">{item.title}</p>
-                    <span className="text-[11px] text-slate-400 font-semibold">{item.views} مشاهدة</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* الأكثر مشاهدة */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <TrendingUp size={18} className="text-[var(--color-secondary)]" />
+              <span>أكثر المقالات مشاهدة</span>
+            </h3>
           </div>
-          <button className="w-full mt-5 py-3 bg-[var(--color-primary)] text-white hover:bg-[var(--color-secondary)] font-semibold text-sm rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md">
-            عرض جميع المقالات
-          </button>
+          <div className="space-y-3 flex-1">
+            {topViewed.length > 0 ? topViewed.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group cursor-pointer">
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 shadow-sm ${idx === 0 ? "bg-red-50 text-red-600 border border-red-100" : idx === 1 ? "bg-orange-50 text-orange-600 border border-orange-100" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
+                  {item.rank}
+                </span>
+                <img src={item.image} alt={item.title} className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[var(--color-secondary)] transition-colors">{item.title}</p>
+                  <span className="text-[11px] text-slate-400 font-semibold">{item.views} مشاهدة</span>
+                </div>
+              </div>
+            )) : (
+              <div className="text-sm text-slate-400 text-center py-10">لا توجد بيانات للمشاهدات.</div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Placeholder للمخططات */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6">
-          <h3 className="font-bold text-slate-800 text-sm mb-4">المشاهدات خلال آخر 7 أيام</h3>
-          <div className="h-40 flex items-center justify-center text-slate-400 text-sm">مخطط المشاهدات (يتم إعداده)</div>
-        </div>
+      {/* ================= الصف الثاني: توزيع المقالات (الدائرة + البارات) ================= */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-4xl">
+        <h3 className="font-bold text-slate-800 text-base mb-6 flex items-center gap-2">
+          <PieChart size={18} className="text-slate-400" />
+          توزيع المقالات حسب التصنيف
+        </h3>
+        
+        <div className="flex flex-col md:flex-row-reverse items-center gap-10">
+          
+          {/* الدائرة الملونة */}
+          <div 
+            className="relative w-36 h-36 flex items-center justify-center shrink-0 rounded-full shadow-inner"
+            style={{ background: generateConicGradient() }}
+          >
+            <div className="w-24 h-24 bg-white rounded-full absolute z-0 shadow-sm"></div>
+            <div className="text-center z-10 relative">
+              <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">الإجمالي</span>
+              <span className="text-2xl font-black text-slate-700 leading-tight">{totalArticlesCount}</span>
+            </div>
+          </div>
 
-        {/* Category Breakdown (الدايرة الديناميكية) */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-slate-800 text-sm mb-4">المقالات حسب التصنيف</h3>
-            <div className="flex flex-row-reverse items-center justify-between gap-4 mt-2">
-              <div 
-                className="relative w-28 h-28 flex items-center justify-center shrink-0 rounded-full"
-                style={{ background: generateConicGradient() }}
-              >
-                <div className="w-20 h-20 bg-white rounded-full absolute z-0"></div>
-                <div className="text-center z-10 relative">
-                  <span className="text-xs text-slate-400 block">الإجمالي</span>
-                  <span className="text-sm font-bold text-slate-700">{totalArticlesCount}</span>
-                </div>
-              </div>
-              <div className="flex-1 space-y-1.5">
-                {categoryDistribution.length > 0 ? (
-                  categoryDistribution.map((cat, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-right text-[11px]">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${cat.color}`}></span>
-                        <span className="text-slate-500 font-medium">{cat.name}</span>
+          {/* البارات والأقسام */}
+          <div className="flex-1 w-full space-y-5">
+            {categoryDistribution.length > 0 ? (
+              categoryDistribution.map((cat, idx) => {
+                const hexColor = extractHexColor(cat.color); // 👈 استخراج اللون لكل قسم
+
+                return (
+                  <div key={idx}>
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <div className="flex items-center gap-2">
+                        {/* 👈 تم تطبيق اللون هنا */}
+                        <span 
+                          className="w-3 h-3 rounded-full shadow-sm" 
+                          style={{ backgroundColor: hexColor }}
+                        ></span>
+                        <span className="font-bold text-slate-700">{cat.name}</span>
                       </div>
-                      <span className="text-slate-400 font-mono font-semibold">{cat.percentage}% ({cat.count})</span>
+                      <span className="text-slate-500 font-mono font-bold">
+                        {cat.percentage}% <span className="text-slate-400 text-xs font-normal">({cat.count} مقال)</span>
+                      </span>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-xs text-slate-400 text-center mt-4">لا توجد بيانات</div>
-                )}
-              </div>
-            </div>
+                    {/* البار الخلفي */}
+                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                      {/* 👈 تم تطبيق اللون هنا للبار الأمامي الملون */}
+                      <div 
+                        className="h-full rounded-full transition-all duration-1000" 
+                        style={{ width: `${cat.percentage}%`, backgroundColor: hexColor }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-sm text-slate-400 text-center py-6">لا توجد تصنيفات لعرضها حالياً.</div>
+            )}
           </div>
-        </div>
 
-        {/* Quick Stats */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6">
-          <h3 className="font-bold text-slate-800 text-sm mb-4">إحصائيات سريعة</h3>
-          <div className="divide-y divide-slate-50">
-            {quickStats.map((stat, idx) => (
-              <div key={idx} className="flex items-center justify-between py-3 text-xs">
-                <span className="text-slate-500 font-medium">{stat.label}</span>
-                <span className="font-bold text-slate-800 font-mono">{stat.value}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
-    </>
+
+    </div>
   );
 }

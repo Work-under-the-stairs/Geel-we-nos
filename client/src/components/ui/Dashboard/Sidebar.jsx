@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, FileText, PlusCircle, Folder, MessageSquare, Users, BarChart2, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveTab }) {
   const sidebarLinks = [
@@ -7,16 +8,14 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, se
     { name: "المقالات", icon: FileText },
     { name: "إضافة مقال", icon: PlusCircle },
     { name: "التصنيفات", icon: Folder },
-    { name: "التعليقات", icon: MessageSquare },
     { name: "المستخدمين", icon: Users },
-    { name: "الإحصائيات", icon: BarChart2 },
-    { name: "الإعدادات", icon: Settings },
   ];
+  const navigate = useNavigate();
 
   return (
     <aside className={`fixed inset-y-0 right-0 z-50 w-64 bg-[var(--color-primary)] text-white transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col bulk-sidebar`}>
       <div className="p-6 flex items-center justify-between border-b border-[#134E5E]">
-        <div className="flex items-center gap-3">
+        <div onClick={()=> navigate("/")} className="cursor-pointer flex items-center gap-3">
           <img src="/images/logo_rev_crop.png" alt="جيل ونص" className="w-60 h-15 rounded-2xl object-contain" />
         </div>
         <button className="lg:hidden text-slate-400 hover:text-white transition" onClick={() => setIsSidebarOpen(false)}>

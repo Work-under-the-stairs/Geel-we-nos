@@ -161,7 +161,7 @@ exports.getDashboardSummary = async (req, res) => {
         .sort("-createdAt")
         .limit(5)
         .populate("category", "name") // 👈 بنجيب اسم القسم
-        .select("title images category views createdAt"),
+        .select("title images category views createdAt status"),
         
       // جلب أكثر 5 أخبار مشاهدة
       News.find()
@@ -225,7 +225,7 @@ exports.getDashboardSummary = async (req, res) => {
           // 👈 بنعرض اسم القسم لو موجود
           category: news.category ? news.category.name : "غير مصنف", 
           date: new Date(news.createdAt).toLocaleDateString('ar-EG'),
-          status: "منشور", // قيمة ثابتة لأن مفيش حقل للحالة في السكيما
+          status: news.status,
           views: news.views || 0,
           statusColor: "bg-green-50 text-green-600"
         })),
