@@ -1,23 +1,55 @@
 import React, { useState } from 'react';
 import { 
+  // الأيقونات الأساسية للواجهة
   Folder, Plus, Edit, Trash2, Search, X,
-  // --- 30 أيقونة مختارة للأقسام الصحفية ---
+  
+  // --- الأيقونات القديمة (30 أيقونة) ---
   Newspaper, Globe, TrendingUp, Landmark, Scale, 
   Briefcase, Cpu, HeartPulse, Trophy, Film, 
   Music, BookOpen, ShieldAlert, Zap, Flame,
   Camera, Radio, Tv, MapPin, Stethoscope,
   Activity, Laptop, Rocket, Palette, Coins,
-  Gavel, Siren, Target, Compass, Users
+  Gavel, Siren, Target, Compass, Users,
+
+  // --- الأيقونات الجديدة (21 أيقونة إضافية) ---
+  Sparkles,       // حصريات / تريند / ذكاء اصطناعي
+  Car,            // سيارات ومحركات
+  Banknote,       // اقتصاد / بنوك / عملات
+  Wallet,         // مالية / محافظ
+  Building2,      // عقارات / شركات
+  Plane,          // سفر / سياحة / طيران
+  Utensils,       // طبخ / مطاعم / غذاء
+  Dumbbell,       // لياقة بدنية / رياضة
+  Medal,          // بطولات / أولمبياد
+  AlertTriangle,  // حوادث / طوارئ
+  Skull,          // جرائم / حوادث خطيرة
+  BadgeAlert,     // أخبار عاجلة / أمنية
+  Home,           // أخبار محلية / شؤون المحافظات
+  CloudRain,      // طقس / مناخ
+  Thermometer,    // درجات الحرارة
+  Coffee,         // لايف ستايل / صباحيات
+  Shirt,          // أزياء / موضة
+  MessageSquare,  // مقالات رأي / نقاشات
+  PenTool,        // تحرير / كتابات
+  Mic,            // بودكاست / مقابلات
+  Baby            // أسرة / طفولة
 } from 'lucide-react';
 
-// قاموس الأيقونات عشان نقدر نعرضها بناءً على اسمها اللي جاي من الداتابيز
+// قاموس الأيقونات (51 أيقونة مخصصة للأقسام)
 const ICONS_DICTIONARY = {
+  // القديم
   Newspaper, Globe, TrendingUp, Landmark, Scale, 
   Briefcase, Cpu, HeartPulse, Trophy, Film, 
   Music, BookOpen, ShieldAlert, Zap, Flame,
   Camera, Radio, Tv, MapPin, Stethoscope,
   Activity, Laptop, Rocket, Palette, Coins,
-  Gavel, Siren, Target, Compass, Users
+  Gavel, Siren, Target, Compass, Users,
+  
+  // الجديد
+  Sparkles, Car, Banknote, Wallet, Building2, 
+  Plane, Utensils, Dumbbell, Medal, AlertTriangle, 
+  Skull, BadgeAlert, Home, CloudRain, Thermometer, 
+  Coffee, Shirt, MessageSquare, PenTool, Mic, Baby
 };
 
 export default function CategoriesTable({ 
