@@ -146,13 +146,18 @@ export default function ArticleDetail() {
               </div>
             )}
 
-            {/* 3. متن الخبر */}
+            {/* 3. متن الخبر
             <div 
               style={{ fontFamily: "'Cairo', sans-serif" }}
               className="text-lg text-gray-800 leading-relaxed font-normal whitespace-pre-line space-y-4"
             >
               {article.content}
-            </div>
+            </div> */}
+            <div 
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+              className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
 
             <hr className="border-gray-100 my-8" />
 

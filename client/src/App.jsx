@@ -28,7 +28,7 @@ const App = () => {
           <Route path="/news/:id" element={<ArticleDetail/>}/>
         </Route>
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
-        <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Login/>} />
+        <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

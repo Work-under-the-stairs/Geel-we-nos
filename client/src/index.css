@@ -2,7 +2,7 @@
 @import "tailwindcss";
 @theme {
     /* Brand Colors */
-    --color-primary: #0D4B58;
+    --color-primary: #0d4857;
     --color-secondary: #fc6955;
 
     --color-orange1: #ff7f53;
@@ -56,4 +56,17 @@ body {
     0% { transform: translateX(0%); }
     100% { transform: translateX(100%); }
   }
+}
+
+/* في ملف index.css أو أي ملف تنسيق عام */
+.article-content img {
+  max-width: 100%;       /* الصور لا تخرج عن حدود العرض */
+  height: auto;          /* الحفاظ على أبعاد الصورة */
+  border-radius: 16px;   /* إضافة زوايا دائرية للصور */
+  margin: 20px 0;        /* مسافات حول الصور */
+  display: block;        /* جعل الصورة بلوك لمنع تداخل النصوص */
+}
+
+.article-content p {
+  margin-bottom: 1.5rem; /* مسافات بين الفقرات */
 }
