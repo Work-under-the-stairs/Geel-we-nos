@@ -404,7 +404,7 @@ export default function AddArticle() {
                 <input
                   type="text"
                   value={hashtagInput}
-                  onChange={(e) => setTemplateHashtagInput(e.target.value)}
+                  onChange={(e) => setHashtagInput(e.target.value)}
                   onKeyDown={handleHashtagKeyDown}
                   placeholder="اكتب هاشتاج واضغط Enter"
                   className="flex-1 min-w-[180px] h-10 outline-none text-sm"

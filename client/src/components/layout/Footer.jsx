@@ -112,6 +112,18 @@ export default function Footer() {
 
           {/* Social Media Icons (أيقونات السوشيال ميديا الحقيقية عبر الـ SVG المباشر) */}
           <div className="flex items-center gap-5 order-1 sm:order-2">
+            {/* تيك توك */}
+            <a 
+              href="https://www.tiktok.com/@geelwnos_?_r=1&_t=ZS-96FmnUVLqlE" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              aria-label="تيك توك"
+              className="text-slate-400 hover:text-secondary transition-colors duration-200"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743 2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+              </svg>
+            </a>
             
             {/* فيسبوك */}
             <a 
