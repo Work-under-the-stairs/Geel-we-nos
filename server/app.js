@@ -1,5 +1,4 @@
 require("dotenv").config();
-// تهيئة Firebase Admin في بداية التطبيق لربطه بالـ Middleware
 require("./config/firebaseAdmin"); 
 
 const fs = require("fs");
@@ -7,12 +6,12 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { ImageKit } = require("@imagekit/nodejs");
+const { ImageKit } = require("@imagekit/nodejs"); 
 const crypto = require("crypto");
 
 const app = express();
 
-// 💡 تعديل CORS: السماح بـ localhost أثناء التطوير ونطاق Vercel تلقائياً عند الرفع
+// ─── CORS CONFIG ──────────────────────────────────────────────────
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5000",
@@ -34,25 +33,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ==========================================
-// 💡 إدارة اتصال MONGODB لبيئة SERVERLESS
-// ==========================================
+// ─── MONGODB CONNECTION ───────────────────────────────────────────
 let isConnected = false;
 
 const connectDB = async () => {
-  if (isConnected) {
-    console.log("🔄 Using existing MongoDB connection");
-    return;
-  }
-
+  if (isConnected) return;
   try {
     const db = await mongoose.connect(process.env.MONGO_URI, {
       bufferCommands: false, 
     });
     isConnected = db.connections[0].readyState;
-    console.log("✅ MongoDB Atlas connected successfully 🌍");
+    console.log("✅ MongoDB Connected");
   } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("❌ MongoDB Error:", err);
     throw err;
   }
 };
@@ -66,27 +59,27 @@ app.use(async (req, res, next) => {
   }
 });
 
-// =========================
-// IMAGEKIT CONFIG
-// =========================
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-});
+// ─── 💡 تَعريف الدالة المفقودة هنا (تأكدي من وجود هذا الجزء) ──────────────
+const getExpressImageKitInstance = () => {
+  if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+    throw new Error("Missing ImageKit Environment Variables!");
+  }
+  return new ImageKit({
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+  });
+};
 
-// =========================
-// IMAGEKIT AUTH ROUTE
-// =========================
+// ─── IMAGEKIT AUTH ROUTE ──────────────────────────────────────────
 app.get("/api/imagekit/auth", (req, res) => {
   try {
     const token = req.query.token || crypto.randomUUID();
     const expire = req.query.expire || Math.floor(Date.now() / 1000) + 30 * 60;
     const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
 
-    // التأكد من وجود المفتاح السري قبل التشفير
     if (!privateKey) {
-      return res.status(500).json({ message: "ImageKit private key is missing in environment variables" });
+      return res.status(500).json({ message: "ImageKit private key missing" });
     }
 
     const signature = crypto
@@ -94,20 +87,13 @@ app.get("/api/imagekit/auth", (req, res) => {
       .update(token + expire)
       .digest("hex");
 
-    res.json({
-      token,
-      expire,
-      signature,
-    });
+    res.json({ token, expire, signature });
   } catch (error) {
     console.error("ImageKit auth error:", error);
     res.status(500).json({ message: "ImageKit auth failed" });
   }
 });
-
-// ==========================================
-// ✅ IMAGEKIT DELETE ROUTE (النسخة الحديثة المتوافقة مع Vercel)
-// ==========================================
+// ─── IMAGEKIT DELETE ROUTE ────────────────────────────────────────
 app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
   const { fileId } = req.params;
 
@@ -116,34 +102,57 @@ app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
   }
 
   try {
-    // الـ SDK يدعم الـ Promises تلقائياً باستخدام async/await دون الحاجة لـ Callback يدوية
-    const result = await imagekit.deleteFile(fileId);
+    const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+
+    if (!privateKey) {
+      return res.status(500).json({ message: "المفتاح السري لـ ImageKit مفقود" });
+    }
+
+    // تشفير الـ Private Key باستخدام Base64 كما يطلب الـ API الرسمي لـ ImageKit
+    const authToken = Buffer.from(privateKey + ":").toString("base64");
+
+    // إرسال طلب حذف مباشر لخوادم ImageKit بدون استخدام الـ SDK المخادع
+    const response = await fetch(`https://api.imagekit.io/v1/files/${fileId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Basic ${authToken}`,
+      },
+    });
+
+    // إذا كان الرد ناجحاً (كود 204 يعبر عن الحذف الناجح في ImageKit)
+    if (response.status === 204 || response.ok) {
+      console.log(`✅ ImageKit Direct Delete Success for file: ${fileId}`);
+      return res.json({ success: true, message: "تم حذف الملف بنجاح" });
+    }
+
+    // إذا أرجعت خوادم ImageKit خطأ معين
+    const errorData = await response.json().catch(() => ({}));
+    console.error("❌ ImageKit API responded with error:", errorData);
     
-    console.log("✅ ImageKit Delete Success:", result);
-    return res.json({ success: true, message: "تم حذف الملف بنجاح من خوادم ImageKit" });
+    return res.status(response.status || 500).json({
+      message: "فشل حذف الملف من السيرفر السحابي لـ ImageKit",
+      error: errorData,
+    });
 
   } catch (error) {
-    console.error("❌ [ImageKit Error]:", error);
+    console.error("❌ [ImageKit Direct API Error]:", error);
     return res.status(500).json({
-      message: "فشل حذف الملف من السيرفر السحابي",
+      message: "فشل غير متوقع أثناء معالجة طلب الحذف",
       error: error.message || error,
     });
   }
 });
-
-// ─── Routes ────────────────────────────────────────────────────────
+// ─── ROUTES & ERROR HANDLER ───────────────────────────────────────
 app.use("/api/news",       require("./routes/news"));
 app.use("/api/users",      require("./routes/users"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/news",       require("./routes/commentRoutes"));
 
-// ─── Global error handler ──────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
 });
 
-// 💡 تشغيل الـ listen فقط عند التطوير المحلي (Local)
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`🚀 Server running locally on port ${PORT}`));
