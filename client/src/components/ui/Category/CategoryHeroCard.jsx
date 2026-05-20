@@ -27,9 +27,6 @@ export default function CategoryHeroCard({ article }) {
           {article.title}
         </h3>
         
-        <p className="text-gray-200 text-xs sm:text-base line-clamp-1 sm:line-clamp-2 max-w-2xl font-light">
-          {article.summary || article.content}
-        </p>
         
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-300 font-medium">
           <span className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-white">
