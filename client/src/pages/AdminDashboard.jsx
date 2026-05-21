@@ -76,7 +76,6 @@ export default function AdminDashboard() {
       case "المقالات":
         return (
           <ManageArticles 
-            articles={dashboardData?.recentArticles || []} 
             categories={categoriesData?.data || []} 
             onDeleteArticle={deleteArticle}
             isDeletingArticle={isDeletingArticle}

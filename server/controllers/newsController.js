@@ -337,3 +337,71 @@ exports.deleteNews = async (req, res, next) => {
     next(err);
   }
 };
+
+
+// ==========================================
+// جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
+// ==========================================
+exports.getAllNews = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+
+    // 1. فلترة بالقسم
+    if (req.query.category) filter.category = req.query.category;
+
+    // 2. فلترة بالحالة (منشور / مسودة)
+    if (req.query.status) {
+      if (req.query.status === "published") {
+        // 🌟 التعديل هنا: هنجيب أي مقال حالته لا تساوي "مسودة"
+        // ده هيشمل المنشور، واللي مفيهوش ستاتس، واللي الستاتس بتاعه فاضي
+        filter.status = { $ne: "draft" }; 
+      } else {
+        // لو اختار "مسودة" هنجيب المسودة بس
+        filter.status = req.query.status;
+      }
+    }
+
+    // 3. البحث في العنوان والمحتوى
+    if (req.query.search) {
+      filter.$or = [
+        { title: { $regex: req.query.search, $options: "i" } },
+        { content: { $regex: req.query.search, $options: "i" } }
+      ];
+    }
+
+    // 4. الترتيب
+    let sortQuery = { createdAt: -1 }; 
+    if (req.query.sort === "-views") {
+      sortQuery = { views: -1, createdAt: -1 };
+    } else if (req.query.sort === "-createdAt") {
+      sortQuery = { createdAt: -1 };
+    }
+
+    // التنفيذ
+    const totalArticles = await News.countDocuments(filter);
+    const totalPages = Math.ceil(totalArticles / limit);
+
+    const news = await News.find(filter)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit)
+      .populate("writer", "name avatar")
+      .populate("category", "name icon_name")
+      .lean();
+
+    res.status(200).json({
+      status: "success",
+      page,
+      limit,
+      totalPages,
+      totalArticles,
+      data: news,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

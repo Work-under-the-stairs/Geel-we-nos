@@ -46,7 +46,7 @@ export default function DashboardContent({
   // تحديد حالة المقال
   const getStatusBadge = (status) => {
     const safeStatus = String(status || '').toLowerCase().trim();
-    const isDraft = safeStatus === 'draft' || safeStatus === 'مسودة';
+    const isDraft = safeStatus === 'draft';
 
     return {
       text: isDraft ? 'مسودة' : 'منشور',

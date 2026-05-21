@@ -26,7 +26,10 @@ router.post("/:id/view", newsController.trackView); // تسجيل المشاهد
 // 🔐 روابط الإدارة والمنشئين (Protected & Authorized)
 // ============================================================
 
-router.post("/add",protect, restrictTo("admin"), 
+// 👇 ده السطر اللي ضفناه عشان يحل مشكلة الـ 404 للداشبورد
+router.get("/", protect, restrictTo("admin"), newsController.getAllNews);
+
+router.post("/add", protect, restrictTo("admin"), 
 upload.fields([{ name: "images", maxCount: 10 },{ name: "videos", maxCount: 5 },]), 
 newsController.createNews);
 
@@ -35,4 +38,5 @@ router.patch("/:id", protect, restrictTo("admin"), newsController.updateNews);
 
 // 3. حذف الخبر نهائياً (للأدمن، أو الكاتب صاحب الخبر نفسه)
 router.delete("/:id", protect, restrictTo("admin"), newsController.deleteNews);
+
 module.exports = router;

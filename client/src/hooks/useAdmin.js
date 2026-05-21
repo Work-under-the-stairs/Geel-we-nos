@@ -23,13 +23,13 @@ export const useDashboardSummary = () =>
   })
 
 // ============ إدارة المقالات (Queries & Mutations) ============
-export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '' }) =>
-  useQuery({
-    queryKey: ADMIN_KEYS.articles(filters),
-    queryFn:  () => adminService.getArticles(filters.page, filters.limit, filters.search, filters.status).then(res => res.data),
-    placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 2,
-  })
+// export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '' }) =>
+//   useQuery({
+//     queryKey: ADMIN_KEYS.articles(filters),
+//     queryFn:  () => adminService.getArticles(filters.page, filters.limit, filters.search, filters.status).then(res => res.data),
+//     placeholderData: keepPreviousData,
+//     staleTime: 1000 * 60 * 2,
+//   })
 
 export const useAdminArticle = (id) =>
   useQuery({
@@ -148,3 +148,19 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+// ضفناهم في الـ filters الافتراضية
+export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '', category: '', sort: '-createdAt' }) =>
+  useQuery({
+    queryKey: ADMIN_KEYS.articles(filters),
+    queryFn:  () => adminService.getArticles(
+      filters.page, 
+      filters.limit, 
+      filters.search, 
+      filters.status, 
+      filters.category, 
+      filters.sort
+    ).then(res => res.data), // بنرجع الـ response كامل عشان نحتاج منه totalPages
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 2,
+  })

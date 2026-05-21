@@ -13,7 +13,7 @@ import { isAuthenticated,isAdmin } from './utils/auth';
 import EditArticle from './pages/EditArticle'
 
 const App = () => {
-  const userData = isAuthenticated(); // يمكنكِ لاحقاً ربط هذه القيمة بحالة تسجيل الدخول الحقيقية (Context أو Redux)
+  const userData = isAuthenticated();
 
   useEffect(() => {
     const handleImageError = (e) => {
@@ -21,7 +21,6 @@ const App = () => {
         if (e.target.dataset.fallbackApplied) return;
         e.target.dataset.fallbackApplied = "true";
 
-        // 👇 السطر ده مهم: بنمسح الـ object-cover عشان الأيقونة تظهر بحجمها الطبيعي
         e.target.classList.remove('object-cover');
         
         e.target.classList.add('bg-slate-100', 'object-contain', 'p-4', 'border', 'border-slate-200');
