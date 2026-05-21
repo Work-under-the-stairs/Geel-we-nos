@@ -206,7 +206,7 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                   <td className="p-4 text-left">
                     <div className="flex items-center justify-end gap-1.5">
                       <button 
-                        onClick={() => navigate(`/article/${art._id}`)} // افتراضي لصفحة عرض المقال
+                        onClick={() => navigate(`/news/${art._id}`)} // افتراضي لصفحة عرض المقال
                         className="p-2 text-slate-400 hover:text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" 
                         title="عرض"
                       >

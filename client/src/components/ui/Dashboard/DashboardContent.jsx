@@ -141,7 +141,7 @@ export default function DashboardContent({
                         <td className="py-4 font-bold text-slate-700 text-xs text-center">{art.views}</td>
                         <td className="py-4 text-left pl-2">
                           <div className="flex items-center justify-end gap-1.5">
-                            <button className="p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors" title="عرض">
+                            <button onClick={()=>navigate(`/news/${art.id}`)} className="p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors" title="عرض">
                               <Eye size={16} />
                             </button>
                              <button
