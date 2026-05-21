@@ -54,7 +54,7 @@ export default function ArticleDetail() {
     }
 
     const username = getUsername();
-    console.log("المعلق الحالي هو:", username);
+    // console.log("المعلق الحالي هو:", username);
 
     if (!newComment.trim()) return;
 

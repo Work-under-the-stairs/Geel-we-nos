@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
 import { Mail, Lock, UserPlus, Loader2, User, AtSign } from "lucide-react"; // أيقونات التصميم الجديد
+import api from "../services/api";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -32,18 +33,12 @@ export default function Register() {
       const firebaseUser = userCredential.user;
 
       // الخطوة 2: إرسال الـ UID والبيانات الإضافية إلى الباك إند (MongoDB)
-      const response = await fetch("/api/users/register-db", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firebaseUid: firebaseUser.uid,
-          name: formData.name,
-          username: formData.username.toLowerCase().trim(),
-          email: formData.email,
-          avatar: "", // يمكنكِ إضافة رابط صورة افتراضية هنا لاحقاً
-        }),
+      const response = await api.post("/users/register-db", {
+        firebaseUid: firebaseUser.uid,
+        name: formData.name,
+        username: formData.username.toLowerCase().trim(),
+        email: formData.email,
+        avatar: "", // يمكنكِ إضافة رابط صورة افتراضية هنا لاحقاً
       });
 
       const data = await response.json();

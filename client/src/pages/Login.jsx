@@ -30,8 +30,8 @@ export default function Login() {
       // 2. جلب بيانات المستخدم من MongoDB
       // نرسل التوكين في الهيدر ليتمكن السيرفر من التحقق من هويتك
       const response = await api.get(`/users/me/${user.uid}`, {
-  headers: { Authorization: `Bearer ${idToken}` }
-});
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
       
       if (response.data) {
         const userData = response.data;

@@ -25,7 +25,7 @@ const CommentItem = ({ comment, articleId }) => {
     }
 
     const username = getUsername();
-    console.log("المعلق الحالي هو:", username);
+    // console.log("المعلق الحالي هو:", username);
 
     if (!replyText.trim()) return;
 
