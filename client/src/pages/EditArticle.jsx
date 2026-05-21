@@ -83,7 +83,7 @@ export default function EditArticle() {
   const deleteMediaFromServer = async (fileId) => {
     if (!fileId) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/imagekit/delete/${fileId}`, {
+      const response = await fetch(`/api/imagekit/delete/${fileId}`, {
         method: "DELETE",
       });
       const data = await response.json();

@@ -16,6 +16,7 @@ import {
   useDeleteArticle 
 } from "../hooks/useAdmin";
 import AddArticle from "./AddArticle";
+import ManageArticles from "../components/ui/Dashboard/ManageArticles";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -74,7 +75,12 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "المقالات":
         return (
-          <DashboardContent/>
+          <ManageArticles 
+            articles={dashboardData?.recentArticles || []} 
+            categories={categoriesData?.data || []} 
+            onDeleteArticle={deleteArticle}
+            isDeletingArticle={isDeletingArticle}
+          />
         );
       case "إضافة مقال":
         return (

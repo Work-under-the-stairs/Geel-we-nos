@@ -32,7 +32,7 @@ export default function Register() {
       const firebaseUser = userCredential.user;
 
       // الخطوة 2: إرسال الـ UID والبيانات الإضافية إلى الباك إند (MongoDB)
-      const response = await fetch("http://localhost:5000/api/users/register-db", {
+      const response = await fetch("/api/users/register-db", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

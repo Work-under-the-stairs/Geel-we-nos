@@ -1,6 +1,7 @@
 // src/components/ui/Category/CategoryHeroCard.jsx
 import React from 'react';
 import { User } from 'lucide-react';
+import { stripHtml } from '../../../utils/textUtils';
 
 export default function CategoryHeroCard({ article }) {
   if (!article) return null;
@@ -11,10 +12,22 @@ export default function CategoryHeroCard({ article }) {
       className="group relative block overflow-hidden rounded-2xl bg-gray-950 aspect-[4/3] sm:aspect-[16/9] shadow-md select-none"
     >
       <img 
-        src={article.images?.[0] || "/default-news.png"} 
+        // تأكدي هنا إننا بنعالج الـ undefined والـ null والـ "" في نفس اللحظة
+        src={article.images?.[0] && article.images[0].trim() !== "" ? article.images[0] : "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E"} 
         alt={article.title}
         className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
-        onError={(e) => { e.target.src = "/default-news.png"; }}
+        onError={(e) => {
+          // استبدال أي صورة فشل تحميلها (أو رابط بايظ) بالـ SVG البديل
+          e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E";
+          
+          // ضبط الستايلات عشان الأيقونة تظهر في النص
+          e.target.style.objectFit = "contain";
+          e.target.style.padding = "25%";
+          e.target.style.backgroundColor = "rgba(0,0,0,0.05)";
+          
+          // منع تكرار الـ Error
+          e.target.onerror = null;
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
       
@@ -27,11 +40,14 @@ export default function CategoryHeroCard({ article }) {
           {article.title}
         </h3>
         
+        <p className="text-gray-500 text-sm mt-2 line-clamp-2 font-light flex-1">
+          {stripHtml(article.content)}
+        </p>
         
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-300 font-medium">
           <span className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-white">
             <User size={10} className="sm:w-3 sm:h-3" />
-            {article.writer?.name || 'المحرر'}
+            {article.writer?.name || 'جيل ونص'}
           </span>
           <span>•</span>
           <span>{new Date(article.createdAt || article.date).toLocaleDateString('ar-EG')}</span>
