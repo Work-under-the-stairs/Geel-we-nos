@@ -33,36 +33,45 @@ export default function Register() {
       const firebaseUser = userCredential.user;
 
       // الخطوة 2: إرسال الـ UID والبيانات الإضافية إلى الباك إند (MongoDB)
+      // Axios بيرجع الداتا في response.data ومفيش حاجة اسمها response.json()
       const response = await api.post("/users/register-db", {
         firebaseUid: firebaseUser.uid,
         name: formData.name,
         username: formData.username.toLowerCase().trim(),
         email: formData.email,
-        avatar: "", // يمكنكِ إضافة رابط صورة افتراضية هنا لاحقاً
+        avatar: "", 
       });
 
-      const data = await response.json();
+      // لو الكود وصل هنا معناه إن الـ Status 200/201 والحساب اتعمل في المونجو
+      toast.success("تم إنشاء الحساب بنجاح! 🎉");
+      navigate("/login");
 
-      if (response.ok) {
-        toast.success("تم إنشاء الحساب بنجاح! 🎉"); // 2. استخدمي toast بدلاً من alert
-        navigate("/login");
-      } else {
-        toast.error(data.message || "حدث خطأ ما."); // 3. استخدمي toast.error للأخطاء
-      }
     } catch (err) {
-      // معالجة أخطاء فايربيس الشائعة مثل إيميل مسجل مسبقاً أو كلمة مرور ضعيفة
+      console.error(err);
+
+      // 1. معالجة أخطاء الباك إند (لو Axios ضرب Error 409 أو 400 من المونجو)
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+        setError(err.response.data.message);
+        return; // بنوقف الكود عشان ميكملش لأخطاء فايربيز
+      }
+
+      // 2. معالجة أخطاء فايربيز 
       if (err.code === "auth/email-already-in-use") {
         setError("البريد الإلكتروني مستخدم بالفعل.");
+        toast.error("البريد الإلكتروني مستخدم بالفعل.");
       } else if (err.code === "auth/weak-password") {
         setError("كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل.");
+        toast.error("كلمة المرور ضعيفة جداً.");
       } else {
-        setError(err.message);
+        setError("حدث خطأ أثناء إنشاء الحساب.");
+        toast.error("حدث خطأ أثناء إنشاء الحساب.");
       }
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 py-10 font-['Cairo']" dir="rtl">
       
