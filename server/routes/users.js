@@ -27,7 +27,8 @@ router.get("/me", protect, async (req, res) => {
 router.get("/", isAdmin, userController.getUsers);
 
 // 2. جلب بيانات المستخدم نفسه عن طريق Firebase UID (لأي مستخدم مسجل الدخول)
-//router.get("/me/:uid", userController.getUserByFirebaseUid);
+ // أضيفي الميدلوير protect هنا للتأكد من وجود بيانات المستخدم
+router.get("/me/:uid", protect, userController.getUserByFirebaseUid);
 
 router.get("/dashboard", userController.getDashboardSummary);
 
