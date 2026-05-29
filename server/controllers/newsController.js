@@ -260,6 +260,20 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
+    // 3b. معالجة فريق العمل بنفس الطريقة الآمنة
+    let contributors = [];
+    if (req.body.contributors) {
+      if (Array.isArray(req.body.contributors)) {
+        contributors = req.body.contributors;
+      } else {
+        try {
+          contributors = JSON.parse(req.body.contributors);
+        } catch (e) {
+          contributors = [];
+        }
+      }
+    }
+
     // 4. إنشاء وحفظ وثيقة الخبر الجديدة
     const article = await News.create({
       title: req.body.title,
@@ -272,6 +286,7 @@ exports.createNews = async (req, res, next) => {
       images: imageUrls,
       videos: videoUrls,
       hashtags: hashtags,
+      contributors: contributors,
       status: req.body.status || "draft", 
     });
 
@@ -304,6 +319,7 @@ exports.updateNews = async (req, res, next) => {
       "important_rate", 
       "isUrgent",
       "hashtags",
+      "contributors",
       "status"
     ];
 
