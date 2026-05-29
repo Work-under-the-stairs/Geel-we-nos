@@ -21,43 +21,65 @@ export default function Register() {
  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
-    let firebaseUser = null; // نُعرف المتغير خارج الـ try
+    // --- 1. التحقق في الفرونت إند (Frontend Validation) ---
+    if (formData.password.length < 6) {
+      setError("كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.");
+      return toast.error("كلمة المرور قصيرة جداً.");
+    }
+    if (/\s/.test(formData.username)) {
+      setError("اسم المستخدم لا يجب أن يحتوي على مسافات.");
+      return toast.error("اسم المستخدم يحتوي على مسافات.");
+    }
+
+    setLoading(true);
+    let firebaseUser = null;
 
     try {
-      // 1. إنشاء الحساب في Firebase
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      // 2. إنشاء الحساب في Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        formData.email.toLowerCase().trim(), // توحيد الإيميل
+        formData.password
+      );
       firebaseUser = userCredential.user;
 
-      // 2. محاولة الحفظ في MongoDB
+      // 3. محاولة الحفظ في MongoDB
       try {
         await api.post("/users/register-db", {
           firebaseUid: firebaseUser.uid,
           name: formData.name,
           username: formData.username.toLowerCase().trim(),
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(), // توحيد الإيميل
         });
         
         toast.success("تم إنشاء الحساب بنجاح! 🎉");
         navigate("/login");
       } catch (dbError) {
-        // إذا فشل الحفظ في MongoDB، نحذف الحساب من Firebase فوراً
+        // --- 4. حماية عملية الحذف (Safe Rollback) ---
         console.error("MongoDB Save Failed, Rolling back Firebase user...");
-        await firebaseUser.delete(); // حذف المستخدم من Firebase
-        throw dbError; // إعادة رمي الخطأ للـ catch الكبيرة
+        try {
+          if (firebaseUser) {
+            await firebaseUser.delete(); 
+          }
+        } catch (rollbackError) {
+          console.error("Critical: Failed to delete Firebase user after DB failure", rollbackError);
+        }
+        throw dbError; // إعادة رمي الخطأ للـ catch الكبيرة عشان المستخدم يشوف رسالة الخطأ
       }
 
     } catch (err) {
       console.error(err);
       
-      // معالجة الأخطاء
       if (err.response?.data?.message) {
         setError(err.response.data.message);
         toast.error(err.response.data.message);
       } else if (err.code === "auth/email-already-in-use") {
         setError("البريد الإلكتروني مستخدم بالفعل.");
         toast.error("البريد الإلكتروني مستخدم بالفعل.");
+      } else if (err.code === "auth/invalid-email") { // إضافة إيرور الإيميل غير الصالح
+        setError("صيغة البريد الإلكتروني غير صحيحة.");
+        toast.error("صيغة البريد الإلكتروني غير صحيحة.");
       } else {
         setError("حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة لاحقاً.");
         toast.error("حدث خطأ أثناء إنشاء الحساب.");

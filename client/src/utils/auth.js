@@ -1,10 +1,35 @@
-// src/utils/auth.js
+import { jwtDecode } from "jwt-decode";
 
-/**
- * دالة للتأكد هل المستخدم مسجل دخول (عن طريق التحقق من وجود التوكن)
- */
+export const logout = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  window.location.reload(); 
+};
+
 export const isAuthenticated = () => {
-  return !!localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  
+  if (!token) return false;
+
+  try {
+    // فك تشفير التوكن لمعرفة بياناته
+    const decodedToken = jwtDecode(token);
+    // الوقت الحالي بالثواني
+    const currentTime = Date.now() / 1000;
+
+    // مقارنة الوقت الحالي بوقت انتهاء التوكن
+    if (decodedToken.exp < currentTime) {
+      // لو التوكن منتهي الصلاحية، نعمل تسجيل خروج فوراً
+      logout();
+      return false;
+    }
+    
+    return true; // التوكن موجود وصالح
+  } catch (error) {
+    // لو التوكن مش سليم أو حصل خطأ في فك التشفير
+    logout();
+    return false;
+  }
 };
 
 /**
@@ -30,13 +55,4 @@ export const getUsername = () => {
 export const isAdmin = () => {
   const user = getUserData();
   return user ? user?.role === 'admin' : false;
-};
-
-/**
- * دالة لتسجيل الخروج (تنظيف الـ localStorage)
- */
-export const logout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  window.location.reload(); // إعادة تحميل الصفحة عشان الـ Navbar يتحدث
 };
