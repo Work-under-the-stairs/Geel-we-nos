@@ -224,14 +224,16 @@ exports.trackView = async (req, res, next) => {
   }
 };
 
-
+// ==========================================
+// ➕ 4. إنشاء خبر جديد
+// ==========================================
 exports.createNews = async (req, res, next) => {
   try {
-    // 1. التقاط الروابط المباشرة المرسلة من الفرونت إند
+    // 1. التقاط الروابط المباشرة لملفات الـ ImageKit أو الكلاود المرسلة من الفرونت إند
     let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
     let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
 
-    // 2. إذا تم إرسال ملفات بصيغة binary/form-data، يتم رفعها إلى كلاوديناري
+    // 2. إذا تم إرسال ملفات binary مرفوعة مباشرة عبر السيرفر، يتم معالجتها
     if (req.files?.images) {
       for (const file of req.files.images) {
         const result = await uploadFile(file.buffer, "news/images", "image");
@@ -246,7 +248,21 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
-    // 3. معالجة الهاشتاجات بأمان لتجنب توقف السيرفر
+    // 3. معالجة روابط وأيديهات يوتيوب (تأتي نصاً من الـ Body)
+    let youtubeVideos = [];
+    if (req.body.youtube_videos) {
+      if (Array.isArray(req.body.youtube_videos)) {
+        youtubeVideos = req.body.youtube_videos;
+      } else {
+        try {
+          youtubeVideos = JSON.parse(req.body.youtube_videos);
+        } catch (e) {
+          youtubeVideos = typeof req.body.youtube_videos === 'string' ? req.body.youtube_videos.split(',').map(v => v.trim()) : [];
+        }
+      }
+    }
+
+    // 4. معالجة الهاشتاجات بأمان لتجنب توقف السيرفر
     let hashtags = [];
     if (req.body.hashtags) {
       if (Array.isArray(req.body.hashtags)) {
@@ -260,7 +276,7 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
-    // 3b. معالجة فريق العمل بنفس الطريقة الآمنة
+    // 5. معالجة فريق العمل
     let contributors = [];
     if (req.body.contributors) {
       if (Array.isArray(req.body.contributors)) {
@@ -274,17 +290,18 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
-    // 4. إنشاء وحفظ وثيقة الخبر الجديدة
+    // 6. إنشاء وحفظ وثيقة الخبر الجديدة
     const article = await News.create({
       title: req.body.title,
       content: req.body.content,
-      // 🛡️ حماية: ربط المقال بـ ID المستخدم مسجل الدخول من التوكن (أكثر أماناً من الفرونت)
+      // 🛡️ حماية: ربط المقال بـ ID المستخدم مسجل الدخول من التوكن
       writer: req.user._id, 
       category: req.body.category,
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
       images: imageUrls,
       videos: videoUrls,
+      youtube_videos: youtubeVideos, // حفظ الـ IDs المستخرجة من يوتيوب
       hashtags: hashtags,
       contributors: contributors,
       status: req.body.status || "draft", 
@@ -297,7 +314,7 @@ exports.createNews = async (req, res, next) => {
 };
 
 // ==========================================
-// 2. تعديل الخبر
+// ✏️ 5. تعديل الخبر
 // ==========================================
 exports.updateNews = async (req, res, next) => {
   try {
@@ -315,6 +332,7 @@ exports.updateNews = async (req, res, next) => {
       "content", 
       "images", 
       "videos", 
+      "youtube_videos", // إضافة الحقل هنا ليدعم التعديل
       "category", 
       "important_rate", 
       "isUrgent",
@@ -322,6 +340,20 @@ exports.updateNews = async (req, res, next) => {
       "contributors",
       "status"
     ];
+
+    // معالجة الحقول التي قد تأتي مدمجة بنظام نصي (في حال استخدام FormData بالفرونت إند)
+    const jsonFields = ["hashtags", "contributors", "youtube_videos", "images", "videos"];
+    jsonFields.forEach((field) => {
+      if (req.body[field] && typeof req.body[field] === "string") {
+        try {
+          req.body[field] = JSON.parse(req.body[field]);
+        } catch (e) {
+          if (field === "hashtags" || field === "youtube_videos") {
+            req.body[field] = req.body[field].split(',').map(item => item.trim());
+          }
+        }
+      }
+    });
 
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) article[field] = req.body[field];
@@ -335,7 +367,7 @@ exports.updateNews = async (req, res, next) => {
 };
 
 // ==========================================
-// 3. حذف الخبر
+// 🗑️ 6. حذف الخبر
 // ==========================================
 exports.deleteNews = async (req, res, next) => {
   try {
@@ -356,7 +388,7 @@ exports.deleteNews = async (req, res, next) => {
 
 
 // ==========================================
-// جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
+// 📊 7. جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
 // ==========================================
 exports.getAllNews = async (req, res, next) => {
   try {
@@ -372,11 +404,9 @@ exports.getAllNews = async (req, res, next) => {
     // 2. فلترة بالحالة (منشور / مسودة)
     if (req.query.status) {
       if (req.query.status === "published") {
-        // 🌟 التعديل هنا: هنجيب أي مقال حالته لا تساوي "مسودة"
-        // ده هيشمل المنشور، واللي مفيهوش ستاتس، واللي الستاتس بتاعه فاضي
+        // 🌟 هنجيب أي مقال حالته لا تساوي "مسودة"
         filter.status = { $ne: "draft" }; 
       } else {
-        // لو اختار "مسودة" هنجيب المسودة بس
         filter.status = req.query.status;
       }
     }

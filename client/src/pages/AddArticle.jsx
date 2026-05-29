@@ -52,9 +52,12 @@ export default function AddArticle() {
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress] = useState(0);
 
-  // أضيفي هذا مع الـ states الموجودة
-   const [contributors, setContributors] = useState([]); // قائمة الأشخاص
-   const [newContributor, setNewContributor] = useState({ name: "", role: "writer" }); // بيانات الشخص الجديد
+  const [contributors, setContributors] = useState([]); 
+  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" }); 
+
+  // --- حالات وروابط يوتيوب الجديدة ---
+  const [youtubeLinks, setYoutubeLinks] = useState([]); // سيحفظ { id: "...", url: "..." }
+  const [youtubeInput, setYoutubeInput] = useState("");
 
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
@@ -82,17 +85,52 @@ export default function AddArticle() {
   };
 
   const addContributor = () => {
-  if (!newContributor.name.trim()) {
-    toast.error("يرجى إدخال اسم الشخص");
-    return;
-  }
-  setContributors((prev) => [...prev, newContributor]);
-  setNewContributor({ name: "", role: "writer" }); // إعادة ضبط الحقول
-};
+    if (!newContributor.name.trim()) {
+      toast.error("يرجى إدخال اسم الشخص");
+      return;
+    }
+    setContributors((prev) => [...prev, newContributor]);
+    setNewContributor({ name: "", role: "writer" }); 
+  };
 
-const removeContributor = (index) => {
-  setContributors((prev) => prev.filter((_, i) => i !== index));
-};
+  const removeContributor = (index) => {
+    setContributors((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // --- دوال معالجة يوتيوب ---
+  const extractYouTubeId = (url) => {
+    // Regex لاستخراج ID الفيديو من معظم صيغ روابط يوتيوب
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleAddYoutubeLink = () => {
+    if (!youtubeInput.trim()) return;
+    
+    const videoId = extractYouTubeId(youtubeInput);
+    if (!videoId) {
+      toast.error("الرابط غير صالح! يرجى إدخال رابط يوتيوب صحيح.");
+      return;
+    }
+
+    // التأكد من عدم تكرار الفيديو
+    const isExist = youtubeLinks.some(link => link.id === videoId);
+    if (isExist) {
+      toast.error("تمت إضافة هذا الفيديو مسبقاً!");
+      return;
+    }
+
+    setYoutubeLinks(prev => [...prev, { id: videoId, url: youtubeInput }]);
+    setYoutubeInput("");
+    toast.success("تم إضافة فيديو يوتيوب بنجاح");
+  };
+
+  const handleRemoveYoutubeLink = (idToRemove) => {
+    setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
+  };
+  // -------------------------
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -150,6 +188,9 @@ const removeContributor = (index) => {
     const allVideos = [];
     if (videoPreview?.url) allVideos.push(videoPreview.url);
 
+    // تجهيز مصفوفة أيديهات يوتيوب
+    const youtubeIdsArray = youtubeLinks.map(item => item.id);
+
     const articlePayload = {
       title: title.trim(),
       content: contentHTML,
@@ -158,9 +199,9 @@ const removeContributor = (index) => {
       isUrgent: isUrgent,
       images: allImages,
       videos: allVideos,
+      youtube_videos: youtubeIdsArray, // إرسال أيديهات يوتيوب للباك اند
       hashtags: hashtags,
-      //status: targetStatus,
-      contributors: contributors, // إضافة قائمة الفريق
+      contributors: contributors, 
       status: targetStatus,
     };
 
@@ -187,6 +228,9 @@ const removeContributor = (index) => {
     setHashtags([]);
     setImportance(5);
     setIsUrgent(false);
+    setContributors([]);
+    setYoutubeLinks([]); // تفريغ الروابط
+    setYoutubeInput("");
     editor?.commands.setContent("<h2>ابدأ بكتابة المقال...</h2>");
   };
 
@@ -365,7 +409,6 @@ const removeContributor = (index) => {
         .ProseMirror p  { margin-bottom:14px; }
         .ProseMirror ul { list-style:disc;    padding-right:20px; }
         .ProseMirror ol { list-style:decimal; padding-right:20px; }
-        /* اقتباس التحرير يتبع الـ Primary */
         .ProseMirror blockquote { border-right:4px solid var(--color-primary,#0D4C54); padding:14px; background:#f8fafc; border-radius:12px; margin:16px 0; }
         .ProseMirror img, .ProseMirror video { border-radius:18px; margin:18px 0; width:100%; }
       `}</style>
@@ -373,7 +416,6 @@ const removeContributor = (index) => {
       {createArticleMutation.isPending && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-[9999] flex items-center justify-center">
           <div className="bg-white p-5 rounded-2xl shadow-xl flex items-center gap-3">
-            {/* اللودر يتبع الـ Secondary البرتقالي */}
             <Loader2 className="animate-spin text-[var(--color-secondary,#FF5A00)]" size={24} />
             <span className="text-sm font-bold text-slate-800">جاري الحفظ والمزامنة...</span>
           </div>
@@ -407,43 +449,44 @@ const removeContributor = (index) => {
             removeHashtag={removeHashtag} featuredUploading={featuredUploading} featuredProgress={featuredProgress}
             featuredImage={featuredImage} handleRemoveFeatured={handleRemoveFeatured} handleFeaturedImage={handleFeaturedImage}
           />
-          {/* قسم فريق العمل */}
-<div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
-  <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
-  
-  <div className="flex flex-wrap gap-3 mb-4">
-    <input 
-      placeholder="اسم الشخص" 
-      className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
-      value={newContributor.name}
-      onChange={(e) => setNewContributor({...newContributor, name: e.target.value})}
-    />
-    <select 
-      className="p-3 rounded-xl border border-slate-200"
-      value={newContributor.role}
-      onChange={(e) => setNewContributor({...newContributor, role: e.target.value})}
-    >
-      <option value="writer">كاتب (Writer)</option>
-      <option value="photographer">مصور (Photographer)</option>
-      <option value="editor">محرر (Editor)</option>
-    </select>
-    <button 
-      onClick={addContributor}
-      className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
-    >
-      + إضافة
-    </button>
-  </div>
 
-  <div className="space-y-2">
-    {contributors.map((c, index) => (
-      <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-        <span className="font-medium text-slate-700">{c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span></span>
-        <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">حذف</button>
-      </div>
-    ))}
-  </div>
-</div>
+          {/* قسم فريق العمل */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input 
+                placeholder="اسم الشخص" 
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
+                value={newContributor.name}
+                onChange={(e) => setNewContributor({...newContributor, name: e.target.value})}
+              />
+              <select 
+                className="p-3 rounded-xl border border-slate-200"
+                value={newContributor.role}
+                onChange={(e) => setNewContributor({...newContributor, role: e.target.value})}
+              >
+                <option value="writer">كاتب (Writer)</option>
+                <option value="photographer">مصور (Photographer)</option>
+                <option value="editor">محرر (Editor)</option>
+              </select>
+              <button 
+                onClick={addContributor}
+                className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
+              >
+                + إضافة
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {contributors.map((c, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <span className="font-medium text-slate-700">{c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span></span>
+                  <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">حذف</button>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <EditorSection
             innerRef={contentRef} editorUploading={editorUploading} editorProgress={editorProgress}
@@ -455,6 +498,52 @@ const removeContributor = (index) => {
             handleRemoveVideo={handleRemoveVideo} handleVideoUpload={handleVideoUpload} galleryUploading={galleryUploading}
             galleryProgress={galleryProgress} handleGalleryUpload={handleGalleryUpload} gallery={gallery} handleRemoveGalleryItem={handleRemoveGalleryItem}
           />
+
+          {/* --- قسم روابط يوتيوب الإضافية --- */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب (اختياري)</h2>
+            <p className="text-sm text-slate-500 mb-4">أضف روابط الفيديوهات الخارجية كبديل للرفع المباشر.</p>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input 
+                placeholder="https://www.youtube.com/watch?v=..." 
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200 text-left"
+                style={{ direction: "ltr" }}
+                value={youtubeInput}
+                onChange={(e) => setYoutubeInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddYoutubeLink())}
+              />
+              <button 
+                onClick={handleAddYoutubeLink}
+                className="bg-secondary text-white px-6 rounded-xl font-bold hover:bg-orange4 transition"
+              >
+                + إضافة الفيديو
+              </button>
+            </div>
+
+            {youtubeLinks.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {youtubeLinks.map((link, index) => (
+                  <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-hidden">
+                    <div className="flex items-center gap-3 truncate">
+                      <img 
+                        src={`https://img.youtube.com/vi/${link.id}/default.jpg`} 
+                        alt="thumbnail" 
+                        className="w-12 h-9 object-cover rounded-md"
+                      />
+                      <a href={link.url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline truncate" dir="ltr">
+                        {link.id}
+                      </a>
+                    </div>
+                    <button onClick={() => handleRemoveYoutubeLink(link.id)} className="text-red-500 text-sm hover:underline mr-2">
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* ---------------------------------- */}
 
           <ImportanceSection
             innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent}
