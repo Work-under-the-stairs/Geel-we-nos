@@ -1,12 +1,17 @@
 // src/pages/ArticleDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2 } from 'lucide-react';
+import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Loader2 } from 'lucide-react';
 import PopularArticles from '../components/ui/PopularArticles';
 import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
-import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
+import { isAuthenticated } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
+
+// استيراد مكتبة Plyr والـ CSS الخاص بها
+import { Plyr } from "plyr-react";
+import "plyr/dist/plyr.css";
+
 import { 
   useArticle, 
   useComments, 
@@ -22,12 +27,11 @@ export default function ArticleDetail() {
   const { id } = useParams();
 
   // === 1. تفعيل الهوكس الخاصة بالباك إند ===
-  useTrackView(id); // الهوك العبقري بتاعك هيسجل المشاهدة بعد 10 ثواني في صمت
+  useTrackView(id); 
   
   const { data: article, isLoading: loadArticle } = useArticle(id);
   const { data: commentsData, isLoading: loadComments } = useComments(id);
-  const { data: popularArticlesData } = useTrending(5); // جلب الأكثر قراءة للسايدبار
-
+  const { data: popularArticlesData } = useTrending(5);
 
   const { mutate: submitComment, isPending: isCommenting } = useAddComment(id);
 
@@ -35,14 +39,33 @@ export default function ArticleDetail() {
   const [activeMedia, setActiveMedia] = useState(null);
   const [newComment, setNewComment] = useState("");
 
-  // لضبط الميديا الافتراضية أول ما الخبر يجي من الباك إند
+  // لضبط الميديا الافتراضية (الأولوية للصور أولاً كما طلبت، ثم الفيديوهات)
   useEffect(() => {
-    if (article?.images?.length > 0) {
+    if (article?.images && article.images.length > 0) {
       setActiveMedia({ type: 'image', url: article.images[0] });
     } else if (article?.image) {
       setActiveMedia({ type: 'image', url: article.image });
+    } else if (article?.videos && article.videos.length > 0) {
+      setActiveMedia({ type: 'youtube', url: article.videos[0] });
     }
   }, [article]);
+
+  // إعدادات Plyr لإخفاء كل ما يخص يوتيوب قدر الإمكان وتشغيل الفيديو تلقائياً
+  const plyrOptions = {
+    autoplay: true, // تشغيل تلقائي بمجرد اختيار الفيديو
+    youtube: { 
+      noCookie: true,    // أمان أفضل ويمنع تتبع الإعلانات
+      rel: 0,            // منع الفيديوهات المقترحة من قنوات أخرى
+      modestbranding: 1, // إخفاء لوجو يوتيوب قدر الإمكان
+      iv_load_policy: 3, // إخفاء البطاقات التفاعلية
+      controls: 0,       // إخفاء تحكم يوتيوب الأصلي لترك التحكم لـ Plyr فقط
+      disablekb: 1,      // تعطيل اختصارات كيبورد يوتيوب
+      playsinline: 1     // تشغيل داخل الإطار في الموبايل
+    },
+    controls: [
+      'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
+    ],
+  };
 
   // === 3. إضافة تعليق جديد رئيسي ===
   const handleCommentSubmit = (e) => {
@@ -52,9 +75,6 @@ export default function ArticleDetail() {
       toast.error("يجب تسجيل الدخول أولاً!");
       return;
     }
-
-    const username = getUsername();
-    // console.log("المعلق الحالي هو:", username);
 
     if (!newComment.trim()) return;
 
@@ -66,7 +86,6 @@ export default function ArticleDetail() {
   if (loadArticle) return <Loading />;
   if (!article) return <div className="text-center py-20 text-xl font-bold">عذراً، هذا الخبر غير موجود.</div>;
 
-  // معالجة التاريخ
   const articleDate = new Date(article.createdAt || Date.now());
   const formattedDate = articleDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   const formattedTime = articleDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -91,7 +110,6 @@ export default function ArticleDetail() {
                 {article.title}
               </h1>
 
-              {/* الميتا داتا */}
               <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-gray-500 border-y border-gray-100 py-3">
                 <span className="flex items-center gap-1.5 font-semibold text-gray-700">
                   <User size={16} className="text-[var(--color-secondary)]" />
@@ -119,28 +137,55 @@ export default function ArticleDetail() {
                       className="w-full h-full object-cover transition-opacity duration-300"
                     />
                   ) : (
-                    <video 
-                      src={activeMedia.url} 
-                      controls autoPlay
-                      className="w-full h-full object-contain"
-                    />
+                    <div className="w-full h-full text-left" dir="ltr">
+                      <Plyr 
+                        source={{
+                          type: 'video',
+                          sources: [{ src: activeMedia.url, provider: 'youtube' }]
+                        }} 
+                        options={plyrOptions} 
+                      />
+                    </div>
                   )}
                 </div>
 
-                {/* شريط الصور المصغرة */}
-                {((article.images?.length > 1) || (article.videos?.length > 0)) && (
+                {/* شريط الصور والفيديوهات المصغرة */}
+                {((article.images?.length > 1) || (article.videos?.length > 1) || (article.images?.length > 0 && article.videos?.length > 0)) && (
                   <div className="flex flex-wrap gap-3 overflow-x-auto py-1 custom-scrollbar">
+                    
+                    {/* عرض الصور أولاً كما طلبت */}
                     {article.images?.map((imgUrl, idx) => (
                       <button
                         key={`img-${idx}`}
                         onClick={() => setActiveMedia({ type: 'image', url: imgUrl })}
                         className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden bg-gray-100 border-2 transition-all shrink-0 ${
-                          activeMedia?.url === imgUrl ? 'border-[var(--color-secondary)] scale-95 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
+                          activeMedia?.url === imgUrl && activeMedia?.type === 'image' ? 'border-[var(--color-secondary)] scale-95 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
                         }`}
                       >
                         <img src={imgUrl} alt="" className="w-full h-full object-cover" />
                       </button>
                     ))}
+
+                    {/* ثم عرض الفيديوهات ثانياً */}
+                    {article.videos?.map((vidId, idx) => (
+                      <button
+                        key={`vid-${idx}`}
+                        onClick={() => setActiveMedia({ type: 'youtube', url: vidId })}
+                        className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden bg-gray-900 border-2 transition-all shrink-0 flex items-center justify-center ${
+                          activeMedia?.url === vidId && activeMedia?.type === 'youtube' ? 'border-[var(--color-secondary)] scale-95 shadow-sm' : 'border-transparent opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <img 
+                          src={`https://img.youtube.com/vi/${vidId}/0.jpg`} 
+                          alt="تشغيل الفيديو" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-50" 
+                        />
+                        <div className="relative z-10 bg-red-600 text-white p-1.5 rounded-full shadow-md">
+                          <Play size={16} fill="currentColor" />
+                        </div>
+                      </button>
+                    ))}
+
                   </div>
                 )}
               </div>
@@ -174,7 +219,6 @@ export default function ArticleDetail() {
                 <span>التعليقات ({commentsList.length})</span>
               </h3>
 
-              {/* فورم إضافة تعليق رئيسي */}
               <form onSubmit={handleCommentSubmit} className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <label className="block text-sm font-bold text-gray-700">اترك تعليقاً:</label>
                 <div className="relative">
@@ -195,7 +239,6 @@ export default function ArticleDetail() {
                 </div>
               </form>
 
-              {/* قائمة التعليقات بالردود بتاعتها */}
               <div className="space-y-4">
                 {loadComments ? (
                   <div className="flex justify-center py-4"><Loader2 className="animate-spin text-gray-400" /></div>
