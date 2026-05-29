@@ -1,7 +1,7 @@
 // src/pages/ArticleDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Loader2 } from 'lucide-react';
+import { User, Users, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2 } from 'lucide-react';
 import PopularArticles from '../components/ui/PopularArticles';
 import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
@@ -124,6 +124,25 @@ export default function ArticleDetail() {
                   الساعة {formattedTime}
                 </span>
               </div>
+
+              {/* فريق العمل */}
+              {article.contributors && article.contributors.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    <Users size={14} className="text-[var(--color-primary)]" />
+                    فريق العمل:
+                  </span>
+                  {article.contributors.map((c, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 bg-[var(--color-primary)]/8 text-[var(--color-primary)] text-xs font-semibold px-3 py-1 rounded-full border border-[var(--color-primary)]/20"
+                    >
+                      {c.name}
+                      <span className="text-[10px] font-normal opacity-60 uppercase">{c.role}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 2. معرض الميديا */}

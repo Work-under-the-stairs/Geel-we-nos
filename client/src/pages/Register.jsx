@@ -18,53 +18,48 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    let firebaseUser = null; // نُعرف المتغير خارج الـ try
+
     try {
-      // الخطوة 1: إنشاء الحساب في Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      const firebaseUser = userCredential.user;
+      // 1. إنشاء الحساب في Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      firebaseUser = userCredential.user;
 
-      // الخطوة 2: إرسال الـ UID والبيانات الإضافية إلى الباك إند (MongoDB)
-      // Axios بيرجع الداتا في response.data ومفيش حاجة اسمها response.json()
-      const response = await api.post("/users/register-db", {
-        firebaseUid: firebaseUser.uid,
-        name: formData.name,
-        username: formData.username.toLowerCase().trim(),
-        email: formData.email,
-        avatar: "", 
-      });
-
-      // لو الكود وصل هنا معناه إن الـ Status 200/201 والحساب اتعمل في المونجو
-      toast.success("تم إنشاء الحساب بنجاح! 🎉");
-      navigate("/login");
+      // 2. محاولة الحفظ في MongoDB
+      try {
+        await api.post("/users/register-db", {
+          firebaseUid: firebaseUser.uid,
+          name: formData.name,
+          username: formData.username.toLowerCase().trim(),
+          email: formData.email,
+        });
+        
+        toast.success("تم إنشاء الحساب بنجاح! 🎉");
+        navigate("/login");
+      } catch (dbError) {
+        // إذا فشل الحفظ في MongoDB، نحذف الحساب من Firebase فوراً
+        console.error("MongoDB Save Failed, Rolling back Firebase user...");
+        await firebaseUser.delete(); // حذف المستخدم من Firebase
+        throw dbError; // إعادة رمي الخطأ للـ catch الكبيرة
+      }
 
     } catch (err) {
       console.error(err);
-
-      // 1. معالجة أخطاء الباك إند (لو Axios ضرب Error 409 أو 400 من المونجو)
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
+      
+      // معالجة الأخطاء
+      if (err.response?.data?.message) {
         setError(err.response.data.message);
-        return; // بنوقف الكود عشان ميكملش لأخطاء فايربيز
-      }
-
-      // 2. معالجة أخطاء فايربيز 
-      if (err.code === "auth/email-already-in-use") {
+        toast.error(err.response.data.message);
+      } else if (err.code === "auth/email-already-in-use") {
         setError("البريد الإلكتروني مستخدم بالفعل.");
         toast.error("البريد الإلكتروني مستخدم بالفعل.");
-      } else if (err.code === "auth/weak-password") {
-        setError("كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل.");
-        toast.error("كلمة المرور ضعيفة جداً.");
       } else {
-        setError("حدث خطأ أثناء إنشاء الحساب.");
+        setError("حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة لاحقاً.");
         toast.error("حدث خطأ أثناء إنشاء الحساب.");
       }
     } finally {

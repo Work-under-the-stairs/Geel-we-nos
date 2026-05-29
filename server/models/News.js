@@ -24,6 +24,18 @@ const newsSchema = new mongoose.Schema(
     
     // قائمة الهاشتاجات المضافة للمقال
     hashtags: [{ type: String, trim: true }],
+
+    // فريق العمل: كل شخص بيكون ليه اسم ودور
+    contributors: [
+      {
+        name: { type: String, trim: true, required: true },
+        role: {
+          type: String,
+          enum: ["writer", "photographer", "editor"],
+          default: "writer",
+        },
+      },
+    ],
     
     // حالة المقال: منشور أو مسودة
     status: {

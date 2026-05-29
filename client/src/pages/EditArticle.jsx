@@ -66,6 +66,9 @@ export default function EditArticle() {
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress] = useState(0);
 
+  const [contributors, setContributors] = useState([]);
+  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" });
+
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
@@ -145,6 +148,7 @@ export default function EditArticle() {
     setImportance(articleData.important_rate || 5);
     setIsUrgent(articleData.isUrgent || false);
     setHashtags(articleData.hashtags || []);
+    setContributors(articleData.contributors || []);
 
     if (articleData.images && articleData.images.length > 0) {
       setFeaturedImage({ url: articleData.images[0], fileId: null });
@@ -210,6 +214,7 @@ export default function EditArticle() {
       images: allImages,
       videos: allVideos,
       hashtags: hashtags,
+      contributors: contributors,
       status: targetStatus,
     };
 
@@ -434,6 +439,19 @@ export default function EditArticle() {
     }
   };
 
+  const addContributor = () => {
+    if (!newContributor.name.trim()) {
+      toast.error("يرجى إدخال اسم الشخص");
+      return;
+    }
+    setContributors((prev) => [...prev, newContributor]);
+    setNewContributor({ name: "", role: "writer" });
+  };
+
+  const removeContributor = (index) => {
+    setContributors((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleHashtagKeyDown = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -549,6 +567,46 @@ export default function EditArticle() {
             handleRemoveFeatured={handleRemoveFeatured}
             handleFeaturedImage={handleFeaturedImage}
           />
+
+          {/* قسم فريق العمل */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input
+                placeholder="اسم الشخص"
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
+                value={newContributor.name}
+                onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })}
+              />
+              <select
+                className="p-3 rounded-xl border border-slate-200"
+                value={newContributor.role}
+                onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}
+              >
+                <option value="writer">كاتب (Writer)</option>
+                <option value="photographer">مصور (Photographer)</option>
+                <option value="editor">محرر (Editor)</option>
+              </select>
+              <button
+                onClick={addContributor}
+                className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
+              >
+                + إضافة
+              </button>
+            </div>
+            <div className="space-y-2">
+              {contributors.map((c, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <span className="font-medium text-slate-700">
+                    {c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span>
+                  </span>
+                  <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">
+                    حذف
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <EditorSection
             innerRef={contentRef}
