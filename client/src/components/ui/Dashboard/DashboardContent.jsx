@@ -2,6 +2,7 @@ import React from 'react';
 import { FileText, Eye, Edit, Trash2, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+
 export default function DashboardContent({ 
   recentArticles = [], 
   topViewed = [], 
@@ -10,7 +11,8 @@ export default function DashboardContent({
   isDeletingArticle 
 }) {
   const navigate = useNavigate();
-  // دالة الحذف باستخدام React Hot Toast
+  const fallbackPlaceholder = '/images/image_placeholder.jpg';
+
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex flex-col gap-3" dir="rtl">
@@ -43,7 +45,6 @@ export default function DashboardContent({
     });
   };
 
-  // تحديد حالة المقال
   const getStatusBadge = (status) => {
     const safeStatus = String(status || '').toLowerCase().trim();
     const isDraft = safeStatus === 'draft';
@@ -56,16 +57,14 @@ export default function DashboardContent({
     };
   };
 
-  // 👈 دالة مساعدة لاستخراج اللون كـ Hex Code من كلاس الباك اند
   const extractHexColor = (colorString) => {
-    if (!colorString) return '#cbd5e1'; // رمادي افتراضي
+    if (!colorString) return '#cbd5e1'; 
     const match = colorString.match(/\[(.*?)\]/);
     return match ? match[1] : '#cbd5e1';
   };
 
   const totalArticlesCount = categoryDistribution.reduce((acc, curr) => acc + curr.count, 0);
 
-  // دالة رسم الدايرة الملونة
   const generateConicGradient = () => {
     if (!categoryDistribution || categoryDistribution.length === 0) {
       return 'conic-gradient(#f1f5f9 0% 100%)';
@@ -73,7 +72,7 @@ export default function DashboardContent({
     
     let cumulative = 0;
     const stops = categoryDistribution.map(cat => {
-      const hexColor = extractHexColor(cat.color); // 👈 استخدام الدالة الجديدة
+      const hexColor = extractHexColor(cat.color); 
       const start = cumulative;
       cumulative += cat.percentage;
       return `${hexColor} ${start}% ${cumulative}%`;
@@ -88,11 +87,11 @@ export default function DashboardContent({
 
   return (
     <div className="space-y-6">
-      {/* ================= الصف الأول: آخر المقالات + الأكثر مشاهدة ================= */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         {/* جدول آخر المقالات */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 xl:col-span-2 flex flex-col justify-between shadow-sm">
+        {/* ✅ ضفنا min-w-0 هنا لمنع الـ Flexbox من تشويه عرض الشاشة */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 xl:col-span-2 flex flex-col justify-between shadow-sm min-w-0">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
@@ -100,65 +99,99 @@ export default function DashboardContent({
                 <span>آخر المقالات</span>
               </h3>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-right border-collapse min-w-[600px]">
+            
+            {/* ✅ الحاوية دي هي المسؤولة عن السكرول الأفقي النظيف */}
+            <div className="w-full overflow-x-auto pb-2 custom-scrollbar">
+              {/* ✅ كبرنا الحد الأدنى للعرض لـ 800px عشان مفيش حاجة تضغط التانية */}
+              <table className="w-full text-right border-collapse min-w-[800px]">
                 <thead>
                   <tr className="border-b-2 border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="pb-3 font-semibold">المقال</th>
-                    <th className="pb-3 font-semibold">التصنيف</th>
-                    <th className="pb-3 font-semibold">التاريخ</th>
-                    <th className="pb-3 font-semibold text-center">الحالة</th>
-                    <th className="pb-3 font-semibold text-center">المشاهدات</th>
-                    <th className="pb-3 font-semibold text-left pl-2">العمليات</th>
+                    {/* ✅ whitespace-nowrap بتمنع النص ينزل على سطرين */}
+                    <th className="pb-3 font-semibold whitespace-nowrap">المقال</th>
+                    <th className="pb-3 font-semibold whitespace-nowrap">التصنيف</th>
+                    <th className="pb-3 font-semibold whitespace-nowrap">التاريخ</th>
+                    <th className="pb-3 font-semibold text-center whitespace-nowrap">الحالة</th>
+                    <th className="pb-3 font-semibold text-center whitespace-nowrap">المشاهدات</th>
+                    <th className="pb-3 font-semibold text-left pl-2 whitespace-nowrap">العمليات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-sm">
                   {recentArticles.length > 0 ? recentArticles.map((art, idx) => {
                     const statusBadge = getStatusBadge(art.status);
+                    
+                    const artImg = art.image || art.images?.[0];
+                    let artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
+                    if (artImgUrl?.includes('via.placeholder.com')) artImgUrl = fallbackPlaceholder;
+
+                    const categoryName = typeof art.category === 'object' ? art.category?.name : (art.category || 'عام');
+
+                    let formattedDate = art.date;
+                    if (!formattedDate) {
+                      const rawDate = (art.createdAt && typeof art.createdAt === 'object' && art.createdAt.$date) 
+                        ? art.createdAt.$date 
+                        : art.createdAt;
+                      formattedDate = rawDate ? new Date(rawDate).toLocaleString('ar-EG', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit', hour12: true
+                      }) : 'تاريخ غير محدد';
+                    }
+
+                    const articleId = art.id || art._id;
 
                     return (
-                      <tr key={idx} className="hover:bg-slate-50/80 transition-colors group">
+                      <tr key={articleId || idx} className="hover:bg-slate-50/80 transition-colors group">
                         <td className="py-4">
                           <div className="flex items-center gap-3">
-                            <img src={art.image} alt={art.title} className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100" />
+                            <img 
+                              src={artImgUrl || fallbackPlaceholder} 
+                              alt={art.title} 
+                              className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100 bg-slate-50" 
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = fallbackPlaceholder;
+                              }}
+                            />
                             <div className="min-w-0">
-                              <h3 className="font-semibold text-slate-800 truncate max-w-[220px] group-hover:text-primary transition-colors">{art.title}</h3>
-                              <p className="text-[11px] text-slate-400 mt-1 font-medium">بواسطة الإدارة</p>
+                              <h3 className="font-semibold text-slate-800 truncate max-w-[200px] md:max-w-[250px] group-hover:text-[var(--color-primary)] transition-colors" title={art.title}>
+                                {art.title}
+                              </h3>
+                              <p className="text-[11px] text-slate-400 mt-1 font-medium whitespace-nowrap">
+                                بواسطة {art.writer?.name || 'الإدارة'}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="py-4">
-                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-medium">
-                            {art.category}
+                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
+                            {categoryName}
                           </span>
                         </td>
-                        <td className="py-4 text-slate-500 text-xs font-medium">{art.date}</td>
+                        <td className="py-4 text-slate-500 text-xs font-medium whitespace-nowrap" dir="ltr">{formattedDate}</td>
                         <td className="py-4 text-center">
-                          <span className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${statusBadge.colorClass}`}>
+                          <span className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap ${statusBadge.colorClass}`}>
                             {statusBadge.text}
                           </span>
                         </td>
-                        <td className="py-4 font-bold text-slate-700 text-xs text-center">{art.views}</td>
+                        <td className="py-4 font-bold text-slate-700 text-xs text-center whitespace-nowrap">{art.views || 0}</td>
                         <td className="py-4 text-left pl-2">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button onClick={()=>navigate(`/news/${art.id}`)} className="p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors" title="عرض">
-                              <Eye size={16} />
+                          <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                            <button onClick={() => navigate(`/news/${articleId}`)} className="p-2 text-slate-400 hover:text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" title="عرض">
+                              <Eye size={18} />
                             </button>
-                             <button
-                            onClick={() => {
-                              navigate(`/edit/article/${art.id}`);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100"
-                          >
-                            <Edit size={14} />
-                          </button>
+                            <button
+                              onClick={() => navigate(`/edit/article/${articleId}`)}
+                              className="p-2 text-slate-400 hover:text-blue-600 bg-transparent hover:bg-blue-50 rounded-lg transition-all"
+                              title="تعديل"
+                            >
+                              <Edit size={18} />
+                            </button>
                             <button 
-                              onClick={() => handleDelete(art.id)}
+                              onClick={() => handleDelete(articleId)}
                               disabled={isDeletingArticle}
-                              className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors cursor-pointer"
+                              className="p-2 text-slate-400 hover:text-red-600 bg-transparent hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
                               title="حذف"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </td>
@@ -176,7 +209,7 @@ export default function DashboardContent({
         </div>
 
         {/* الأكثر مشاهدة */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col shadow-sm min-w-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
               <TrendingUp size={18} className="text-[var(--color-secondary)]" />
@@ -184,18 +217,38 @@ export default function DashboardContent({
             </h3>
           </div>
           <div className="space-y-3 flex-1">
-            {topViewed.length > 0 ? topViewed.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group cursor-pointer">
-                <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 shadow-sm ${idx === 0 ? "bg-red-50 text-red-600 border border-red-100" : idx === 1 ? "bg-orange-50 text-orange-600 border border-orange-100" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
-                  {item.rank}
-                </span>
-                <img src={item.image} alt={item.title} className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[var(--color-secondary)] transition-colors">{item.title}</p>
-                  <span className="text-[11px] text-slate-400 font-semibold">{item.views} مشاهدة</span>
+            {topViewed.length > 0 ? topViewed.map((item, idx) => {
+              const itemViewedImg = item.image || item.images?.[0];
+              let itemViewedImgUrl = typeof itemViewedImg === 'object' ? itemViewedImg?.url : itemViewedImg;
+              if (itemViewedImgUrl?.includes('via.placeholder.com')) itemViewedImgUrl = fallbackPlaceholder;
+
+              const itemId = item.id;
+
+              return (
+                <div 
+                  key={itemId || idx} 
+                  onClick={() => itemId && navigate(`/news/${itemId}`)}
+                  className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group cursor-pointer"
+                >
+                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 shadow-sm ${idx === 0 ? "bg-red-50 text-red-600 border border-red-100" : idx === 1 ? "bg-orange-50 text-orange-600 border border-orange-100" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
+                    {item.rank || (idx + 1)}
+                  </span>
+                  <img 
+                    src={itemViewedImgUrl || fallbackPlaceholder} 
+                    alt={item.title} 
+                    className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm bg-slate-50" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = fallbackPlaceholder;
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[var(--color-secondary)] transition-colors">{item.title}</p>
+                    <span className="text-[11px] text-slate-400 font-semibold">{item.views || 0} مشاهدة</span>
+                  </div>
                 </div>
-              </div>
-            )) : (
+              );
+            }) : (
               <div className="text-sm text-slate-400 text-center py-10">لا توجد بيانات للمشاهدات.</div>
             )}
           </div>
@@ -211,7 +264,6 @@ export default function DashboardContent({
         
         <div className="flex flex-col md:flex-row-reverse items-center gap-10">
           
-          {/* الدائرة الملونة */}
           <div 
             className="relative w-36 h-36 flex items-center justify-center shrink-0 rounded-full shadow-inner"
             style={{ background: generateConicGradient() }}
@@ -223,17 +275,15 @@ export default function DashboardContent({
             </div>
           </div>
 
-          {/* البارات والأقسام */}
           <div className="flex-1 w-full space-y-5">
             {categoryDistribution.length > 0 ? (
               categoryDistribution.map((cat, idx) => {
-                const hexColor = extractHexColor(cat.color); // 👈 استخراج اللون لكل قسم
+                const hexColor = extractHexColor(cat.color); 
 
                 return (
-                  <div key={idx}>
+                  <div key={cat._id || idx}>
                     <div className="flex items-center justify-between text-sm mb-2">
                       <div className="flex items-center gap-2">
-                        {/* 👈 تم تطبيق اللون هنا */}
                         <span 
                           className="w-3 h-3 rounded-full shadow-sm" 
                           style={{ backgroundColor: hexColor }}
@@ -244,9 +294,7 @@ export default function DashboardContent({
                         {cat.percentage}% <span className="text-slate-400 text-xs font-normal">({cat.count} مقال)</span>
                       </span>
                     </div>
-                    {/* البار الخلفي */}
                     <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                      {/* 👈 تم تطبيق اللون هنا للبار الأمامي الملون */}
                       <div 
                         className="h-full rounded-full transition-all duration-1000" 
                         style={{ width: `${cat.percentage}%`, backgroundColor: hexColor }}

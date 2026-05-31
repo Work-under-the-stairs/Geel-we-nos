@@ -230,13 +230,14 @@ exports.getDashboardSummary = async (req, res) => {
         .sort("-createdAt")
         .limit(5)
         .populate("category", "name")
-        .select("title images category views createdAt status"),
+        .populate("writer", "name")
+        .select("title images category views createdAt status writer"),
         
       // جلب أكثر 5 أخبار مشاهدة
       News.find()
         .sort("-views")
         .limit(5)
-        .select("title images views")
+        .select("title images views ")
     ]);
 
     // حساب المقالات اللي اتضافت النهاردة
@@ -291,12 +292,15 @@ exports.getDashboardSummary = async (req, res) => {
           title: news.title,
           image: (news.images && news.images.length > 0) ? news.images[0] : "https://via.placeholder.com/150",
           category: news.category ? news.category.name : "غير مصنف", 
+          writer: news.writer,
+          createdAt: news.createdAt,
           date: new Date(news.createdAt).toLocaleDateString('ar-EG'),
-          status: news.status, // 👈 الحالة بتتبعت هنا بشكل سليم عشان التلوين في الفرونت
+          status: news.status,
           views: news.views || 0,
           statusColor: "bg-green-50 text-green-600"
         })),
         topViewed: topViewedNews.map((news, i) => ({
+          id: news._id,
           rank: i + 1,
           title: news.title,
           views: news.views || 0,

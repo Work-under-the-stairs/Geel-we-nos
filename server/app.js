@@ -34,17 +34,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── MONGODB CONNECTION ───────────────────────────────────────────
-let isConnected = false;
+// تم تعديل هذا الجزء لحفظ الـ Promise لمنع محاولات الاتصال المتكررة في نفس المايكروثانية
+let databasePromise = null;
 
 const connectDB = async () => {
-  if (isConnected) return;
-  try {
-    const db = await mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: false, 
+  // 1. إذا كان الاتصال قائماً بالفعل، اخرج فوراً
+  if (mongoose.connection.readyState === 1) return;
+
+  // 2. إذا كان هناك اتصال قيد التنفيذ الآن، انتظر نفس الوعد ولا تفتح اتصالاً جديداً
+  if (!databasePromise) {
+    databasePromise = mongoose.connect(process.env.MONGO_URI, {
+      bufferCommands: true, // تفعيلها يحمي الاستعلامات المتزامنة من السقوط الفوري
     });
-    isConnected = db.connections[0].readyState;
+  }
+
+  try {
+    await databasePromise;
     console.log("✅ MongoDB Connected");
   } catch (err) {
+    databasePromise = null; // إعادة التعيين في حالة الفشل لكي يحاول مجدداً مع الطلب القادم
     console.error("❌ MongoDB Error:", err);
     throw err;
   }
@@ -59,7 +67,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// ─── 💡 تَعريف الدالة المفقودة هنا (تأكدي من وجود هذا الجزء) ──────────────
+// ─── IMAGEKIT INSTANCE FUNCTION ──────────────────────────────────
 const getExpressImageKitInstance = () => {
   if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
     throw new Error("Missing ImageKit Environment Variables!");
@@ -93,6 +101,7 @@ app.get("/api/imagekit/auth", (req, res) => {
     res.status(500).json({ message: "ImageKit auth failed" });
   }
 });
+
 // ─── IMAGEKIT DELETE ROUTE ────────────────────────────────────────
 app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
   const { fileId } = req.params;
@@ -108,10 +117,10 @@ app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
       return res.status(500).json({ message: "المفتاح السري لـ ImageKit مفقود" });
     }
 
-    // تشفير الـ Private Key باستخدام Base64 كما يطلب الـ API الرسمي لـ ImageKit
+    // تشفير الـ Private Key باستخدام Base64
     const authToken = Buffer.from(privateKey + ":").toString("base64");
 
-    // إرسال طلب حذف مباشر لخوادم ImageKit بدون استخدام الـ SDK المخادع
+    // ✅ تم تصحيح الرابط المباشر هنا وحذف localhost:5000 الخطأ
     const response = await fetch(`https://api.imagekit.io/v1/files/${fileId}`, {
       method: "DELETE",
       headers: {
@@ -119,13 +128,11 @@ app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
       },
     });
 
-    // إذا كان الرد ناجحاً (كود 204 يعبر عن الحذف الناجح في ImageKit)
     if (response.status === 204 || response.ok) {
       console.log(`✅ ImageKit Direct Delete Success for file: ${fileId}`);
       return res.json({ success: true, message: "تم حذف الملف بنجاح" });
     }
 
-    // إذا أرجعت خوادم ImageKit خطأ معين
     const errorData = await response.json().catch(() => ({}));
     console.error("❌ ImageKit API responded with error:", errorData);
     
@@ -142,6 +149,7 @@ app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
     });
   }
 });
+
 // ─── ROUTES & ERROR HANDLER ───────────────────────────────────────
 app.use("/api/news",       require("./routes/news"));
 app.use("/api/users",      require("./routes/users"));

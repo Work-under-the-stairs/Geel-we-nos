@@ -5,7 +5,6 @@ import { formatDate } from '../../../utils/dateFormatter'
 export default function CategoriesGrid({ articles = {} }) {
   
   // الاستخراج المباشر والذكي للأخبار من الأوبجكت المبعوث من الباك إند
-  // الـ articles[categoryName]?.articles بتضمن لو الاسم مش مطابق بالظبط ترجع مصفوفة فاضية بدل ما تضرب
   const techArticles    = articles['تكنولوجيا ومهارات']?.articles || [];
   const economyArticles = articles['اقتصاد']?.articles || [];
   const healthArticles  = articles['صحة']?.articles || [];
@@ -26,6 +25,10 @@ export default function CategoriesGrid({ articles = {} }) {
           // جلب المقالين الثاني والثالث للـ List السفلية
           const subPosts = sec.data.slice(1, 3)
 
+          // ✅ استخراج الرابط بشكل آمن (يدعم الأوبجكت الجديد والاسترينج القديم)
+          const mainPostImg = mainPost?.images?.[0];
+          const mainPostImgUrl = typeof mainPostImg === 'object' ? mainPostImg?.url : mainPostImg;
+
           return (
             <div key={idx} className="flex flex-col gap-5">
               {/* Column Category Header */}
@@ -40,16 +43,19 @@ export default function CategoriesGrid({ articles = {} }) {
                 <Link to={`/news/${mainPost._id}`} className="group block flex-shrink-0 cursor-pointer">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-50 shadow-sm mb-3">
                     <img
-                      src={mainPost.images?.[0]}
+                      // ✅ تم التعديل هنا لقراءة الـ URL المتقشر وجاهز
+                      src={mainPostImgUrl || "/default-news.png"}
                       alt={mainPost.title}
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
-                      onError={(e) => { e.target.src = "/default-news.png"; }} // حماية ضد الـ 404
+                      onError={(e) => { 
+                        e.target.src = "/default-news.png"; 
+                        e.target.onerror = null; // منع اللوب اللانهائي لو الصورة البديلة مش موجودة
+                      }} 
                     />
                   </div>
                   <h4 className="text-primary font-extrabold text-[16px] leading-snug group-hover:text-secondary transition-colors line-clamp-2">
                     {mainPost.title}
                   </h4>
-                  {/* تأمين قراءة التاريخ من الحقل الجديد المعتمد */}
                   <p className="text-slate-400 text-xs font-medium mt-1.5">
                     {formatDate(mainPost.createdAt || mainPost.date)}
                   </p>

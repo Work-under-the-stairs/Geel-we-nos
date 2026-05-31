@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { auth } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Mail, Lock, LogIn, Loader2 } from "lucide-react";
 import api from "../services/api";
@@ -12,7 +12,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,7 +27,6 @@ export default function Login() {
       const idToken = await user.getIdToken();
 
       // 2. جلب بيانات المستخدم من MongoDB
-      // نرسل التوكين في الهيدر ليتمكن السيرفر من التحقق من هويتك
       const response = await api.get(`/users/me/${user.uid}`, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
@@ -41,7 +39,10 @@ export default function Login() {
         localStorage.setItem("token", idToken);
         
         toast.success(`مرحباً بك مجدداً يا ${userData.name} 👋`);
-        navigate("/"); 
+
+        setTimeout(() => {
+          window.location.replace("/");
+        }, 500);
       }
     } catch (err) {
       console.error(err);
@@ -59,7 +60,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 font-['Cairo']" dir="rtl">
-      {/* الخلفية الإبداعية */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       <div className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-[var(--color-primary)] opacity-[0.15] blur-[120px] rounded-full pointer-events-none animate-pulse duration-1000"></div>
       <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-[var(--color-secondary)] opacity-[0.15] blur-[100px] rounded-full pointer-events-none animate-pulse duration-1000 delay-500"></div>

@@ -1,17 +1,20 @@
-// src/components/PopularArticles.jsx
+// src/components/ui/PopularArticles.jsx
 import React, { useState } from 'react';
 
 export default function PopularArticles({ articles }) {
   // نقل حالة التتبع (hover) لداخل المكون ليكون مستقل بذاته
   const [hoveredArticleId, setHoveredArticleId] = useState(null);
 
-  // 🌟 خطوة الأمان السحرية: استخراج المصفوفة الصافية مهما كان شكل تغليف الداتا من الباك إند
+  // 🌟 خطوة الأمان السحرية: استخراج مصفوفة الأخبار الصافية مهما كان شكل تغليف الداتا من الباك إند
   const popularList = Array.isArray(articles) 
     ? articles 
     : (articles?.data || articles?.docs || []);
 
-  // لو لسه مفيش داتا أو المصفوفة فاضية، الكومبونانت بينسحب بهدوء بدون كراش
+  // لو لسه مفيش داتا أو مصفوفة الأخبار فاضية، الكومبونانت بينسحب بهدوء بدون كراش
   if (popularList.length === 0) return null;
+
+  // تعريف الـ SVG الافتراضي في متغير موحد منعا للتكرار في الكود
+  const fallbackSvg = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E";
 
   return (
     <div className="sticky top-32 bg-gray-50/60 rounded-2xl p-6 border border-gray-100/80 text-right" dir="rtl">
@@ -25,28 +28,30 @@ export default function PopularArticles({ articles }) {
           const articleId = article._id || article.id;
           const isHovered = hoveredArticleId === articleId;
 
+          // ✅ خط الدفاع المشترك: استخراج رابط الصورة بأمان تام (سواء أوبجكت الباك إند الجديد أو النص القديم)
+          const artImg = article.images?.[0] || article.image;
+          const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
+
           // 1. الخبر الأول يظهر دائماً بصورته مسبقاً كما هو
           if (isFirst) {
             return (
               <a href={`/news/${articleId}`} key={articleId} className="group block space-y-3 border-b border-gray-200/60 pb-5">
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100">
-                <img 
-                  src={article.images?.[0] || article.image || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E"} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    // استبدال أي صورة تالفة بالأيقونة البرمجية
-                    e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E";
-                    
-                    // تعديل التنسيق لضبط مظهر الأيقونة بدلاً من الصورة المكسورة
-                    e.target.style.objectFit = "contain";
-                    e.target.style.padding = "25%";
-                    e.target.style.backgroundColor = "#f1f5f9"; // لون bg-slate-100
-                    
-                    // منع حدوث حلقة تكرار (Infinite Loop)
-                    e.target.onerror = null;
-                  }}
-                />
+                  <img 
+                    // ✅ تم التعديل لقراءة الرابط المستخرج
+                    src={artImgUrl || fallbackSvg} 
+                    alt={article.title} 
+                    className="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.onerror = null; // منع حدوث حلقة تكرار (Infinite Loop)
+                      e.target.src = fallbackSvg; 
+                      
+                      // تعديل التنسيق لضبط مظهر الأيقونة بدلاً من الصورة المكسورة
+                      e.target.style.objectFit = "contain";
+                      e.target.style.padding = "25%";
+                      e.target.style.backgroundColor = "#f1f5f9"; // لون bg-slate-100
+                    }}
+                  />
                   <span className="absolute top-2 right-2 bg-[var(--color-primary)] text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg shadow-sm">
                     1
                   </span>
@@ -56,7 +61,7 @@ export default function PopularArticles({ articles }) {
                 </h4>
                 <div className="flex items-center gap-2 mt-2 text-[11px] text-gray-400">
                   <span className="font-semibold text-gray-600">
-                    {article.writer?.name ||  'جيل ونص'}
+                    {article.writer?.name || 'جيل ونص'}
                   </span>
                   <span>•</span>
                   <span>{article.views || article.viewsCount || 0} مشاهدة</span>
@@ -102,23 +107,21 @@ export default function PopularArticles({ articles }) {
                 }`}
               >
                 <div className="overflow-hidden rounded-xl aspect-[16/9] w-full bg-gray-100 shadow-inner">
-                <img 
-                  src={article.images?.[0] || article.image || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E"} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    // 1. استبدال المصدر بأيقونة SVG نظيفة
-                    e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E";
-                    
-                    // 2. تعديل التنسيق لضمان أن الأيقونة تظهر في المنتصف ولا تظهر "ممطوطة"
-                    e.target.style.objectFit = "contain";
-                    e.target.style.padding = "25%";
-                    e.target.style.backgroundColor = "rgba(241, 245, 249, 1)"; // لون bg-slate-100
-                    
-                    // 3. منع تكرار الخطأ
-                    e.target.onerror = null;
-                  }}
-                />
+                  <img 
+                    // ✅ تم التعديل لقراءة الرابط المستخرج هنا أيضاً
+                    src={artImgUrl || fallbackSvg} 
+                    alt={article.title} 
+                    className="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.onerror = null; // منع تكرار الخطأ
+                      e.target.src = fallbackSvg;
+                      
+                      // تعديل التنسيق لضمان أن الأيقونة تظهر في المنتصف ولا تظهر "ممطوطة"
+                      e.target.style.objectFit = "contain";
+                      e.target.style.padding = "25%";
+                      e.target.style.backgroundColor = "rgba(241, 245, 249, 1)"; // لون bg-slate-100
+                    }}
+                  />
                 </div>
               </div>
             </div>

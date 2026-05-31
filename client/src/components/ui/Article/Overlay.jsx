@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Bold, Italic, Underline, Heading1, Heading2,
   List, ListOrdered, Quote, Image as ImageIcon, Video, X, Trash2,
   Upload, Flame, Loader2, Save, ChevronLeft,
-  AlignRight, AlignCenter, AlignLeft, Check // ← تم تجميع الـ Check هنا بالأعلى بشكل صحيح
+  AlignRight, AlignCenter, AlignLeft, Check,
+  Link, LinkIcon
 } from "lucide-react";
 import { EditorContent } from "@tiptap/react";
+import toast from "react-hot-toast";
 
 // =============================================================
 // UPLOAD PROGRESS OVERLAY
@@ -167,7 +169,6 @@ export function BasicInfoSection({
         <label className="block mb-2 text-sm font-bold text-slate-700">الهاشتاجات</label>
         <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
           {hashtags.map((tag, i) => (
-            /* الهاشتاجات تعتمد على الـ Secondary البرتقالي */
             <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
               <span>{tag}</span>
               <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
@@ -204,7 +205,6 @@ export function BasicInfoSection({
               <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-[var(--color-primary,#0D4C54)] mb-3">
                 <Upload size={30} />
               </div>
-              {/* زر رفع الصورة يعتمد على الـ Primary البترولي */}
               <label className="h-11 px-5 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white flex items-center gap-2 cursor-pointer text-sm font-medium hover:opacity-90 transition">
                 <Upload size={16} /> رفع صورة
                 <input type="file" hidden accept="image/*" onChange={handleFeaturedImage} />
@@ -224,11 +224,32 @@ export function EditorSection({
   innerRef, editorUploading, editorProgress, editorUploadLabel, editor,
   addImageToEditor, addVideoToEditor
 }) {
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+
+  const handleSaveLink = () => {
+    if (linkUrl.trim() === "") {
+      toast.error("يرجى إدخال رابط صحيح");
+      return;
+    }
+    
+    editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
+    toast.success("تم إضافة الرابط بنجاح");
+    
+    setShowLinkInput(false);
+    setLinkUrl("");
+  };
+
+  const handleRemoveLink = () => {
+    editor.chain().focus().unsetLink().run();
+    toast.success("تم إزالة الرابط");
+  };
+
   return (
     <div ref={innerRef} className="bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm scroll-mt-24 relative">
       {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
 
-      <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50">
+      <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50 relative">
         <ToolbarButton active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}>
           <Bold size={17} />
         </ToolbarButton>
@@ -258,9 +279,57 @@ export function EditorSection({
           <Video size={17} />
           <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
         </label>
+
+        <ToolbarButton 
+          active={editor?.isActive("link")} 
+          onClick={() => {
+            if (!editor) return;
+            if (editor.isActive("link")) {
+              handleRemoveLink();
+            } else {
+              setShowLinkInput(!showLinkInput);
+            }
+          }}
+        >
+          <LinkIcon size={17} />
+        </ToolbarButton>
       </div>
 
-      <EditorContent editor={editor} />
+      {showLinkInput && (
+        <div className="bg-slate-100 p-3 flex gap-2 border-b border-slate-200 transition-all">
+          <input
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            placeholder="أدخل رابطاً (مثال: https://example.com)"
+            dir="ltr"
+            className="flex-1 h-10 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary,#0D4C54)] text-sm text-left"
+          />
+          <button 
+            onClick={handleSaveLink}
+            className="h-10 px-5 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white text-sm font-bold hover:opacity-90 transition"
+          >
+            إضافة
+          </button>
+          <button 
+            onClick={() => setShowLinkInput(false)}
+            className="h-10 px-5 rounded-xl bg-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-300 transition"
+          >
+            إلغاء
+          </button>
+        </div>
+      )}
+
+      <div className="p-4 sm:p-6 min-h-[300px]">
+        <EditorContent 
+          editor={editor} 
+          className="outline-none prose max-w-none text-slate-800
+            [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-blue-800 [&_a]:cursor-pointer
+            [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-200 [&_img]:shadow-sm [&_img]:mx-auto
+            [&_figure]:mx-auto [&_figure]:text-center [&_figure]:my-6
+            [&_figcaption]:text-sm [&_figcaption]:text-slate-500 [&_figcaption]:mt-2 [&_figcaption]:italic [&_figcaption]:outline-none"
+        />
+      </div>
     </div>
   );
 }
@@ -274,7 +343,6 @@ export function MediaSection({
 }) {
   return (
     <div ref={innerRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4 scroll-mt-24">
-      {/* قسم الفيديو يعتمد على الـ Primary البترولي */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
         <h3 className="text-lg font-black mb-3 text-slate-800">إضافة فيديو خارجي</h3>
         <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50">
@@ -301,7 +369,6 @@ export function MediaSection({
         </div>
       </div>
 
-      {/* قسم معرض الصور يعتمد على الـ Secondary البرتقالي */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
         <h3 className="text-lg font-black mb-3 text-slate-800">معرض صور إضافية</h3>
         <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50">
@@ -340,7 +407,6 @@ export function ImportanceSection({ innerRef, importance, setImportance, isUrgen
     <div ref={innerRef} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm scroll-mt-24">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-black text-slate-800">أهمية المقال وتثبيته</h2>
-        {/* شارة التقييم تعتمد على الـ Secondary البرتقالي */}
         <div className="h-12 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center justify-center font-bold">
           {importance} / 10
         </div>
@@ -354,7 +420,6 @@ export function ImportanceSection({ innerRef, importance, setImportance, isUrgen
         className="w-full accent-[var(--color-secondary,#FF5A00)]"
       />
 
-      {/* حقل التثبيت كخبر عاجل يعتمد على درجات الـ Secondary */}
       <label className="mt-4 flex items-center justify-between rounded-xl bg-[var(--color-secondary,#FF5A00)]/5 p-4 cursor-pointer border border-[var(--color-secondary,#FF5A00)]/20">
         <div className="flex items-center gap-3">
           <Flame size={20} className="text-[var(--color-secondary,#FF5A00)]" />
@@ -395,7 +460,6 @@ export function ActionButtonsSection({ innerRef, handleSubmitArticle, handleCanc
           إلغاء المقال بالكامل
         </button>
       </div>
-      {/* زر النشر الرئيسي يعتمد على الـ Secondary البرتقالي المتوهج للنشر */}
       <button
         type="button"
         onClick={() => handleSubmitArticle("published")}
