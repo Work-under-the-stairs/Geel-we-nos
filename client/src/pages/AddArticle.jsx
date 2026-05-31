@@ -95,7 +95,7 @@ export default function AddArticle() {
   const [editorUploading, setEditorUploading] = useState(false);
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress] = useState(0);
-
+const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
   const [contributors, setContributors] = useState([]); 
   const [newContributor, setNewContributor] = useState({ name: "", role: "photographer" }); 
 

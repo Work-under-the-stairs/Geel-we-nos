@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 const stories = [
@@ -285,6 +288,18 @@ const StoryCard = ({ story, onClick, index }) => (
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function CrossMediaPage() {
+  // داخل المكون (قبل جملة الـ return):
+const [searchParams] = useSearchParams();
+const storyIdFromUrl = searchParams.get("storyId");
+
+useEffect(() => {
+  if (storyIdFromUrl) {
+    const story = stories.find(s => s.id == storyIdFromUrl);
+    if (story) {
+      setSelectedStory(story);
+    }
+  }
+}, [storyIdFromUrl]);
   const [selectedStory, setSelectedStory] = useState(null);
   const [filter, setFilter] = useState("all");
 

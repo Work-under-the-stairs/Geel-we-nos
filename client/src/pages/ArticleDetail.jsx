@@ -6,8 +6,9 @@ import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
-import StoryModal from '../components/StoryModal'; 
-import { stories } from "../data/stories";
+//import StoryModal from '../components/StoryModal'; 
+//import { stories } from "../data/stories";
+import { useNavigate } from "react-router-dom";
 import { 
   useArticle, 
   useComments, 
@@ -32,10 +33,11 @@ export default function ArticleDetail() {
   const { data: commentsData, isLoading: loadComments } = useComments(id);
   const { data: popularArticlesData } = useTrending(5);
   const { mutate: submitComment, isPending: isCommenting } = useAddComment(id);
+  const navigate = useNavigate();
 
   const [activeMedia, setActiveMedia] = useState(null);
   const [newComment, setNewComment] = useState("");
-  const [selectedStory, setSelectedStory] = useState(null);
+  //const [selectedStory, setSelectedStory] = useState(null);
 
   const handleMediaSelect = (mediaObj) => {
     if (activeMedia?.url === mediaObj.url && activeMedia?.id === mediaObj.id) return;
@@ -286,10 +288,7 @@ export default function ArticleDetail() {
     <h3 className="text-2xl font-black mb-3">هل تريد معرفة المزيد؟</h3>
     <p className="text-red-100 mb-6 font-medium opacity-90">هذا الخبر مرتبط بقصة تفاعلية بصرية، اضغط هنا للمشاهدة.</p>
     <button 
-      onClick={() => {
-        const story = stories.find(s => s.id == article.crossMediaId);
-        setSelectedStory(story);
-      }}
+      onClick={() => navigate(`/cross-media?storyId=${article.crossMediaId}`)}
       className="bg-white text-red-600 px-10 py-4 rounded-full font-black text-lg hover:bg-slate-50 transition-all shadow-md"
     >
       اضغط هنا لمعرفة المزيد
@@ -299,11 +298,7 @@ export default function ArticleDetail() {
 {/* --- نهاية كود الربط التفاعلي --- */}
 
 {/* إضافة المودال في نهاية الملف */}
-<StoryModal 
-  isOpen={!!selectedStory} 
-  onClose={() => setSelectedStory(null)} 
-  story={selectedStory} 
-/>
+ 
 
             {article.hashtags && article.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
