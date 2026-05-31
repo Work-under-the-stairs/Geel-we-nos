@@ -68,7 +68,7 @@ export default function Category() {
         return;
       }
     }
-    navigate(`/article/${article._id}`);
+    navigate(`/news/${article._id}`);
   };
 
   if (isCatLoading || !currentCategory) {
