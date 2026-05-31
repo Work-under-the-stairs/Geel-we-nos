@@ -133,14 +133,10 @@ export default function EditArticle() {
   const [editorProgress, setEditorProgress] = useState(0);
 
   const [contributors, setContributors] = useState([]);
-  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" });
+  const [newContributor, setNewContributor] = useState({ name: "", role: "photographer" });
 
   const [youtubeLinks, setYoutubeLinks] = useState([]);
   const [youtubeInput, setYoutubeInput] = useState("");
-
-  // قوائم طاقم العمل (مطابقة لـ AddArticle)
-  const [writers, setWriters] = useState([]);
-  const [photographers, setPhotographers] = useState([]);
 
   // حالات مودال الكابشن للصور داخل المحرر
   const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
@@ -387,7 +383,7 @@ export default function EditArticle() {
     setYoutubeLinks([]);
     setYoutubeInput("");
     setContributors([]);
-    setNewContributor({ name: "", role: "writer" });
+    setNewContributor({ name: "", role: "photographer" });
     editor?.commands.setContent("");
   };
 
@@ -587,7 +583,7 @@ export default function EditArticle() {
       return;
     }
     setContributors((prev) => [...prev, newContributor]);
-    setNewContributor({ name: "", role: "writer" });
+    setNewContributor({ name: "", role: "Editor" });
   };
 
   const removeContributor = (index) => {
@@ -742,10 +738,6 @@ export default function EditArticle() {
             featuredImage={featuredImage}
             handleRemoveFeatured={handleRemoveFeatured}
             handleFeaturedImage={handleFeaturedImage}
-            writers={writers}
-            setWriters={setWriters}
-            photographers={photographers}
-            setPhotographers={setPhotographers}
           />
 
           {/* القسم الثاني: فريق العمل المساهم */}
@@ -766,7 +758,6 @@ export default function EditArticle() {
                 value={newContributor.role}
                 onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}
               >
-                <option value="writer">كاتب (Writer)</option>
                 <option value="photographer">مصور (Photographer)</option>
                 <option value="editor">محرر (Editor)</option>
               </select>

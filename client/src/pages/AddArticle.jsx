@@ -78,10 +78,6 @@ export default function AddArticle() {
   const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
 
-  // قوائم طاقم العمل العامة للمقال ككل
-  const [writers, setWriters] = useState([]);
-  const [photographers, setPhotographers] = useState([]);
-
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
   const [featuredProgress, setFeaturedProgress] = useState(0);
@@ -100,7 +96,7 @@ export default function AddArticle() {
   const [editorProgress, setEditorProgress] = useState(0);
 
   const [contributors, setContributors] = useState([]); 
-  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" }); 
+  const [newContributor, setNewContributor] = useState({ name: "", role: "photographer" }); 
 
   // --- حالات وروابط يوتيوب الجديدة ---
   const [youtubeLinks, setYoutubeLinks] = useState([]); // سيحفظ { id: "...", url: "..." }
@@ -142,7 +138,7 @@ export default function AddArticle() {
       return;
     }
     setContributors((prev) => [...prev, newContributor]);
-    setNewContributor({ name: "", role: "writer" }); 
+    setNewContributor({ name: "", role: "photographer" }); 
   };
 
   const removeContributor = (index) => {
@@ -238,8 +234,6 @@ export default function AddArticle() {
       videos: allVideos,
       youtube_videos: youtubeIdsArray, 
       hashtags: hashtags,
-      writers: writers,
-      photographers: photographers,
       contributors: contributors, 
       status: targetStatus,
     };
@@ -261,8 +255,6 @@ export default function AddArticle() {
     setFeaturedImage(null);
     setVideoPreview(null);
     setGallery([]);
-    setWriters([]);
-    setPhotographers([]);
     setEditorMediaList([]);
     setTitle("");
     setCategory("");
@@ -556,8 +548,6 @@ export default function AddArticle() {
             hashtagInput={hashtagInput} setHashtagInput={setHashtagInput} handleHashtagKeyDown={handleHashtagKeyDown}
             removeHashtag={removeHashtag} featuredUploading={featuredUploading} featuredProgress={featuredProgress}
             featuredImage={featuredImage} handleRemoveFeatured={handleRemoveFeatured} handleFeaturedImage={handleFeaturedImage}
-            writers={writers} setWriters={setWriters}                         
-            photographers={photographers} setPhotographers={setPhotographers} 
           />
 
           {/* قسم فريق العمل */}
@@ -576,7 +566,7 @@ export default function AddArticle() {
                 value={newContributor.role}
                 onChange={(e) => setNewContributor({...newContributor, role: e.target.value})}
               >
-                <option value="writer">كاتب (Writer)</option>
+
                 <option value="photographer">مصور (Photographer)</option>
                 <option value="editor">محرر (Editor)</option>
               </select>
