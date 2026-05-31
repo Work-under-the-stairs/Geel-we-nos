@@ -22,14 +22,6 @@
     --color-main-text: #111827;
 }
 
-/* Dark Mode Variant Configuration */
-/* @variant dark (&:where(.dark, .dark *)); */
-
-/* @theme dark {
-    --color-main-bg: #111827;
-    --color-main-text: white;
-    --color-main-text: white;
-} */
 
 /* Global Styles */
 body {
@@ -70,16 +62,9 @@ body {
 }
 
 .article-content p {
-  margin-bottom: 1.5rem; /* مسافات بين الفقرات */
+  margin-bottom: 1.5rem;
 }
 
-
-/* 
-  اصطياد كل حالات الصور الفاضية أو البايظة:
-  1. img:not([src]) -> مفيش src أصلاً (حالة images[0] لما تكون undefined)
-  2. img[src=""] -> السورس فاضي
-  3. img[src="undefined"] / img[src="null"] -> السورس اتبعت كنص غلط
-*/
 img:not([src]),
 img[src=""],
 img[src="undefined"],
@@ -92,4 +77,8 @@ img[src="null"] {
   padding: 1.5rem !important;
   object-fit: contain !important; 
   border: 1px solid #e2e8f0 !important;
+}
+
+html {
+  scroll-behavior: smooth;
 }

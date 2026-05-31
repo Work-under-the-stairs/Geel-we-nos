@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '../firebase'; // Make sure the path to your firebase.js is correct
+import { auth } from '../firebase'; // تأكدي من مسار ملف الـ firebase
 import { logout } from '../utils/auth';
 
 const api = axios.create({
@@ -15,14 +15,22 @@ if (!import.meta.env.VITE_API_URL) {
 // 1. Request Interceptor: Attach fresh Firebase token to every outgoing request
 api.interceptors.request.use(async (config) => {
   try {
+    // 🌟 التعديل الجوهري: ننتظر حتى ينتهي فايربيز من تهيئة حالة تسجيل الدخول
+    if (typeof auth.authStateReady === 'function') {
+      await auth.authStateReady();
+    }
+
     const user = auth.currentUser;
     
     if (user) {
-      // Automatically retrieves the token, and refreshes it if it is expired
+      // فايربيز هنا بيجيب التوكن، ولو لقى التوكن قرب ينتهي بيجدده تلقائياً قبل ما يبعته
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
+      
+      // بنحدث التوكن في اللوكال ستوريدج كـ Fallback احتياطي
+      localStorage.setItem('token', token);
     } else {
-      // Fallback to localStorage if Firebase auth state is not initialized yet
+      // لو المستخدم فعلاً مش مسجل دخول في فايربيز، بنجرب اللوكال ستوريدج
       const localToken = localStorage.getItem('token');
       if (localToken) config.headers.Authorization = `Bearer ${localToken}`;
     }
@@ -41,7 +49,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // If backend returns 401 (Unauthorized / Token truly invalid)
+    // لو الباك إند رجع 401 بعد ما بعتنا التوكن الطازة، ده معناه إن اليوزر فعلاً ملوش صلاحية أو تم حظره
     if (error.response && error.response.status === 401) {
       logout(); 
     }
