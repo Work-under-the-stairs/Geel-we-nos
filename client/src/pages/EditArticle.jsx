@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users, Trash2, Link as LinkIcon } from "lucide-react";
 
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -8,6 +8,7 @@ import UnderlineExtension from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
+import { mergeAttributes } from "@tiptap/core";
 
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
@@ -23,6 +24,74 @@ import {
   ImportanceSection,
   ActionButtonsSection,
 } from "../components/ui/Article/Overlay";
+
+// 🌟 امتداد مخصص للصور يدعم الكابشن
+const ImageWithCaption = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      caption: {
+        default: null,
+        // نقرأ caption من data-caption attribute على الـ <img>
+        parseHTML: (element) => element.getAttribute('data-caption') || null,
+        // لا نكتبه كـ HTML attribute — يُعرض في figcaption فقط
+        renderHTML: () => ({}),
+      },
+      // نحتفظ بـ data-caption على الـ <img> في الـ HTML المحفوظ للقراءة عند الرجوع
+      'data-caption': {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-caption') || null,
+        renderHTML: (attrs) => attrs['data-caption'] ? { 'data-caption': attrs['data-caption'] } : {},
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'img[src]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const { caption, 'data-caption': dataCaption, ...rest } = HTMLAttributes;
+    const captionText = caption || dataCaption;
+    if (captionText) {
+      return [
+        'figure',
+        { class: 'editor-figure my-4 block text-center' },
+        ['img', mergeAttributes(this.options.HTMLAttributes, rest, { 'data-caption': captionText })],
+        ['figcaption', { class: 'text-xs text-slate-500 mt-2 font-medium bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100 block w-full text-center' }, captionText],
+      ];
+    }
+    return ['img', mergeAttributes(this.options.HTMLAttributes, rest)];
+  },
+});
+
+// دالة مساعدة: تحوّل <figure><img/><figcaption>text</figcaption></figure>
+// إلى <img data-caption="text"/> قبل تمريره لـ setContent
+const preprocessContentHTML = (html) => {
+  if (!html) return html;
+  return html.replace(
+    /<figure[^>]*>\s*<img([^>]*?)\/?\s*>\s*<figcaption[^>]*>([\s\S]*?)<\/figcaption>\s*<\/figure>/gi,
+    (_, imgAttrs, captionText) => {
+      const caption = captionText.trim().replace(/"/g, '&quot;');
+      return `<img${imgAttrs} data-caption="${caption}"/>`;
+    }
+  );
+};
+
+const editorExtensions = [
+  StarterKit,
+  UnderlineExtension,
+  Link.configure({
+    openOnClick: false,
+    HTMLAttributes: {
+      class: "text-[var(--color-secondary,#FF5A00)] underline cursor-pointer hover:text-[var(--color-primary,#0D4C54)] transition"
+    }
+  }),
+  ImageWithCaption.configure({
+    HTMLAttributes: { class: "editor-uploaded-img rounded-2xl w-full my-2" }
+  }),
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
+];
 
 export default function EditArticle() {
   const { id } = useParams();
@@ -66,9 +135,17 @@ export default function EditArticle() {
   const [contributors, setContributors] = useState([]);
   const [newContributor, setNewContributor] = useState({ name: "", role: "writer" });
 
-  // --- حالات يوتيوب ---
   const [youtubeLinks, setYoutubeLinks] = useState([]);
   const [youtubeInput, setYoutubeInput] = useState("");
+
+  // قوائم طاقم العمل (مطابقة لـ AddArticle)
+  const [writers, setWriters] = useState([]);
+  const [photographers, setPhotographers] = useState([]);
+
+  // حالات مودال الكابشن للصور داخل المحرر
+  const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
+  const [pendingEditorImageData, setPendingEditorImageData] = useState(null);
+  const [editorImageCaption, setEditorImageCaption] = useState("");
 
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
@@ -98,7 +175,7 @@ export default function EditArticle() {
     }
   };
 
-  // --- دوال معالجة يوتيوب ---
+  // ── دوال معالجة يوتيوب ───────────────────────────────────────────
   const extractYouTubeId = (url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -128,16 +205,10 @@ export default function EditArticle() {
   const handleRemoveYoutubeLink = (idToRemove) => {
     setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
   };
-  // -------------------------
 
+  // ── إعداد محرّر النصوص Tiptap ─────────────────────────────────
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      UnderlineExtension,
-      Link.configure({ openOnClick: false }),
-      Image.configure({ HTMLAttributes: { class: "editor-uploaded-img" } }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-    ],
+    extensions: editorExtensions,
     content: "",
     editorProps: {
       attributes: {
@@ -167,6 +238,22 @@ export default function EditArticle() {
     },
   });
 
+  // ── مودال الكابشن: تأكيد إدراج الصورة مع النص التوضيحي ──────────
+  const handleConfirmEditorImageCaption = () => {
+    if (!pendingEditorImageData || !editor) return;
+    const captionText = editorImageCaption.trim() || null;
+    editor.chain().focus().setImage({
+      src: pendingEditorImageData.url,
+      caption: captionText,
+      'data-caption': captionText,
+    }).run();
+    setEditorMediaList((prev) => [...prev, pendingEditorImageData]);
+    toast.success("تم إدراج الصورة", { id: "editor-img-success" });
+    setIsCaptionModalOpen(false);
+    setPendingEditorImageData(null);
+    setEditorImageCaption("");
+  };
+
   // ── تهيئة وتعبئة البيانات الآمنة لمرة واحدة ──────────────────
   useEffect(() => {
     if (!articleData || !editor || isInitializedRef.current) return;
@@ -181,20 +268,27 @@ export default function EditArticle() {
     setHashtags(articleData.hashtags || []);
     setContributors(articleData.contributors || []);
 
-    // --- تهيئة يوتيوب ---
     if (articleData.youtube_videos && articleData.youtube_videos.length > 0) {
       const formattedYoutubeLinks = articleData.youtube_videos.map(id => ({
         id: id,
-        url: `https://www.youtube.com/watch?v=${id}` // إعادة بناء رابط وهمي للعرض
+        url: `https://www.youtube.com/watch?v=${id}`
       }));
       setYoutubeLinks(formattedYoutubeLinks);
     }
 
     if (articleData.images && articleData.images.length > 0) {
-      setFeaturedImage({ url: articleData.images[0], fileId: null });
-      const extraImages = articleData.images
-        .slice(1)
-        .map((imgUrl) => ({ url: imgUrl, fileId: null }));
+      // الصور في الـ schema هي objects بالشكل { url, caption }
+      const firstImg = articleData.images[0];
+      setFeaturedImage({
+        url: firstImg?.url ?? firstImg,
+        fileId: null,
+        caption: firstImg?.caption ?? "",
+      });
+      const extraImages = articleData.images.slice(1).map((img) => ({
+        url: img?.url ?? img,
+        fileId: null,
+        caption: img?.caption ?? "",
+      }));
       setGallery(extraImages);
     } else {
       setFeaturedImage(null);
@@ -207,14 +301,14 @@ export default function EditArticle() {
       setVideoPreview(null);
     }
 
-    editor.commands.setContent(articleData.content || "<p></p>");
+    editor.commands.setContent(preprocessContentHTML(articleData.content || "<p></p>"));
 
     setTimeout(() => {
       isContentHydratingRef.current = false;
     }, 100);
   }, [articleData, editor]);
 
-  // ── إرسال التحديثات ───────────────────────────────────────────
+  // ── إرسال التحديثات للمخدم ───────────────────────────────────────
   const handleSubmitArticle = (targetStatus) => {
     if (!title.trim()) {
       toast.error("برجاء إدخال عنوان المقال أولاً");
@@ -235,17 +329,16 @@ export default function EditArticle() {
     }
 
     const allImages = [];
-    if (featuredImage?.url) allImages.push(featuredImage.url);
+    if (featuredImage?.url) allImages.push({ url: featuredImage.url, caption: featuredImage.caption || "" });
     gallery.forEach((img) => {
       if (img.url && img.url !== featuredImage?.url) {
-        allImages.push(img.url);
+        allImages.push({ url: img.url, caption: img.caption || "" });
       }
     });
 
     const allVideos = [];
     if (videoPreview?.url) allVideos.push(videoPreview.url);
 
-    // استخراج الـ IDs من قائمة اليوتيوب لإرسالها
     const youtubeIdsArray = youtubeLinks.map(item => item.id);
 
     const articlePayload = {
@@ -256,7 +349,7 @@ export default function EditArticle() {
       isUrgent: isUrgent,
       images: allImages,
       videos: allVideos,
-      youtube_videos: youtubeIdsArray, // إضافة حقل يوتيوب
+      youtube_videos: youtubeIdsArray,
       hashtags: hashtags,
       contributors: contributors,
       status: targetStatus,
@@ -293,15 +386,15 @@ export default function EditArticle() {
     setIsUrgent(false);
     setYoutubeLinks([]);
     setYoutubeInput("");
+    setContributors([]);
+    setNewContributor({ name: "", role: "writer" });
     editor?.commands.setContent("");
   };
 
   const executeCancelAndCleanup = async () => {
     const deletePromises = [];
-    if (featuredImage?.fileId)
-      deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
-    if (videoPreview?.fileId)
-      deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
+    if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
+    if (videoPreview?.fileId) deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
     gallery.forEach((item) => {
       if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId));
     });
@@ -349,6 +442,7 @@ export default function EditArticle() {
     );
   };
 
+  // ── معالجة حذف ورفع الميديا المباشرة ───────────────────────────
   const handleRemoveFeatured = async () => {
     if (featuredImage?.fileId) await deleteMediaFromServer(featuredImage.fileId);
     setFeaturedImage(null);
@@ -435,6 +529,7 @@ export default function EditArticle() {
     }
   };
 
+  // ── ميديا المحرر (Tiptap Media) ─────────────────────────────
   const addImageToEditor = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -446,9 +541,10 @@ export default function EditArticle() {
         setEditorProgress(pct)
       );
       if (mediaData?.url) {
-        editor.chain().focus().setImage({ src: mediaData.url }).run();
-        setEditorMediaList((prev) => [...prev, mediaData]);
-        toast.success("تم إدراج الصورة", { id: "editor-img-success" });
+        // افتح مودال الكابشن بدلاً من الإدراج المباشر
+        setPendingEditorImageData(mediaData);
+        setEditorImageCaption("");
+        setIsCaptionModalOpen(true);
       }
     } catch (err) {
       toast.error("فشل رفع الصورة للمحرر", { id: "editor-img-error" });
@@ -484,6 +580,7 @@ export default function EditArticle() {
     }
   };
 
+  // ── إدارة فريق العمل (Contributors) ───────────────────────────
   const addContributor = () => {
     if (!newContributor.name.trim()) {
       toast.error("يرجى إدخال اسم الشخص");
@@ -497,6 +594,7 @@ export default function EditArticle() {
     setContributors((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // ── إدارة الوسوم (Hashtags) ───────────────────────────────────
   const handleHashtagKeyDown = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -511,17 +609,12 @@ export default function EditArticle() {
   const removeHashtag = (tag) =>
     setHashtags((prev) => prev.filter((t) => t !== tag));
 
-  // ── Loading & Error States ────────────────────────────────────
+  // ── حالات التحميل والخطأ ───────────────────────────────────────
   if (isArticleLoading) {
     return (
       <div className="min-h-screen bg-[#f5f7fb] flex flex-col items-center justify-center gap-3">
-        <Loader2
-          className="animate-spin text-[var(--color-primary,#0D4C54)]"
-          size={40}
-        />
-        <p className="text-sm font-bold text-slate-600">
-          جاري تحميل بيانات المقال للمراجعة...
-        </p>
+        <Loader2 className="animate-spin text-[#0D4C54]" size={40} />
+        <p className="text-sm font-bold text-slate-600">جاري تحميل بيانات المقال للمراجعة...</p>
       </div>
     );
   }
@@ -529,17 +622,13 @@ export default function EditArticle() {
   if (isArticleError || !articleData) {
     return (
       <div className="min-h-screen bg-[#f5f7fb] flex flex-col items-center justify-center gap-2 text-center p-4">
-        <p className="text-lg font-bold text-red-500">
-          حدث خطأ أثناء محاولة جلب المقال المطلوبة
-        </p>
-        <p className="text-xs text-slate-500">
-          تأكد من أن المعرّف (ID) صحيح أو أنك تملك الصلاحيات الكافية
-        </p>
+        <p className="text-lg font-bold text-red-500">حدث خطأ أثناء محاولة جلب المقال المطلوبة</p>
+        <p className="text-xs text-slate-500">تأكد من أن المعرّف (ID) صحيح أو أنك تملك الصلاحيات الكافية</p>
       </div>
     );
   }
 
-  // ── Render ────────────────────────────────────────────────────
+  // ── العرض البصري واجهة المستخدم (UI Render) ─────────────────────
   return (
     <div
       dir="rtl"
@@ -550,7 +639,7 @@ export default function EditArticle() {
         .ProseMirror h1 { font-size:28px; font-weight:800; margin-bottom:18px; }
         .ProseMirror h2 { font-size:22px; font-weight:700; margin-bottom:14px; }
         .ProseMirror p  { margin-bottom:14px; }
-        .ProseMirror ul { list-style:disc;    padding-right:20px; }
+        .ProseMirror ul { list-style:disc; padding-right:20px; }
         .ProseMirror ol { list-style:decimal; padding-right:20px; }
         .ProseMirror blockquote { border-right:4px solid var(--color-primary,#0D4C54); padding:14px; background:#f8fafc; border-radius:12px; margin:16px 0; }
         .ProseMirror img, .ProseMirror video { border-radius:18px; margin:18px 0; width:100%; }
@@ -559,18 +648,62 @@ export default function EditArticle() {
       {updateArticleMutation.isPending && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-[9999] flex items-center justify-center">
           <div className="bg-white p-5 rounded-2xl shadow-xl flex items-center gap-3">
-            <Loader2
-              className="animate-spin text-[var(--color-secondary,#FF5A00)]"
-              size={24}
+            <Loader2 className="animate-spin text-orange-500" size={24} />
+            <span className="text-sm font-bold text-slate-800">جاري تعديل وحفظ التغييرات...</span>
+          </div>
+        </div>
+      )}
+
+      {/* 🌟 مودال الكابشن للصور داخل المحرر 🌟 */}
+      {isCaptionModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl shadow-xl max-w-md w-full space-y-4 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-800">إضافة نص توضيحي للصورة</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                اكتب تعليقاً توضيحياً (Caption) ليظهر بشكل منظم أسفل الصورة داخل المقال (اختياري).
+              </p>
+            </div>
+            {pendingEditorImageData?.url && (
+              <img
+                src={pendingEditorImageData.url}
+                alt="preview"
+                className="w-full max-h-48 object-cover rounded-xl border border-slate-100"
+              />
+            )}
+            <input
+              type="text"
+              className="w-full p-3.5 rounded-xl border border-slate-200 outline-none text-sm font-medium focus:border-[var(--color-secondary,#FF5A00)] focus:ring-1 focus:ring-[var(--color-secondary,#FF5A00)] transition"
+              placeholder="مثال: لقطة من المؤتمر الصحفي اليوم..."
+              value={editorImageCaption}
+              onChange={(e) => setEditorImageCaption(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmEditorImageCaption()}
+              autoFocus
             />
-            <span className="text-sm font-bold text-slate-800">
-              جاري تعديل وحفظ التغييرات...
-            </span>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={handleConfirmEditorImageCaption}
+                className="h-11 px-5 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900 transition shadow-sm"
+              >
+                إدراج الصورة
+              </button>
+              <button
+                onClick={() => {
+                  setIsCaptionModalOpen(false);
+                  setPendingEditorImageData(null);
+                  setEditorImageCaption("");
+                }}
+                className="h-11 px-5 rounded-xl border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition"
+              >
+                إلغاء
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[325px_1fr] gap-4 sm:gap-6 items-start">
+        {/* شريط التنقل الجانبي الذكي */}
         <div className="w-full xl:sticky xl:top-5 z-10">
           <SidebarStepper
             basicInfoRef={basicInfoRef}
@@ -582,16 +715,14 @@ export default function EditArticle() {
           />
         </div>
 
+        {/* جسم الاستمارة الرئيسي المنسق بالكامل */}
         <div className="space-y-4 sm:space-y-6 w-full min-w-0">
           <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-800">
-              تعديل ومراجعة المقال
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              تحديث البيانات والوسائط للمقال المحدد
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-800">تعديل ومراجعة المقال</h1>
+            <p className="text-sm text-slate-500 mt-1">تحديث البيانات والوسائط للمقال المحدد ومزامنتها تلقائياً</p>
           </div>
 
+          {/* القسم الأول: المعلومات الأساسية */}
           <BasicInfoSection
             innerRef={basicInfoRef}
             title={title}
@@ -611,20 +742,27 @@ export default function EditArticle() {
             featuredImage={featuredImage}
             handleRemoveFeatured={handleRemoveFeatured}
             handleFeaturedImage={handleFeaturedImage}
+            writers={writers}
+            setWriters={setWriters}
+            photographers={photographers}
+            setPhotographers={setPhotographers}
           />
 
-          {/* قسم فريق العمل */}
-          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
-            <div className="flex flex-wrap gap-3 mb-4">
+          {/* القسم الثاني: فريق العمل المساهم */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+              <Users className="text-slate-700 w-5 h-5" />
+              <h2 className="text-lg font-bold text-slate-800">فريق العمل والمساهمين</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
               <input
-                placeholder="اسم الشخص"
-                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
+                placeholder="اسم الشخص المساهم"
+                className="col-span-1 sm:col-span-1 p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200 transition"
                 value={newContributor.name}
                 onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })}
               />
               <select
-                className="p-3 rounded-xl border border-slate-200"
+                className="p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200 transition bg-white"
                 value={newContributor.role}
                 onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}
               >
@@ -634,25 +772,26 @@ export default function EditArticle() {
               </select>
               <button
                 onClick={addContributor}
-                className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
+                className="bg-slate-800 text-white p-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition shadow-xs"
               >
-                + إضافة
+                + إضافة للمقال
               </button>
             </div>
             <div className="space-y-2">
               {contributors.map((c, index) => (
                 <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <span className="font-medium text-slate-700">
-                    {c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span>
+                  <span className="font-medium text-slate-700 text-sm">
+                    {c.name} — <span className="text-xs text-slate-400 font-bold uppercase">{c.role}</span>
                   </span>
-                  <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">
-                    حذف
+                  <button onClick={() => removeContributor(index)} className="text-red-500 text-xs font-bold hover:underline flex items-center gap-1">
+                    <Trash2 size={14} /> حذف
                   </button>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* القسم الثالث: محرر النصوص الغني */}
           <EditorSection
             innerRef={contentRef}
             editorUploading={editorUploading}
@@ -663,6 +802,7 @@ export default function EditArticle() {
             addVideoToEditor={addVideoToEditor}
           />
 
+          {/* القسم الرابع: الميديا المباشرة */}
           <MediaSection
             innerRef={mediaRef}
             videoUploading={videoUploading}
@@ -675,27 +815,36 @@ export default function EditArticle() {
             handleGalleryUpload={handleGalleryUpload}
             gallery={gallery}
             handleRemoveGalleryItem={handleRemoveGalleryItem}
+            setGallery={setGallery}
           />
 
-          {/* --- قسم روابط يوتيوب الإضافية --- */}
-          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب (اختياري)</h2>
-            <p className="text-sm text-slate-500 mb-4">أضف روابط الفيديوهات الخارجية كبديل للرفع المباشر.</p>
+          {/* القسم الخامس: فيديوهات يوتيوب المدمجة */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-2 border-b border-slate-100 pb-3">
+              <svg className="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              <h2 className="text-lg font-bold text-slate-800">فيديوهات يوتيوب المرفقة (اختياري)</h2>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">يمكنك إضافة روابط فيديو من منصة يوتيوب الخارجية لعرضها بسلاسة داخل المقال.</p>
             
-            <div className="flex flex-wrap gap-3 mb-4">
-              <input 
-                placeholder="https://www.youtube.com/watch?v=..." 
-                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200 text-left"
-                style={{ direction: "ltr" }}
-                value={youtubeInput}
-                onChange={(e) => setYoutubeInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddYoutubeLink())}
-              />
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="flex-1 relative">
+                <input 
+                  placeholder="https://www.youtube.com/watch?v=..." 
+                  className="w-full p-3 pl-10 rounded-xl border border-slate-200 text-left text-sm focus:outline-none focus:ring-2 focus:ring-slate-200 transition"
+                  style={{ direction: "ltr" }}
+                  value={youtubeInput}
+                  onChange={(e) => setYoutubeInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddYoutubeLink())}
+                />
+                <LinkIcon className="absolute left-3 top-3.5 text-slate-400 w-4 h-4" />
+              </div>
               <button 
                 onClick={handleAddYoutubeLink}
-                className="bg-secondary text-white px-6 rounded-xl font-bold hover:bg-orange4 transition"
+                className="bg-slate-800 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition"
               >
-                + إضافة الفيديو
+                + ربط الفيديو
               </button>
             </div>
 
@@ -707,22 +856,22 @@ export default function EditArticle() {
                       <img 
                         src={`https://img.youtube.com/vi/${link.id}/default.jpg`} 
                         alt="thumbnail" 
-                        className="w-12 h-9 object-cover rounded-md"
+                        className="w-12 h-9 object-cover rounded-md border border-slate-200 shadow-2xs"
                       />
-                      <a href={link.url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline truncate" dir="ltr">
+                      <a href={link.url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline truncate" dir="ltr">
                         {link.id}
                       </a>
                     </div>
-                    <button onClick={() => handleRemoveYoutubeLink(link.id)} className="text-red-500 text-sm hover:underline mr-2">
-                      حذف
+                    <button onClick={() => handleRemoveYoutubeLink(link.id)} className="text-red-500 text-xs font-bold hover:underline mr-2 flex items-center gap-1">
+                      <Trash2 size={13} /> إزالة
                     </button>
                   </div>
                 ))}
               </div>
             )}
           </div>
-          {/* ---------------------------------- */}
 
+          {/* القسم السادس: مستوى الأهمية والدرجة */}
           <ImportanceSection
             innerRef={importanceRef}
             importance={importance}
@@ -731,6 +880,7 @@ export default function EditArticle() {
             setIsUrgent={setIsUrgent}
           />
 
+          {/* القسم السابع والأخير: أزرار التحكم والاتخاذ للإجراءات */}
           <ActionButtonsSection
             innerRef={publishRef}
             handleSubmitArticle={handleSubmitArticle}
