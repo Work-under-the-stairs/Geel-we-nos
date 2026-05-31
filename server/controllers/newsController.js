@@ -227,45 +227,38 @@ exports.trackView = async (req, res, next) => {
 
 exports.createNews = async (req, res, next) => {
   try {
-    // 1. التقاط الروابط المباشرة المرسلة من الفرونت إند
-    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
-    let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
+    let imageUrls = [];
+    if (req.body.images) {
+      imageUrls = Array.isArray(req.body.images) ? req.body.images : JSON.parse(req.body.images || "[]");
+    }
 
-    // 2. إذا تم إرسال ملفات بصيغة binary/form-data، يتم رفعها إلى كلاوديناري
     if (req.files?.images) {
       for (const file of req.files.images) {
         const result = await uploadFile(file.buffer, "news/images", "image");
-        imageUrls.push(result.secure_url);
+        imageUrls.push({ url: result.secure_url, caption: "" });
       }
     }
 
-    if (req.files?.videos) {
-      for (const file of req.files.videos) {
-        const result = await uploadFile(file.buffer, "news/videos", "video");
-        videoUrls.push(result.secure_url);
-      }
+    // معالجة القوائم العامة للمقال بمرونة وأمان
+    let writersList = [];
+    if (req.body.writers) {
+      writersList = Array.isArray(req.body.writers) ? req.body.writers : JSON.parse(req.body.writers || "[]");
     }
 
-    // 3. معالجة الهاشتاجات بأمان لتجنب توقف السيرفر
-    let hashtags = [];
-    if (req.body.hashtags) {
-      if (Array.isArray(req.body.hashtags)) {
-        hashtags = req.body.hashtags;
-      } else {
-        try {
-          hashtags = JSON.parse(req.body.hashtags);
-        } catch (e) {
-          hashtags = typeof req.body.hashtags === 'string' ? req.body.hashtags.split(',').map(h => h.trim()) : [];
-        }
-      }
+    let photographersList = [];
+    if (req.body.photographers) {
+      photographersList = Array.isArray(req.body.photographers) ? req.body.photographers : JSON.parse(req.body.photographers || "[]");
     }
 
-    // 4. إنشاء وحفظ وثيقة الخبر الجديدة
+    let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
+    let hashtags = req.body.hashtags ? (Array.isArray(req.body.hashtags) ? req.body.hashtags : JSON.parse(req.body.hashtags || "[]")) : [];
+
     const article = await News.create({
       title: req.body.title,
       content: req.body.content,
-      // 🛡️ حماية: ربط المقال بـ ID المستخدم مسجل الدخول من التوكن (أكثر أماناً من الفرونت)
       writer: req.user._id, 
+      writers: writersList,               // حفظ قائمة الكتاب للمقال
+      photographers: photographersList,   // حفظ قائمة المصورين للمقال
       category: req.body.category,
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
@@ -289,30 +282,55 @@ exports.updateNews = async (req, res, next) => {
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    // 🛡️ حماية: لو اللي بيعدل كاتب، نتأكد إنه صاحب الخبر (الأدمن يعدل أي حاجة)
+    // 🛡️ حماية وأمان: إذا كان المستخدم كاتب (writer)، نتأكد أنه صاحب المقال الأصلي
+    // بينما يمتلك الأدمن (admin) صلاحية تعديل أي مقال في المنصة
     if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "You are not authorized to edit this article" });
     }
 
-    // القائمة البيضاء للحقول المسموح بتعديلها
+    // القائمة البيضاء المحدثة للحقول المسموح بتعديلها في قاعدة البيانات
     const allowed = [
       "title", 
       "content", 
-      "images", 
+      "images",         // تشمل الروابط والـ Captions المحدثة من الفرونت إند
       "videos", 
       "category", 
       "important_rate", 
       "isUrgent",
       "hashtags",
-      "status"
+      "status",
+      "writers",        // تُمكّن من تحديث مصفوفة أسماء كتاب المقال
+      "photographers"   // تُمكّن من تحديث مصفوفة أسماء مصوري المقال ككل
     ];
 
+    // تحديث القيم في المستند فقط في حال تم إرسالها في جسم الطلب (req.body)
     allowed.forEach((field) => {
-      if (req.body[field] !== undefined) article[field] = req.body[field];
+      if (req.body[field] !== undefined) {
+        // معالجة البيانات القادمة من الفرونت إند في حال تم إرسالها بنظام FormData كـ Stringified JSON
+        if (["images", "writers", "photographers", "hashtags"].includes(field) && typeof req.body[field] === "string") {
+          try {
+            article[field] = JSON.parse(req.body[field]);
+          } catch (e) {
+            // كخطة بديلة (Fallback) إذا تم إرسال النصوص مفصولة بفاصلة
+            if (field === "writers" || field === "photographers" || field === "hashtags") {
+              article[field] = req.body[field].split(",").map(item => item.trim());
+            }
+          }
+        } else {
+          // التحديث المباشر للمصفوفات الجاهزة أو الحقول النصية والرقمية الأخرى
+          article[field] = req.body[field];
+        }
+      }
     });
 
+    // 🚀 حفظ التعديلات وتفعيل الـ Validation الخاص بـ Schema
     await article.save();
-    res.json({ status: "success", data: article });
+    
+    res.json({ 
+      status: "success", 
+      message: "Article updated successfully", 
+      data: article 
+    });
   } catch (err) {
     next(err);
   }

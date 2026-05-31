@@ -21,6 +21,8 @@ const newsSchema = new mongoose.Schema(
     // مصفوفات النصوص لاستقبال روابط الـ Front-end (ImageKit) أو روابط الميديا المباشرة
     images: [{ type: String, trim: true }],
     videos: [{ type: String, trim: true }],
+    writers: [{ type: String, trim: true }],
+    photographers: [{ type: String, trim: true }],
     
     // قائمة الهاشتاجات المضافة للمقال
     hashtags: [{ type: String, trim: true }],
