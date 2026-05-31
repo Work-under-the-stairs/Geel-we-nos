@@ -9,6 +9,7 @@ import {
   useCategoryFeatured,
   useCategoryTrending,
   useCategoryNewsInfinite,
+  useUrgent,
 } from '../hooks/useArticles';
 import { useCategories } from '../hooks/useAdmin';
 import { useEffect } from 'react';
@@ -20,6 +21,9 @@ export default function Category() {
 
   // 1. جلب الأقسام من الداتابيز
   const { data: allCategories, isLoading: isCatLoading } = useCategories();
+  const { data: urgentData, isLoading: loadUrgent } = useUrgent(5);
+  
+  const urgent = urgentData || [];
   const categoriesList = allCategories?.data || (Array.isArray(allCategories) ? allCategories : []);
   
   // 2. تحديد القسم الحالي (سيكون null في حالة التحميل أو عدم العثور عليه)
@@ -96,11 +100,7 @@ export default function Category() {
 
       {/* Breaking News Bar */}
       <BreakingNewsBar
-        breakingArticles={
-          gridArticles.length > 0 ? gridArticles.slice(0, 3)
-          : heroArticle ? [heroArticle]
-          : []
-        }
+        breakingArticles={urgent}
       />
 
       {/* Main Content */}

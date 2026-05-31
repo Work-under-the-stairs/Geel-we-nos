@@ -14,6 +14,7 @@ export const KEYS = {
   categoryFeatured:    (cat)           => ['categoryFeatured', cat],
   categoryNews:        (cat, limit)    => ['categoryNews', cat, limit],
   categoryTrending:    (cat, limit)    => ['categoryTrending', cat, limit],
+  urgent:              (limit)         => ['urgent', limit],
   article:             (id)            => ['article', id],
   comments:            (id)            => ['comments', id],
 }
@@ -46,6 +47,14 @@ export const useFeatured = (limit = 3) =>
     queryKey: KEYS.featured(limit),
     queryFn:  () => articleService.getFeatured(limit)
                     .then(res => res.data.data), // ← object واحد
+    staleTime: 1000 * 60 * 5,
+  })
+
+export const useUrgent = (limit = 5) =>
+  useQuery({
+    queryKey: KEYS.urgent(limit),
+    queryFn:  () => articleService.getUrgent(limit)
+                    .then(res => res.data.data), // ← array
     staleTime: 1000 * 60 * 5,
   })
 

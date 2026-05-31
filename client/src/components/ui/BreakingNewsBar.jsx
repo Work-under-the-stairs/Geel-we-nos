@@ -41,7 +41,8 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
                 to={`/news/${art._id}`}
                 className="flex items-center gap-2 hover:text-yellow-300 transition-colors duration-200"
               >
-                <span className="text-yellow-400 font-extrabold text-[15px]">✦</span>
+                {/* <span className="text-yellow-400 font-extrabold text-[15px]">✦</span> */}
+                <span className="text-yellow-400 font-extrabold text-[15px]">🔥</span>
                 <p className="text-[14px] sm:text-[15px] font-bold tracking-wide">
                   {art.title}
                 </p>

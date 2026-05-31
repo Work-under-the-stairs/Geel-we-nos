@@ -14,6 +14,7 @@ router.get("/featured", newsController.getFeatured);
 router.get("/trending", newsController.getTrending);
 router.get("/latest", newsController.getLatest);
 router.get("/grouped-by-category", newsController.getGroupedByCategory);
+router.get("/urgent", newsController.getUrgent);
 
 router.get("/category/:categoryName/featured", newsController.getCategoryFeatured);
 router.get("/category/:categoryName", newsController.getCategoryNews);

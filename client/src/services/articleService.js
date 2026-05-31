@@ -10,6 +10,8 @@ export const articleService = {
   getTrending:          (limit = 5)  => api.get(`/news/trending?limit=${limit}`),
   getLatest:            (limit = 8)  => api.get(`/news/latest?limit=${limit}`),
   getGroupedByCategory: (limit = 4)  => api.get(`/news/grouped-by-category?limit=${limit}`),
+  getUrgent:            (limit = 5)  => api.get(`/news/urgent?limit=${limit}`),
+
 
   // ============ صفحة القسم ============
   getCategoryFeatured: (cat)            => api.get(`/news/category/${encodeURIComponent(cat)}/featured`),

@@ -276,9 +276,14 @@ export default function ArticleDetail() {
               )}
             </div>
 
-            <div 
+            {/* <div 
               style={{ fontFamily: "'Cairo', sans-serif" }}
               className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            /> */}
+            <div 
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+              className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4 prose prose-lg prose-slate max-w-none prose-headings:text-[var(--color-primary)] prose-a:text-[var(--color-secondary)] prose-img:rounded-xl"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
