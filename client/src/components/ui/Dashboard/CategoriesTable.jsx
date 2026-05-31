@@ -113,6 +113,7 @@ import {
   ShoppingBag,
   Package,
 } from "lucide-react";
+import toast from 'react-hot-toast';
 
 const ICONS_DICTIONARY = {
   Folder,
@@ -231,28 +232,21 @@ export default function CategoriesTable({
   onEditCategory, 
   onDeleteCategory 
 }) {
-  const [search, setSearch] = useState('');
-  
-  // حالات الـ Modal (النافذة المنبثقة)
+const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  
-  // بيانات القسم الحالي (للإضافة أو التعديل)
   const [formData, setFormData] = useState({ id: null, name: '', icon_name: 'Newspaper' });
 
-  // فلترة الأقسام محلياً
-    const filteredCategories = (Array.isArray(categories) ? categories : []).filter(cat => 
-        cat.name.toLowerCase().includes(search.toLowerCase())
-    );
+  const filteredCategories = (Array.isArray(categories) ? categories : []).filter(cat => 
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // فتح نافذة الإضافة
   const handleOpenAdd = () => {
     setEditMode(false);
     setFormData({ id: null, name: '', icon_name: 'Newspaper' });
     setIsModalOpen(true);
   };
 
-  // فتح نافذة التعديل
   const handleOpenEdit = (category) => {
     setEditMode(true);
     setFormData({ 
@@ -263,24 +257,44 @@ export default function CategoriesTable({
     setIsModalOpen(true);
   };
 
-  // إرسال البيانات (إضافة أو تعديل)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    if (editMode) {
-      onEditCategory(formData.id, { name: formData.name, icon_name: formData.icon_name });
-    } else {
-      onAddCategory({ name: formData.name, icon_name: formData.icon_name });
+    try {
+      if (editMode) {
+        await onEditCategory(formData.id, { name: formData.name, icon_name: formData.icon_name });
+        toast.success("تم تعديل القسم بنجاح!");
+      } else {
+        await onAddCategory({ name: formData.name, icon_name: formData.icon_name });
+        toast.success("تم إضافة القسم بنجاح!");
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء حفظ البيانات");
     }
-    setIsModalOpen(false);
   };
 
-  // تأكيد الحذف
   const handleDelete = (id) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا القسم؟ قد يؤثر ذلك على المقالات المرتبطة به.")) {
-      onDeleteCategory(id);
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <p className="font-bold text-sm">هل أنت متأكد؟</p>
+        <p className="text-xs text-slate-600">سيتم حذف القسم وتحويل جميع الأخبار المرتبطة به إلى "قسم عام".</p>
+        <div className="flex gap-2 mt-2">
+          <button 
+            onClick={() => {
+              onDeleteCategory(id);
+              toast.dismiss(t.id);
+              toast.success("تم حذف القسم والاخبار الخاصة به اصبحت غير مصنفة او عامة");
+            }}
+            className="bg-red-500 text-white px-3 py-1 rounded-md text-xs font-bold"
+          >
+            تأكيد الحذف
+          </button>
+          <button onClick={() => toast.dismiss(t.id)} className="bg-slate-200 px-3 py-1 rounded-md text-xs font-bold">تراجع</button>
+        </div>
+      </div>
+    ), { duration: 5000 });
   };
 
   return (
