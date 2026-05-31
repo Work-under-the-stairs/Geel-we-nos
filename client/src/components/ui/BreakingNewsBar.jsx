@@ -7,12 +7,15 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
 
   const latestArticles = breakingArticles
 
+  // Calculate dynamic duration based on items length for a constant scrolling speed
+  const animationDuration = `${latestArticles.length * 20}s`
+
   return (
     <div className="w-full bg-gradient-to-r from-orange1 via-orange3 to-orange5 text-white shadow-md relative overflow-hidden select-none py-3" dir="rtl">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex items-center relative">
         
-        {/* ======= شارة عاجل الثابتة البروز والتأثير ======= */}
+        {/* Fixed "Breaking" badge with pulse effect */}
         <div className="flex items-center gap-1.5 flex-shrink-0 bg-white text-orange4 text-[13px] font-black px-4 py-1.5 rounded-lg shadow-lg z-10 border border-orange-100">
           <Flame size={16} className="fill-orange-600 text-orange3 animate-pulse" />
           <span>عاجل</span>
@@ -22,13 +25,16 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
           </span>
         </div>
 
-        {/* ======= شريط الأخبار المتحرك ======= */}
+        {/* Scrolling news ticker container */}
         <div className="flex flex-1 overflow-hidden relative mr-4 md:mr-6 group">
           
-          {/* الحاوية اللانهائية - تقف عند الـ Hover */}
-          <div className="flex items-center gap-12 whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] cursor-pointer">
+          {/* Infinite marquee - pauses on hover */}
+          <div 
+            className="flex items-center gap-12 whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] cursor-pointer"
+            style={{ animationDuration }}
+          >
             
-            {/* التكرار الأول */}
+            {/* First batch of articles */}
             {latestArticles.map((art) => (
               <Link
                 key={`first-${art._id}`}
@@ -42,7 +48,7 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
               </Link>
             ))}
 
-            {/* التكرار الثاني للحفاظ على سلاسة الحركة المتصلة */}
+            {/* Duplicated batch for a seamless infinite loop */}
             {latestArticles.map((art) => (
               <Link
                 key={`second-${art._id}`}
@@ -58,7 +64,7 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
 
           </div>
 
-          {/* تأثير حواف ناعمة متلاشية */}
+          {/* Gradient overlays for smooth fading edges */}
           <div className="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-orange4 to-transparent pointer-events-none" />
           <div className="absolute top-0 left-0 h-full w-8 bg-gradient-to-r from-orange2 to-transparent pointer-events-none" />
 
