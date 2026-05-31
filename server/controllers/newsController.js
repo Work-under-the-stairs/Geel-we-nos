@@ -10,7 +10,7 @@ const Category = require("../models/Category");
 exports.getFeatured = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 3;
-    
+
     const featuredNews = await News.find()
       .sort({ important_rate: -1, createdAt: -1 }) // الأعلى أهمية ثم الأحدث
       .limit(limit)
@@ -33,7 +33,7 @@ exports.getTrending = async (req, res, next) => {
       .limit(limit)
       .select("title images views category createdAt") // سحب الحقول المطلوبة فقط للـ Sidebar
       .populate("category", "name icon_name");
-      
+
 
     res.status(200).json({ status: "success", data: trendingNews });
   } catch (error) {
@@ -111,14 +111,14 @@ exports.getGroupedByCategory = async (req, res, next) => {
 exports.getCategoryFeatured = async (req, res, next) => {
   try {
     const { categoryName } = req.params;
-    
+
     const category = await Category.findOne({ name: categoryName });
     if (!category) return res.status(404).json({ message: "Category not found" });
 
     const featured = await News.findOne({ category: category._id })
       .sort({ important_rate: -1, createdAt: -1 })
       .populate("writer", "name avatar")
-        .populate("category", "name icon_name");
+      .populate("category", "name icon_name");
 
     res.status(200).json({ status: "success", data: featured });
   } catch (error) {
@@ -141,7 +141,7 @@ exports.getCategoryNews = async (req, res, next) => {
         { _id: require('mongoose').Types.ObjectId.isValid(categoryName) ? categoryName : null }
       ].filter(Boolean)
     });
-    
+
     if (!category) return res.status(404).json({ message: "Category not found" });
 
     // 🌟 التريك الحاسم: حساب إجمالي المقالات في القسم ده عشان نطلع totalPages
@@ -156,13 +156,13 @@ exports.getCategoryNews = async (req, res, next) => {
       .populate("category", "name icon_name");
 
     // 🌟 بنرجع الـ totalPages والـ totalArticles ع الجاهز للفرونت إند
-    res.status(200).json({ 
-      status: "success", 
-      page, 
-      limit, 
-      totalPages, 
-      totalArticles, 
-      data: news 
+    res.status(200).json({
+      status: "success",
+      page,
+      limit,
+      totalPages,
+      totalArticles,
+      data: news
     });
   } catch (error) {
     next(error);
@@ -225,47 +225,97 @@ exports.trackView = async (req, res, next) => {
 };
 
 
+// ==========================================
+// ➕ 4. إنشاء خبر جديد
+// ==========================================
 exports.createNews = async (req, res, next) => {
   try {
     let imageUrls = [];
+
+    // 1. معالجة الصور الجاية من الـ Body (روابط خارجية مثلاً)
     if (req.body.images) {
-      imageUrls = Array.isArray(req.body.images) ? req.body.images : JSON.parse(req.body.images || "[]");
+      try {
+        const parsedImages = Array.isArray(req.body.images)
+          ? req.body.images
+          : JSON.parse(req.body.images);
+
+        // توحيد شكل البيانات لتكون مصفوفة كائنات { url, caption }
+        imageUrls = parsedImages.map((img) => {
+          if (typeof img === "string") {
+            return { url: img, caption: "" };
+          }
+          return { url: img.url, caption: img.caption || "" };
+        });
+      } catch {
+        // لو فشل الـ Parse وكانت صورة واحدة مبعوتة كنص
+        imageUrls = [{ url: req.body.images, caption: "" }];
+      }
     }
 
+    // 2. معالجة الصور المرفوعة عبر الـ Multer (Files) - (تم تنظيف التكرار هنا)
     if (req.files?.images) {
       for (const file of req.files.images) {
-        const result = await uploadFile(file.buffer, "news/images", "image");
+        const result = await uploadFile(file.buffer, "news/images", "image"); 
         imageUrls.push({ url: result.secure_url, caption: "" });
       }
     }
 
-    // معالجة القوائم العامة للمقال بمرونة وأمان
-    let writersList = [];
-    if (req.body.writers) {
-      writersList = Array.isArray(req.body.writers) ? req.body.writers : JSON.parse(req.body.writers || "[]");
+    let videoUrls = req.body.videos
+      ? Array.isArray(req.body.videos)
+        ? req.body.videos
+        : [req.body.videos]
+      : [];
+
+    let youtubeVideos = [];
+    if (req.body.youtube_videos) {
+      try {
+        youtubeVideos = Array.isArray(req.body.youtube_videos)
+          ? req.body.youtube_videos
+          : JSON.parse(req.body.youtube_videos);
+      } catch {
+        youtubeVideos = req.body.youtube_videos
+          .split(",")
+          .map(item => item.trim());
+      }
     }
 
-    let photographersList = [];
-    if (req.body.photographers) {
-      photographersList = Array.isArray(req.body.photographers) ? req.body.photographers : JSON.parse(req.body.photographers || "[]");
+    let hashtags = [];
+    if (req.body.hashtags) {
+      try {
+        hashtags = Array.isArray(req.body.hashtags)
+          ? req.body.hashtags
+          : JSON.parse(req.body.hashtags);
+      } catch {
+        hashtags = req.body.hashtags
+          .split(",")
+          .map(item => item.trim());
+      }
     }
 
-    let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
-    let hashtags = req.body.hashtags ? (Array.isArray(req.body.hashtags) ? req.body.hashtags : JSON.parse(req.body.hashtags || "[]")) : [];
+    let contributors = [];
+    if (req.body.contributors) {
+      try {
+        contributors = Array.isArray(req.body.contributors)
+          ? req.body.contributors
+          : JSON.parse(req.body.contributors);
+      } catch {
+        contributors = [];
+      }
+    }
 
     const article = await News.create({
       title: req.body.title,
       content: req.body.content,
-      writer: req.user._id, 
-      writers: writersList,               // حفظ قائمة الكتاب للمقال
-      photographers: photographersList,   // حفظ قائمة المصورين للمقال
+      writer: req.user._id,
       category: req.body.category,
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
       images: imageUrls,
       videos: videoUrls,
-      hashtags: hashtags,
-      status: req.body.status || "draft", 
+      youtube_videos: youtubeVideos,
+      hashtags,
+      contributors,
+      status: req.body.status || "draft",
     });
 
     res.status(201).json({ status: "success", data: article });
@@ -275,61 +325,89 @@ exports.createNews = async (req, res, next) => {
 };
 
 // ==========================================
-// 2. تعديل الخبر
+// ✏️ 5. تعديل الخبر
 // ==========================================
 exports.updateNews = async (req, res, next) => {
   try {
     const article = await News.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "News not found" });
 
-    // 🛡️ حماية وأمان: إذا كان المستخدم كاتب (writer)، نتأكد أنه صاحب المقال الأصلي
-    // بينما يمتلك الأدمن (admin) صلاحية تعديل أي مقال في المنصة
-    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "You are not authorized to edit this article" });
+    if (!article) {
+      return res.status(404).json({
+        status: "fail",
+        message: "News not found",
+      });
     }
 
-    // القائمة البيضاء المحدثة للحقول المسموح بتعديلها في قاعدة البيانات
+    // السماح للكاتب بتعديل مقالاته فقط
+    if (
+      req.user.role === "writer" &&
+      article.writer.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        status: "fail",
+        message: "You are not authorized to edit this article",
+      });
+    }
+
     const allowed = [
-      "title", 
-      "content", 
-      "images",         // تشمل الروابط والـ Captions المحدثة من الفرونت إند
-      "videos", 
-      "category", 
-      "important_rate", 
+      "title",
+      "content",
+      "images",
+      "videos",
+      "youtube_videos",
+      "category",
+      "important_rate",
       "isUrgent",
       "hashtags",
+      "contributors",
       "status",
-      "writers",        // تُمكّن من تحديث مصفوفة أسماء كتاب المقال
-      "photographers"   // تُمكّن من تحديث مصفوفة أسماء مصوري المقال ككل
     ];
 
-    // تحديث القيم في المستند فقط في حال تم إرسالها في جسم الطلب (req.body)
-    allowed.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        // معالجة البيانات القادمة من الفرونت إند في حال تم إرسالها بنظام FormData كـ Stringified JSON
-        if (["images", "writers", "photographers", "hashtags"].includes(field) && typeof req.body[field] === "string") {
-          try {
-            article[field] = JSON.parse(req.body[field]);
-          } catch (e) {
-            // كخطة بديلة (Fallback) إذا تم إرسال النصوص مفصولة بفاصلة
-            if (field === "writers" || field === "photographers" || field === "hashtags") {
-              article[field] = req.body[field].split(",").map(item => item.trim());
-            }
+    const jsonFields = [
+      "hashtags",
+      "contributors",
+      "youtube_videos",
+      "images",
+      "videos",
+    ];
+
+    // تحويل الـ JSON strings إلى Arrays/Objects
+    jsonFields.forEach((field) => {
+      if (req.body[field] && typeof req.body[field] === "string") {
+        try {
+          req.body[field] = JSON.parse(req.body[field]);
+        } catch (e) {
+          if (
+            [
+              "hashtags",
+              "contributors",
+              "youtube_videos",
+              "writers",
+              "photographers",
+            ].includes(field)
+          ) {
+            req.body[field] = req.body[field]
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean);
           }
-        } else {
-          // التحديث المباشر للمصفوفات الجاهزة أو الحقول النصية والرقمية الأخرى
-          article[field] = req.body[field];
         }
       }
     });
 
-    // 🚀 حفظ التعديلات وتفعيل الـ Validation الخاص بـ Schema
+    // تحديث الحقول المسموح بها
+    allowed.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        article[field] = req.body[field];
+      }
+    });
+
     await article.save();
-    
-    res.json({ 
-      status: "success", 
-      message: "Article updated successfully", 
-      data: article 
+
+    res.status(200).json({
+      status: "success",
+      message: "Article updated successfully",
+      data: article,
     });
   } catch (err) {
     next(err);
@@ -337,7 +415,7 @@ exports.updateNews = async (req, res, next) => {
 };
 
 // ==========================================
-// 3. حذف الخبر
+// 🗑️ 6. حذف الخبر
 // ==========================================
 exports.deleteNews = async (req, res, next) => {
   try {
@@ -358,7 +436,7 @@ exports.deleteNews = async (req, res, next) => {
 
 
 // ==========================================
-// جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
+// 📊 7. جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
 // ==========================================
 exports.getAllNews = async (req, res, next) => {
   try {
@@ -374,11 +452,9 @@ exports.getAllNews = async (req, res, next) => {
     // 2. فلترة بالحالة (منشور / مسودة)
     if (req.query.status) {
       if (req.query.status === "published") {
-        // 🌟 التعديل هنا: هنجيب أي مقال حالته لا تساوي "مسودة"
-        // ده هيشمل المنشور، واللي مفيهوش ستاتس، واللي الستاتس بتاعه فاضي
-        filter.status = { $ne: "draft" }; 
+        // 🌟 هنجيب أي مقال حالته لا تساوي "مسودة"
+        filter.status = { $ne: "draft" };
       } else {
-        // لو اختار "مسودة" هنجيب المسودة بس
         filter.status = req.query.status;
       }
     }
@@ -392,7 +468,7 @@ exports.getAllNews = async (req, res, next) => {
     }
 
     // 4. الترتيب
-    let sortQuery = { createdAt: -1 }; 
+    let sortQuery = { createdAt: -1 };
     if (req.query.sort === "-views") {
       sortQuery = { views: -1, createdAt: -1 };
     } else if (req.query.sort === "-createdAt") {

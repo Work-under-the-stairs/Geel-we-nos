@@ -12,7 +12,6 @@ import TextAlign from "@tiptap/extension-text-align";
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
 
-// ✅ Fix 1: useAdminArticle (not useArticle) — useArticle doesn't exist in useAdmin
 import { useUpdateArticle, useAdminArticle } from "../hooks/useAdmin";
 import { useCategories } from "../hooks/useArticles";
 
@@ -31,14 +30,12 @@ export default function EditArticle() {
 
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
 
-  // ✅ Fix 1 applied: using useAdminArticle instead of useArticle
   const {
     data: articleData,
     isLoading: isArticleLoading,
     isError: isArticleError,
   } = useAdminArticle(id);
 
-  // ✅ Fix 2: useUpdateArticle called with NO argument — id is passed inside mutate payload
   const updateArticleMutation = useUpdateArticle();
 
   // ── States ───────────────────────────────────────────────────
@@ -66,6 +63,13 @@ export default function EditArticle() {
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress] = useState(0);
 
+  const [contributors, setContributors] = useState([]);
+  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" });
+
+  // --- حالات يوتيوب ---
+  const [youtubeLinks, setYoutubeLinks] = useState([]);
+  const [youtubeInput, setYoutubeInput] = useState("");
+
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
@@ -73,7 +77,6 @@ export default function EditArticle() {
   const importanceRef = useRef(null);
   const publishRef = useRef(null);
 
-  // علم (Flag) لمنع معالجة الحذف التلقائي للوسائط أثناء حقن البيانات الأولي
   const isContentHydratingRef = useRef(true);
   const isInitializedRef = useRef(false);
 
@@ -95,6 +98,38 @@ export default function EditArticle() {
     }
   };
 
+  // --- دوال معالجة يوتيوب ---
+  const extractYouTubeId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleAddYoutubeLink = () => {
+    if (!youtubeInput.trim()) return;
+    
+    const videoId = extractYouTubeId(youtubeInput);
+    if (!videoId) {
+      toast.error("الرابط غير صالح! يرجى إدخال رابط يوتيوب صحيح.");
+      return;
+    }
+
+    const isExist = youtubeLinks.some(link => link.id === videoId);
+    if (isExist) {
+      toast.error("تمت إضافة هذا الفيديو مسبقاً!");
+      return;
+    }
+
+    setYoutubeLinks(prev => [...prev, { id: videoId, url: youtubeInput }]);
+    setYoutubeInput("");
+    toast.success("تم إضافة فيديو يوتيوب بنجاح");
+  };
+
+  const handleRemoveYoutubeLink = (idToRemove) => {
+    setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
+  };
+  // -------------------------
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -111,7 +146,6 @@ export default function EditArticle() {
       },
     },
     onUpdate: ({ editor }) => {
-      // إيقاف التحديث إذا كان المحرر يقوم بعملية التهيئة الأولية
       if (isContentHydratingRef.current) return;
 
       const currentHTML = editor.getHTML();
@@ -145,6 +179,16 @@ export default function EditArticle() {
     setImportance(articleData.important_rate || 5);
     setIsUrgent(articleData.isUrgent || false);
     setHashtags(articleData.hashtags || []);
+    setContributors(articleData.contributors || []);
+
+    // --- تهيئة يوتيوب ---
+    if (articleData.youtube_videos && articleData.youtube_videos.length > 0) {
+      const formattedYoutubeLinks = articleData.youtube_videos.map(id => ({
+        id: id,
+        url: `https://www.youtube.com/watch?v=${id}` // إعادة بناء رابط وهمي للعرض
+      }));
+      setYoutubeLinks(formattedYoutubeLinks);
+    }
 
     if (articleData.images && articleData.images.length > 0) {
       setFeaturedImage({ url: articleData.images[0], fileId: null });
@@ -201,6 +245,9 @@ export default function EditArticle() {
     const allVideos = [];
     if (videoPreview?.url) allVideos.push(videoPreview.url);
 
+    // استخراج الـ IDs من قائمة اليوتيوب لإرسالها
+    const youtubeIdsArray = youtubeLinks.map(item => item.id);
+
     const articlePayload = {
       title: title.trim(),
       content: contentHTML,
@@ -209,13 +256,14 @@ export default function EditArticle() {
       isUrgent: isUrgent,
       images: allImages,
       videos: allVideos,
+      youtube_videos: youtubeIdsArray, // إضافة حقل يوتيوب
       hashtags: hashtags,
+      contributors: contributors,
       status: targetStatus,
     };
 
     toast.loading("جاري تحديث المقال ومزامنة البيانات...", { id: "submit-toast" });
 
-    // ✅ Fix 2 applied: passing { id, data } as one object to match the updated hook signature
     updateArticleMutation.mutate(
       { id, data: articlePayload },
       {
@@ -243,6 +291,8 @@ export default function EditArticle() {
     setHashtags([]);
     setImportance(5);
     setIsUrgent(false);
+    setYoutubeLinks([]);
+    setYoutubeInput("");
     editor?.commands.setContent("");
   };
 
@@ -434,6 +484,19 @@ export default function EditArticle() {
     }
   };
 
+  const addContributor = () => {
+    if (!newContributor.name.trim()) {
+      toast.error("يرجى إدخال اسم الشخص");
+      return;
+    }
+    setContributors((prev) => [...prev, newContributor]);
+    setNewContributor({ name: "", role: "writer" });
+  };
+
+  const removeContributor = (index) => {
+    setContributors((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleHashtagKeyDown = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -550,6 +613,46 @@ export default function EditArticle() {
             handleFeaturedImage={handleFeaturedImage}
           />
 
+          {/* قسم فريق العمل */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input
+                placeholder="اسم الشخص"
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
+                value={newContributor.name}
+                onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })}
+              />
+              <select
+                className="p-3 rounded-xl border border-slate-200"
+                value={newContributor.role}
+                onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}
+              >
+                <option value="writer">كاتب (Writer)</option>
+                <option value="photographer">مصور (Photographer)</option>
+                <option value="editor">محرر (Editor)</option>
+              </select>
+              <button
+                onClick={addContributor}
+                className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
+              >
+                + إضافة
+              </button>
+            </div>
+            <div className="space-y-2">
+              {contributors.map((c, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <span className="font-medium text-slate-700">
+                    {c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span>
+                  </span>
+                  <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">
+                    حذف
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <EditorSection
             innerRef={contentRef}
             editorUploading={editorUploading}
@@ -573,6 +676,52 @@ export default function EditArticle() {
             gallery={gallery}
             handleRemoveGalleryItem={handleRemoveGalleryItem}
           />
+
+          {/* --- قسم روابط يوتيوب الإضافية --- */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب (اختياري)</h2>
+            <p className="text-sm text-slate-500 mb-4">أضف روابط الفيديوهات الخارجية كبديل للرفع المباشر.</p>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input 
+                placeholder="https://www.youtube.com/watch?v=..." 
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200 text-left"
+                style={{ direction: "ltr" }}
+                value={youtubeInput}
+                onChange={(e) => setYoutubeInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddYoutubeLink())}
+              />
+              <button 
+                onClick={handleAddYoutubeLink}
+                className="bg-secondary text-white px-6 rounded-xl font-bold hover:bg-orange4 transition"
+              >
+                + إضافة الفيديو
+              </button>
+            </div>
+
+            {youtubeLinks.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {youtubeLinks.map((link, index) => (
+                  <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-hidden">
+                    <div className="flex items-center gap-3 truncate">
+                      <img 
+                        src={`https://img.youtube.com/vi/${link.id}/default.jpg`} 
+                        alt="thumbnail" 
+                        className="w-12 h-9 object-cover rounded-md"
+                      />
+                      <a href={link.url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline truncate" dir="ltr">
+                        {link.id}
+                      </a>
+                    </div>
+                    <button onClick={() => handleRemoveYoutubeLink(link.id)} className="text-red-500 text-sm hover:underline mr-2">
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* ---------------------------------- */}
 
           <ImportanceSection
             innerRef={importanceRef}

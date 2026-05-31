@@ -186,13 +186,33 @@ exports.updatePassword = async (req, res) => {
 // ==========================================
 // 8. حذف مستخدم (للأدمن)
 // ==========================================
+const admin = require("firebase-admin"); // تأكدي من استيراد الـ admin SDK
+
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ message: "User deleted successfully" });
+    // 1. البحث عن المستخدم في قاعدة البيانات أولاً
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
+    }
+
+    // 2. حذف المستخدم من Firebase Authentication
+    if (user.firebaseUid) {
+      try {
+        await admin.auth().deleteUser(user.firebaseUid);
+        console.log(`✅ تم حذف المستخدم ${user.firebaseUid} من Firebase`);
+      } catch (firebaseErr) {
+        // إذا كان المستخدم غير موجود في Firebase، لا نوقف العملية، نكمل حذف من المونجو
+        console.warn("⚠️ تحذير: المستخدم غير موجود في Firebase:", firebaseErr.message);
+      }
+    }
+
+    // 3. حذف المستخدم من MongoDB
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "تم حذف المستخدم من النظام بالكامل بنجاح" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "حدث خطأ أثناء الحذف: " + err.message });
   }
 };
 

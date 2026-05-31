@@ -7,7 +7,7 @@ import UnderlineExtension from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-
+import { mergeAttributes } from "@tiptap/core";
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
 
@@ -22,6 +22,49 @@ import {
   ImportanceSection,
   ActionButtonsSection
 } from "../components/ui/Article/Overlay";
+
+// 🌟 تعريف امتداد مخصص للصور يدعم الكابشن
+const ImageWithCaption = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      caption: {
+        default: null,
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { caption, ...rest } = HTMLAttributes;
+    
+    // لو فيه كابشن، اعرض الصورة جوه <figure> مع <figcaption>
+    if (caption) {
+      return [
+        'figure', 
+        { class: 'editor-figure my-4 block text-center' },
+        ['img', mergeAttributes(this.options.HTMLAttributes, rest)],
+        ['figcaption', { class: 'text-xs text-slate-500 mt-2 font-medium bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100 inline-block' }, caption],
+      ];
+    }
+
+    // لو مفيش كابشن، اعرض الصورة عادية
+    return ['img', mergeAttributes(this.options.HTMLAttributes, rest)];
+  },
+});
+
+const editorExtensions = [
+  StarterKit,
+  UnderlineExtension,
+  Link.configure({ 
+    openOnClick: false,
+    HTMLAttributes: {
+      class: "text-[var(--color-secondary,#FF5A00)] underline cursor-pointer hover:text-[var(--color-primary,#0D4C54)] transition"
+    }
+  }),
+  ImageWithCaption.configure({ 
+    HTMLAttributes: { class: "editor-uploaded-img rounded-2xl w-full my-2" } 
+  }),
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
+];
 
 export default function AddArticle() {
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
@@ -56,6 +99,13 @@ export default function AddArticle() {
   const [editorUploadLabel, setEditorUploadLabel] = useState("");
   const [editorProgress, setEditorProgress] = useState(0);
 
+  const [contributors, setContributors] = useState([]); 
+  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" }); 
+
+  // --- حالات وروابط يوتيوب الجديدة ---
+  const [youtubeLinks, setYoutubeLinks] = useState([]); // سيحفظ { id: "...", url: "..." }
+  const [youtubeInput, setYoutubeInput] = useState("");
+
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
@@ -69,7 +119,7 @@ export default function AddArticle() {
   const deleteMediaFromServer = async (fileId) => {
     if (!fileId) return;
     try {
-      const response = await fetch(`/api/imagekit/delete/${fileId}`, {
+      const response = await fetch(`http://localhost:5000/api/imagekit/delete/${fileId}`, {
         method: "DELETE",
       });
       const data = await response.json();
@@ -81,39 +131,60 @@ export default function AddArticle() {
     }
   };
 
+  const addContributor = () => {
+    if (!newContributor.name.trim()) {
+      toast.error("يرجى إدخال اسم الشخص");
+      return;
+    }
+    setContributors((prev) => [...prev, newContributor]);
+    setNewContributor({ name: "", role: "writer" }); 
+  };
+
+  const removeContributor = (index) => {
+    setContributors((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // --- دوال معالجة يوتيوب ---
+  const extractYouTubeId = (url) => {
+    // Regex لاستخراج ID الفيديو من معظم صيغ روابط يوتيوب
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleAddYoutubeLink = () => {
+    if (!youtubeInput.trim()) return;
+    
+    const videoId = extractYouTubeId(youtubeInput);
+    if (!videoId) {
+      toast.error("الرابط غير صالح! يرجى إدخال رابط يوتيوب صحيح.");
+      return;
+    }
+
+    // التأكد من عدم تكرار الفيديو
+    const isExist = youtubeLinks.some(link => link.id === videoId);
+    if (isExist) {
+      toast.error("تمت إضافة هذا الفيديو مسبقاً!");
+      return;
+    }
+
+    setYoutubeLinks(prev => [...prev, { id: videoId, url: youtubeInput }]);
+    setYoutubeInput("");
+    toast.success("تم إضافة فيديو يوتيوب بنجاح");
+  };
+
+  const handleRemoveYoutubeLink = (idToRemove) => {
+    setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
+  };
+  // -------------------------
+
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      UnderlineExtension,
-      Link.configure({ 
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "text-[var(--color-secondary,#FF5A00)] underline cursor-pointer hover:text-[var(--color-primary,#0D4C54)] transition"
-        }
-      }),
-      Image.configure({ HTMLAttributes: { class: "editor-uploaded-img rounded-2xl w-full my-2" } }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-    ],
+    extensions: editorExtensions, 
     content: "<h2>ابدأ بكتابة المقال...</h2>",
     editorProps: {
       attributes: {
         class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
       },
-    },
-    onUpdate: ({ editor }) => {
-      const currentHTML = editor.getHTML();
-      setEditorMediaList((prevList) => {
-        const remainingMedia = [];
-        prevList.forEach((media) => {
-          const cleanUrl = media.url.split("?")[0];
-          if (currentHTML.includes(cleanUrl) || (media.fileId && currentHTML.includes(media.fileId))) {
-            remainingMedia.push(media);
-          } else {
-            deleteMediaFromServer(media.fileId);
-          }
-        });
-        return remainingMedia;
-      });
     },
   });
 
@@ -136,27 +207,41 @@ export default function AddArticle() {
       return;
     }
 
-    // تجهيز بنية المعرض بدون تداخل المصورين هنا
+    // 1️⃣ تجهيز مصفوفة معرض الصور العادية أولاً
     const formattedGallery = gallery.map((img) => ({
       url: img.url,
+      fileId: img.fileId, 
       caption: img.caption || ""
     }));
+
+    // 2️⃣ الحل السحري: إذا قام المستخدم برفع صورة بارزة، نضعها كأول صورة في مصفوفة الـ images
+    if (featuredImage?.url) {
+      formattedGallery.unshift({
+        url: featuredImage.url,
+        fileId: featuredImage.fileId,
+        caption: "الصورة البارزة" // كابشن تلقائي لتمييزها في قاعدة البيانات والفرونت إند
+      });
+    }
 
     const allVideos = [];
     if (videoPreview?.url) allVideos.push(videoPreview.url);
 
+    const youtubeIdsArray = youtubeLinks.map(item => item.id);
+
+    // 3️⃣ بناء الـ Payload النهائي لإرساله للباك إند
     const articlePayload = {
       title: title.trim(),
       content: contentHTML,
       category: category,
       important_rate: importance,
       isUrgent: isUrgent,
-      images: formattedGallery,  // إرسال المصفوفة المنظمة الجديدة التي تحتوي الـ Captions
-      featured_image: featuredImage?.url || "", 
+      images: formattedGallery,  // ستتضمن الصورة البارزة المرفوعة في مجلد featured + صور المعرض
       videos: allVideos,
+      youtube_videos: youtubeIdsArray, 
       hashtags: hashtags,
-      writers: writers,                  // إرسال مصفوفة الكتاب العامة للمقال
-      photographers: photographers,       // إرسال مصفوفة المصورين العامة للمقال
+      writers: writers,
+      photographers: photographers,
+      contributors: contributors, 
       status: targetStatus,
     };
 
@@ -185,6 +270,9 @@ export default function AddArticle() {
     setHashtags([]);
     setImportance(5);
     setIsUrgent(false);
+    setContributors([]);
+    setYoutubeLinks([]); // تفريغ الروابط
+    setYoutubeInput("");
     editor?.commands.setContent("<h2>ابدأ بكتابة المقال...</h2>");
   };
 
@@ -305,24 +393,21 @@ export default function AddArticle() {
     setEditorUploading(true);
     setEditorUploadLabel("جاري رفع الصورة للمحرر...");
     setEditorProgress(0);
+    
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, (pct) => setEditorProgress(pct));
       if (mediaData?.url) {
-        // طلب إدخال كابشن اختياري من الكاتب فوراً
+        
+        // طلب إدخال الكابشن من المستخدم
         const userCaption = window.prompt("اكتب تعليقاً توضيحياً (Caption) أسفل الصورة (اختياري):") || "";
         
         editor.commands.focus();
-        if (userCaption.trim() !== "") {
-          // إدراج بنية غنية تجمع الصورة والتعليق بشكل رائع وقابل للتعديل
-          editor.commands.insertContent(
-            `<figure class="editor-figure my-4 block text-center">
-              <img src="${mediaData.url}" class="rounded-2xl w-full" alt="${userCaption}"/>
-              <figcaption class="text-xs text-slate-500 mt-2 font-medium bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100 inline-block">${userCaption}</figcaption>
-             </figure><p></p>`
-          );
-        } else {
-          editor.chain().focus().setImage({ src: mediaData.url }).run();
-        }
+        
+        // 👇 استخدام commands.setImage مع تمرير الكابشن
+        editor.chain().focus().setImage({ 
+          src: mediaData.url, 
+          caption: userCaption.trim() !== "" ? userCaption : null 
+        }).run();
 
         setEditorMediaList((prev) => [...prev, mediaData]);
         toast.success("تم إدراج الصورة بنجاح", { id: "editor-img-success" });
@@ -424,6 +509,44 @@ export default function AddArticle() {
             photographers={photographers} setPhotographers={setPhotographers} // مصفوفة المصورين التفاعلية
           />
 
+          {/* قسم فريق العمل */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">فريق العمل</h2>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input 
+                placeholder="اسم الشخص" 
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200"
+                value={newContributor.name}
+                onChange={(e) => setNewContributor({...newContributor, name: e.target.value})}
+              />
+              <select 
+                className="p-3 rounded-xl border border-slate-200"
+                value={newContributor.role}
+                onChange={(e) => setNewContributor({...newContributor, role: e.target.value})}
+              >
+                <option value="writer">كاتب (Writer)</option>
+                <option value="photographer">مصور (Photographer)</option>
+                <option value="editor">محرر (Editor)</option>
+              </select>
+              <button 
+                onClick={addContributor}
+                className="bg-slate-800 text-white px-6 rounded-xl font-bold hover:bg-slate-900"
+              >
+                + إضافة
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {contributors.map((c, index) => (
+                <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <span className="font-medium text-slate-700">{c.name} - <span className="text-xs text-slate-400 uppercase">{c.role}</span></span>
+                  <button onClick={() => removeContributor(index)} className="text-red-500 text-sm hover:underline">حذف</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <EditorSection
             innerRef={contentRef} editorUploading={editorUploading} editorProgress={editorProgress}
             editorUploadLabel={editorUploadLabel} editor={editor} addImageToEditor={addImageToEditor} addVideoToEditor={addVideoToEditor}
@@ -435,6 +558,52 @@ export default function AddArticle() {
             galleryProgress={galleryProgress} handleGalleryUpload={handleGalleryUpload} gallery={gallery} handleRemoveGalleryItem={handleRemoveGalleryItem}
             setGallery={setGallery} // تمرير الـ Setter لتمكين إضافة الـ captions داخل الـ MediaSection بكفاءة
           />
+
+          {/* --- قسم روابط يوتيوب الإضافية --- */}
+          <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب (اختياري)</h2>
+            <p className="text-sm text-slate-500 mb-4">أضف روابط الفيديوهات الخارجية كبديل للرفع المباشر.</p>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              <input 
+                placeholder="https://www.youtube.com/watch?v=..." 
+                className="flex-1 min-w-[200px] p-3 rounded-xl border border-slate-200 text-left"
+                style={{ direction: "ltr" }}
+                value={youtubeInput}
+                onChange={(e) => setYoutubeInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddYoutubeLink())}
+              />
+              <button 
+                onClick={handleAddYoutubeLink}
+                className="bg-secondary text-white px-6 rounded-xl font-bold hover:bg-orange4 transition"
+              >
+                + إضافة الفيديو
+              </button>
+            </div>
+
+            {youtubeLinks.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {youtubeLinks.map((link, index) => (
+                  <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-hidden">
+                    <div className="flex items-center gap-3 truncate">
+                      <img 
+                        src={`https://img.youtube.com/vi/${link.id}/default.jpg`} 
+                        alt="thumbnail" 
+                        className="w-12 h-9 object-cover rounded-md"
+                      />
+                      <a href={link.url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline truncate" dir="ltr">
+                        {link.id}
+                      </a>
+                    </div>
+                    <button onClick={() => handleRemoveYoutubeLink(link.id)} className="text-red-500 text-sm hover:underline mr-2">
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* ---------------------------------- */}
 
           <ImportanceSection
             innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent}

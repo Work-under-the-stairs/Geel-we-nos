@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Trash2, Edit, Eye, AlertTriangle, Plus, ChevronRight, ChevronLeft, ArrowUpDown, Loader2, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useAdminArticles } from '../../../hooks/useAdmin'; // 👈 تأكدي من مسار الاستيراد الصحيح
+import { useAdminArticles } from '../../../hooks/useAdmin'; 
 
 export default function ManageArticles({ categories = [], onDeleteArticle, isDeletingArticle }) {
   const navigate = useNavigate();
@@ -11,15 +11,14 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     page: 1,
-    limit: 10, // عدد المقالات في الصفحة
+    limit: 10, 
     search: '',
     status: '',
     category: '',
-    sort: '-createdAt' // الافتراضي: الأحدث
+    sort: '-createdAt' 
   });
 
   // ================= Debounce للبحث =================
-  // عشان ما يبعتش Request للسيرفر مع كل حرف، بيستنى نص ثانية بعد ما اليوزر يخلص كتابة
   useEffect(() => {
     const timeout = setTimeout(() => {
       setFilters(prev => ({ ...prev, search: searchInput, page: 1 }));
@@ -30,9 +29,11 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
   // ================= جلب الداتا من السيرفر =================
   const { data: articlesData, isLoading, isFetching } = useAdminArticles(filters);
   
-  // استخراج الداتا (تأكدي من شكل الرد من الباك إند، غالباً بيكون data.data للمصفوفة و data.totalPages للصفحات)
   const articles = articlesData?.data || [];
   const totalPages = articlesData?.totalPages || 1;
+
+  // صورة افتراضية آمنة للجدول
+  const fallbackPlaceholder = 'https://via.placeholder.com/150';
 
   // ================= دوال التغيير =================
   const handlePageChange = (newPage) => {
@@ -143,95 +144,107 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {articles.length > 0 ? articles.map((art) => (
-                <tr key={art._id} className="hover:bg-slate-50/80 transition-colors group">
-                  
-                  {/* عمود الصورة والعنوان */}
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={art.images?.[0] || 'https://via.placeholder.com/150'} 
-                        alt={art.title} 
-                        className="w-14 h-14 rounded-xl object-cover border border-slate-100 shrink-0" 
-                      />
-                      <div className="min-w-0 max-w-[250px] md:max-w-[300px]">
-                        <p className="font-bold text-slate-800 text-sm truncate group-hover:text-[var(--color-primary)] transition-colors" title={art.title}>
-                          {art.title}
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-1 font-medium">
-                          {new Date(art.createdAt).toLocaleString('ar-EG', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true 
-                          })}
-                        </p>
+              {articles.length > 0 ? articles.map((art) => {
+                
+                // ✅ تأمين رابط الصورة (سواء الكائن الجديد أو النص القديم) قبل رندرة العنصر
+                const artImg = art.images?.[0];
+                const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
+
+                return (
+                  <tr key={art._id} className="hover:bg-slate-50/80 transition-colors group">
+                    
+                    {/* عمود الصورة والعنوان */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          // ✅ استخدام الرابط الآمن والمستخلص بشكل صحيح
+                          src={artImgUrl || fallbackPlaceholder} 
+                          alt={art.title} 
+                          className="w-14 h-14 rounded-xl object-cover border border-slate-100 shrink-0" 
+                          onError={(e) => {
+                            e.target.onerror = null; // تفادي تكرار الخطأ اللانهائي
+                            e.target.src = fallbackPlaceholder;
+                          }}
+                        />
+                        <div className="min-w-0 max-w-[250px] md:max-w-[300px]">
+                          <p className="font-bold text-slate-800 text-sm truncate group-hover:text-[var(--color-primary)] transition-colors" title={art.title}>
+                            {art.title}
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-1 font-medium">
+                            {art.createdAt ? new Date(art.createdAt).toLocaleString('ar-EG', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true 
+                            }) : 'تاريخ غير محدد'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* عمود التصنيف */}
-                  <td className="p-4 text-sm font-semibold text-slate-600">
-                    <span className="bg-slate-100 px-2.5 py-1 rounded-lg">
-                      {art.category?.name || art.category || 'غير محدد'}
-                    </span>
-                  </td>
+                    {/* عمود التصنيف */}
+                    <td className="p-4 text-sm font-semibold text-slate-600">
+                      <span className="bg-slate-100 px-2.5 py-1 rounded-lg">
+                        {art.category?.name || art.category || 'غير محدد'}
+                      </span>
+                    </td>
 
-                  {/* عمود الكاتب */}
-                  <td className="p-4 text-sm font-medium text-slate-600">
-                    {art.writer?.name || 'الإدارة'}
-                  </td>
+                    {/* عمود الكاتب */}
+                    <td className="p-4 text-sm font-medium text-slate-600">
+                      {art.writer?.name || 'الإدارة'}
+                    </td>
 
-                  {/* عمود المشاهدات */}
-                  <td className="p-4 text-center">
-                    <span className="inline-flex items-center justify-center bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg text-sm font-mono font-bold text-slate-700">
-                      {art.views || 0}
-                    </span>
-                  </td>
+                    {/* عمود المشاهدات */}
+                    <td className="p-4 text-center">
+                      <span className="inline-flex items-center justify-center bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg text-sm font-mono font-bold text-slate-700">
+                        {art.views || 0}
+                      </span>
+                    </td>
 
-                  {/* عمود الحالة */}
-                  <td className="p-4 text-center">
-                    <span className={`inline-flex px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${
-                      art.status === 'draft' // 👈 غيرنا الشرط هنا
-                        ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                        : 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                    }`}>
-                      {art.status === 'draft' ? 'مسودة' : 'منشور'} 
-                    </span>
-                  </td>
+                    {/* عمود الحالة */}
+                    <td className="p-4 text-center">
+                      <span className={`inline-flex px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${
+                        art.status === 'draft' 
+                          ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                          : 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                      }`}>
+                        {art.status === 'draft' ? 'مسودة' : 'منشور'} 
+                      </span>
+                    </td>
 
-                  {/* عمود العمليات */}
-                  <td className="p-4 text-left">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button 
-                        onClick={() => navigate(`/news/${art._id}`)} // افتراضي لصفحة عرض المقال
-                        className="p-2 text-slate-400 hover:text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" 
-                        title="عرض"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button 
-                        onClick={() => navigate(`/edit/article/${art._id}`)} 
-                        className="p-2 text-slate-400 hover:text-blue-600 bg-transparent hover:bg-blue-50 rounded-lg transition-all"
-                        title="تعديل"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(art._id)} 
-                        disabled={isDeletingArticle} 
-                        className="p-2 text-slate-400 hover:text-red-600 bg-transparent hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
-                        title="حذف"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
+                    {/* عمود العمليات */}
+                    <td className="p-4 text-left">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button 
+                          onClick={() => navigate(`/news/${art._id}`)} 
+                          className="p-2 text-slate-400 hover:text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)]/10 rounded-lg transition-all" 
+                          title="عرض"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button 
+                          onClick={() => navigate(`/edit/article/${art._id}`)} 
+                          className="p-2 text-slate-400 hover:text-blue-600 bg-transparent hover:bg-blue-50 rounded-lg transition-all"
+                          title="تعديل"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(art._id)} 
+                          disabled={isDeletingArticle} 
+                          className="p-2 text-slate-400 hover:text-red-600 bg-transparent hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
+                          title="حذف"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
 
-                </tr>
-              )) : (
+                  </tr>
+                );
+              }) : (
                 <tr>
                   <td colSpan="6" className="py-16 text-center">
                     <FileText size={48} className="mx-auto text-slate-200 mb-3" />
@@ -251,7 +264,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
             </span>
             
             <div className="flex items-center gap-1" dir="ltr">
-              {/* زر السابق (عكس الاتجاه لأن الموقع RTL) */}
               <button 
                 onClick={() => handlePageChange(filters.page - 1)}
                 disabled={filters.page === 1}
@@ -260,7 +272,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                 <ChevronLeft size={16} />
               </button>
 
-              {/* أرقام الصفحات */}
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                 <button
                   key={page}
@@ -275,7 +286,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                 </button>
               ))}
 
-              {/* زر التالي */}
               <button 
                 onClick={() => handlePageChange(filters.page + 1)}
                 disabled={filters.page === totalPages}
