@@ -323,22 +323,10 @@ export default function ArticleForm({
   // ── الإلغاء والتنظيف ──────────────────────────────────────────
   const executeCancelAndCleanup = async () => {
     const deletePromises = [];
-    
-    // Cleanup Featured Image
     if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
-    
-    // Cleanup Video
     if (videoPreview?.fileId) deletePromises.push(deleteMediaFromServer(videoPreview.fileId));
-    
-    // Cleanup Gallery Items
-    gallery.forEach((item) => { 
-      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); 
-    });
-    
-    // Cleanup Editor Media
-    editorMediaList.forEach((item) => { 
-      if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); 
-    });
+    gallery.forEach((item) => { if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); });
+    editorMediaList.forEach((item) => { if (item.fileId) deletePromises.push(deleteMediaFromServer(item.fileId)); });
 
     await Promise.all(deletePromises);
     toast.dismiss();
@@ -373,54 +361,18 @@ export default function ArticleForm({
   const handleFeaturedImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFeaturedUploading(true);
+    setFeaturedProgress(0);
     try {
-      const mediaData = await uploadToImageKit(file, IK_FOLDERS.featured);
-      // Ensure we store fileId here
-      setFeaturedImage({ url: mediaData.url, fileId: mediaData.fileId, caption: "الصورة البارزة" });
-      toast.success("تم رفع الصورة البارزة بنجاح!");
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.featured, setFeaturedProgress);
+      setFeaturedImage(mediaData);
+      toast.success("تم رفع الصورة البارزة بنجاح!", { id: "upload-featured-success" });
     } catch (err) {
-      toast.error("فشل رفع الصورة");
+      toast.error("فشل رفع الصورة", { id: "upload-featured-error" });
+    } finally {
+      setFeaturedUploading(false);
+      e.target.value = "";
     }
-  };
-
-  const handleGalleryUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const uploaded = [];
-    for (const file of files) {
-      try {
-        const mediaData = await uploadToImageKit(file, IK_FOLDERS.gallery);
-        // Ensure we store fileId here
-        uploaded.push({ url: mediaData.url, fileId: mediaData.fileId, caption: "" });
-      } catch (err) { console.error(err); }
-    }
-    setGallery((prev) => [...prev, ...uploaded]);
-  };
-
-  const addImageToEditor = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !editor) return;
-    try {
-      const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor);
-      if (mediaData?.url) {
-        setPendingEditorImageData(mediaData); // Stores { url, fileId }
-        setEditorImageCaption("");
-        setIsCaptionModalOpen(true);
-      }
-    } catch (err) { toast.error("فشل رفع الصورة للمحرر"); }
-  };
-
-  const handleConfirmEditorImageCaption = () => {
-    if (!pendingEditorImageData || !editor) return;
-    const captionText = editorImageCaption.trim() || null;
-    // Pass fileId to Tiptap
-    editor.chain().focus().setImage({ 
-        src: pendingEditorImageData.url, 
-        caption: captionText, 
-        fileId: pendingEditorImageData.fileId 
-    }).run();
-    setEditorMediaList((prev) => [...prev, pendingEditorImageData]);
-    setIsCaptionModalOpen(false);
   };
 
   const handleRemoveFeatured = async () => {
@@ -429,6 +381,27 @@ export default function ArticleForm({
     toast.success("تم حذف الصورة البارزة");
   };
 
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setGalleryUploading(true);
+    setGalleryProgress(0);
+    const uploaded = [];
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const mediaData = await uploadToImageKit(files[i], IK_FOLDERS.gallery, (pct) => {
+          setGalleryProgress(Math.round(((i / files.length) * 100) + pct / files.length));
+        });
+        uploaded.push({ ...mediaData, caption: "" });
+      } catch (err) { console.error(err); }
+    }
+    if (uploaded.length > 0) {
+      setGallery((prev) => [...prev, ...uploaded]);
+      toast.success(`تم رفع ${uploaded.length} صور بنجاح!`);
+    }
+    setGalleryUploading(false);
+    e.target.value = "";
+  };
 
   const handleRemoveGalleryItem = async (indexToRemove) => {
     const item = gallery[indexToRemove];
@@ -460,6 +433,37 @@ export default function ArticleForm({
     toast.success("تم حذف الفيديو الخارجي");
   };
 
+  const addImageToEditor = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    setEditorUploading(true);
+    setEditorUploadLabel("جاري رفع الصورة للمحرر...");
+    setEditorProgress(0);
+    try {
+      const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, setEditorProgress);
+      if (mediaData?.url) {
+        setPendingEditorImageData(mediaData);
+        setEditorImageCaption("");
+        setIsCaptionModalOpen(true);
+      }
+    } catch (err) {
+      toast.error("فشل رفع الصورة للمحرر");
+    } finally {
+      setEditorUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleConfirmEditorImageCaption = () => {
+    if (!pendingEditorImageData || !editor) return;
+    const captionText = editorImageCaption.trim() || null;
+    editor.chain().focus().setImage({ src: pendingEditorImageData.url, caption: captionText, 'data-caption': captionText }).run();
+    setEditorMediaList((prev) => [...prev, pendingEditorImageData]);
+    toast.success("تم إدراج الصورة");
+    setIsCaptionModalOpen(false);
+    setPendingEditorImageData(null);
+    setEditorImageCaption("");
+  };
 
   const addVideoToEditor = async (e) => {
     const file = e.target.files?.[0];
