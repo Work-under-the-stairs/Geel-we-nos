@@ -1,7 +1,6 @@
 const News = require("../models/News");
 const Comment = require("../models/Comment");
 const Category = require("../models/Category");
-
 // ============================================================
 // 🏠 1. الروتس الخاصة بالصفحة الرئيسية (Home Page)
 // ============================================================
@@ -249,83 +248,52 @@ exports.createNews = async (req, res, next) => {
   try {
     let imageUrls = [];
 
-    // 1. معالجة الصور الجاية من الـ Body (روابط خارجية مثلاً)
+    // 1. معالجة الصور الجاية من الـ Body
     if (req.body.images) {
       try {
         const parsedImages = Array.isArray(req.body.images)
           ? req.body.images
           : JSON.parse(req.body.images);
 
-        // توحيد شكل البيانات لتكون مصفوفة كائنات { url, caption }
         imageUrls = parsedImages.map((img) => {
           if (typeof img === "string") {
-            return { url: img, caption: "" };
+            return { url: img, fileId: "", caption: "" };
           }
-          return { url: img.url, caption: img.caption || "" };
+          return {
+            url: img.url,
+            fileId: img.fileId || "",
+            caption: img.caption || ""
+          };
         });
       } catch {
-        // لو فشل الـ Parse وكانت صورة واحدة مبعوتة كنص
-        imageUrls = [{ url: req.body.images, caption: "" }];
+        imageUrls = [{ url: req.body.images, fileId: "", caption: "" }];
       }
     }
 
-    // 2. معالجة الصور المرفوعة عبر الـ Multer (Files) - (تم تنظيف التكرار هنا)
+    // 2. معالجة الصور المرفوعة عبر الـ Multer
     if (req.files?.images) {
       for (const file of req.files.images) {
-        const result = await uploadFile(file.buffer, "news/images", "image"); 
-        imageUrls.push({ url: result.secure_url, caption: "" });
+        const result = await uploadFile(file.buffer, "news/images", "image");
+        imageUrls.push({
+          url: result.secure_url,
+          fileId: result.fileId || "",
+          caption: ""
+        });
       }
     }
 
-    let videoUrls = req.body.videos
-      ? Array.isArray(req.body.videos)
-        ? req.body.videos
-        : [req.body.videos]
-      : [];
-
-    let youtubeVideos = [];
-    if (req.body.youtube_videos) {
-      try {
-        youtubeVideos = Array.isArray(req.body.youtube_videos)
-          ? req.body.youtube_videos
-          : JSON.parse(req.body.youtube_videos);
-      } catch {
-        youtubeVideos = req.body.youtube_videos
-          .split(",")
-          .map(item => item.trim());
-      }
-    }
-
-    let hashtags = [];
-    if (req.body.hashtags) {
-      try {
-        hashtags = Array.isArray(req.body.hashtags)
-          ? req.body.hashtags
-          : JSON.parse(req.body.hashtags);
-      } catch {
-        hashtags = req.body.hashtags
-          .split(",")
-          .map(item => item.trim());
-      }
-    }
-
-    let contributors = [];
-    if (req.body.contributors) {
-      try {
-        contributors = Array.isArray(req.body.contributors)
-          ? req.body.contributors
-          : JSON.parse(req.body.contributors);
-      } catch {
-        contributors = [];
-      }
-    }
+    // معالجة الفيديوهات والهاشتاجات
+    let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
+    let youtubeVideos = req.body.youtube_videos ? (Array.isArray(req.body.youtube_videos) ? req.body.youtube_videos : JSON.parse(req.body.youtube_videos)) : [];
+    let hashtags = req.body.hashtags ? (Array.isArray(req.body.hashtags) ? req.body.hashtags : JSON.parse(req.body.hashtags)) : [];
+    let contributors = req.body.contributors ? (Array.isArray(req.body.contributors) ? req.body.contributors : JSON.parse(req.body.contributors)) : [];
 
     const article = await News.create({
       title: req.body.title,
       content: req.body.content,
       writer: req.user._id,
       category: req.body.category,
-      crossMediaId: req.body.crossMediaId ? Number(req.body.crossMediaId) : null, // 👈 أضيفي هذا السطر
+      crossMediaId: req.body.crossMediaId ? Number(req.body.crossMediaId) : null,
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
       images: imageUrls,
@@ -350,75 +318,36 @@ exports.updateNews = async (req, res, next) => {
     const article = await News.findById(req.params.id);
 
     if (!article) {
-      return res.status(404).json({
-        status: "fail",
-        message: "News not found",
-      });
+      return res.status(404).json({ status: "fail", message: "News not found" });
     }
 
-    // السماح للكاتب بتعديل مقالاته فقط
-    if (
-      req.user.role === "writer" &&
-      article.writer.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        status: "fail",
-        message: "You are not authorized to edit this article",
-      });
+    // الصلاحيات
+    if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ status: "fail", message: "You are not authorized" });
     }
 
-    const allowed = [
-      "title",
-      "content",
-      "images",
-      "videos",
-      "youtube_videos",
-      "category",
-       "crossMediaId", // تمت الإضافة هنا
-      "important_rate",
-      "isUrgent",
-      "hashtags",
-      "contributors",
-      "status",
-    ];
+    const allowed = ["title", "content", "images", "videos", "youtube_videos", "category", "crossMediaId", "important_rate", "isUrgent", "hashtags", "contributors", "status"];
+    const jsonFields = ["hashtags", "contributors", "youtube_videos", "images", "videos"];
 
-    const jsonFields = [
-      "hashtags",
-      "contributors",
-      "youtube_videos",
-      "images",
-      "videos",
-    ];
-
-    // تحويل الـ JSON strings إلى Arrays/Objects
+    // تحويل الـ JSON strings
     jsonFields.forEach((field) => {
       if (req.body[field] && typeof req.body[field] === "string") {
         try {
           req.body[field] = JSON.parse(req.body[field]);
         } catch (e) {
-          if (
-            [
-              "hashtags",
-              "contributors",
-              "youtube_videos",
-              "writers",
-              "photographers",
-            ].includes(field)
-          ) {
-            req.body[field] = req.body[field]
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean);
+          if (["hashtags", "contributors", "youtube_videos"].includes(field)) {
+            req.body[field] = req.body[field].split(",").map((item) => item.trim()).filter(Boolean);
           }
         }
       }
     });
 
-    // 2. معالجة خاصة للـ crossMediaId (تحويله لرقم إذا كان موجوداً)
+    // معالجة الـ crossMediaId
     if (req.body.crossMediaId !== undefined) {
       req.body.crossMediaId = req.body.crossMediaId === "" ? null : Number(req.body.crossMediaId);
     }
 
+    // تحديث البيانات
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) {
         article[field] = req.body[field];
@@ -427,11 +356,7 @@ exports.updateNews = async (req, res, next) => {
 
     await article.save();
 
-    res.status(200).json({
-      status: "success",
-      message: "Article updated successfully",
-      data: article,
-    });
+    res.status(200).json({ status: "success", message: "Article updated successfully", data: article });
   } catch (err) {
     next(err);
   }
@@ -440,18 +365,38 @@ exports.updateNews = async (req, res, next) => {
 // ==========================================
 // 🗑️ 6. حذف الخبر
 // ==========================================
+
 exports.deleteNews = async (req, res, next) => {
   try {
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    // 🛡️ حماية: لو اللي بيحذف كاتب، نتأكد إنه صاحب الخبر
+    // Authorization check
     if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "You are not authorized to delete this article" });
+      return res.status(403).json({ message: "You are not authorized" });
+    }
+
+    // 📸 Load imagekit here to break the circular dependency loop
+    const imagekit = require('../utils/imagekit'); 
+
+    if (article.images && article.images.length > 0) {
+      await Promise.all(
+        article.images.map(async (img) => {
+          if (img.fileId) {
+            try {
+              // Now imagekit is guaranteed to be loaded
+              await imagekit.deleteFile(img.fileId); 
+              console.log(`Successfully deleted file: ${img.fileId}`);
+            } catch (imgErr) {
+              console.error(`Failed to delete file ${img.fileId}:`, imgErr.message);
+            }
+          }
+        })
+      );
     }
 
     await article.deleteOne();
-    res.json({ status: "success", message: "Article deleted successfully" });
+    res.json({ status: "success", message: "Article and its images deleted successfully" });
   } catch (err) {
     next(err);
   }

@@ -22,6 +22,7 @@ const newsSchema = new mongoose.Schema(
     images: [
       {
         url: { type: String, required: true, trim: true },
+        fileId: { type: String, required: true, trim: true }, // Added field
         caption: { type: String, trim: true, default: "" },
       },
     ],
