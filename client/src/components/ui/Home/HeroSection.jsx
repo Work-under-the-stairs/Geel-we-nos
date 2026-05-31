@@ -98,15 +98,12 @@ function SidebarCarousel({ sidebarArticles }) {
     </div>
   );
 }
-
-// ======= MAIN COMPONENT =======
 export default function HeroSection({ articles = [] }) {
   const mainArticle = articles[0]
   const sidebarArticles = articles;
 
   if (!mainArticle) return null
 
-  // ✅ استخراج آمن لرابط صورة المقال الرئيسي الكبير
   const mainImg = mainArticle.images?.[0];
   const mainImgUrl = typeof mainImg === 'object' ? mainImg?.url : mainImg;
 
@@ -114,14 +111,12 @@ export default function HeroSection({ articles = [] }) {
     <section className="max-w-7xl mx-auto py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
-        {/* ======= Right Side: Large Featured Main Card ======= */}
         <div className="lg:col-span-2 flex">
           <Link
             to={`/news/${mainArticle._id}`}
-            className="relative block w-full rounded-3xl overflow-hidden
-                       aspect-[16/10] sm:aspect-[16/8] lg:aspect-[16/9.3] cursor-pointer group shadow-sm"
+            // 🌟 التعديل هنا: aspect-[4/3] للموبايل بيخلي الكارد أكبر وأوضح
+            className="relative block w-full rounded-3xl overflow-hidden aspect-[4/3] sm:aspect-[16/9] cursor-pointer group shadow-sm bg-slate-100"
           >
-            {/* Background Image */}
             {mainImgUrl ? (
               <img
                 src={mainImgUrl}
@@ -136,27 +131,23 @@ export default function HeroSection({ articles = [] }) {
               <div className="w-full h-full bg-gradient-to-br from-primary to-primary/60" />
             )}
 
-            {/* Linear Shadow Overlay */}
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
-            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-            {/* Main Card Content */}
-            <div className="absolute bottom-0 right-0 left-0 p-6 md:p-9 flex flex-col items-start gap-3">
-              <span className="bg-secondary text-white text-[12px] font-black
-                               px-4 py-1.5 rounded-full tracking-wide shadow-sm">
+            <div className="absolute bottom-0 right-0 left-0 p-5 md:p-9 flex flex-col items-start gap-2 md:gap-3">
+              <span className="bg-secondary text-white text-[11px] sm:text-[12px] font-black px-4 py-1.5 rounded-full tracking-wide shadow-sm">
                 {mainArticle.category?.name || 'عام'}
               </span>
 
-              <h1 className="text-white font-extrabold leading-snug
-                             text-xl sm:text-2xl md:text-[30px]
-                             max-w-2xl drop-shadow-md">
+              {/* 🌟 التعديل هنا: استخدام line-clamp للتحكم في طول العنوان */}
+              <h1 className="text-white font-extrabold leading-snug text-xl sm:text-2xl md:text-[30px] max-w-3xl drop-shadow-md line-clamp-2 md:line-clamp-3">
                 {mainArticle.title}
               </h1>
-              <p className="text-gray-300 text-sm mt-1 line-clamp-2 font-light flex-1">
+              
+              <p className="text-gray-300 text-xs sm:text-sm mt-1 line-clamp-2 font-light max-w-2xl">
                 {stripHtml(mainArticle.content)}
               </p>
-              <div className="flex items-center gap-2 text-white/75 text-[13px] font-medium">
+              
+              <div className="flex items-center gap-2 text-white/75 text-[11px] sm:text-[13px] font-medium mt-1">
                 <span>{mainArticle.writer?.name || "جيل ونص"}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40 inline-block" />
                 <span>{formatDate(mainArticle.createdAt)}</span>
@@ -165,7 +156,6 @@ export default function HeroSection({ articles = [] }) {
           </Link>
         </div>
 
-        {/* ======= Left Side: Sidebar Carousel ======= */}
         {sidebarArticles.length > 0 && (
           <div className="w-full lg:sticky lg:top-24">
             <SidebarCarousel sidebarArticles={sidebarArticles} />
