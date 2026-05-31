@@ -1,13 +1,14 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
+import { signInWithEmailAndPassword, browserLocalPersistence, setPersistence } from "firebase/auth";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Mail, Lock, LogIn, Loader2 } from "lucide-react";
 import api from "../services/api";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,14 +20,17 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. Authenticate with Firebase
+      // 1. Set persistence to local (keeps user logged in even after closing the browser tab/window)
+      await setPersistence(auth, browserLocalPersistence);
+
+      // 2. Authenticate with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // 2. Get the initial ID Token
+      // 3. Get the initial ID Token
       const idToken = await user.getIdToken();
 
-      // 3. Fetch user data from MongoDB (Interceptor will automatically attach the token now, but we pass it just in case)
+      // 4. Fetch user data from MongoDB (Interceptor will automatically attach the token now, but we pass it just in case)
       const response = await api.get(`/users/me/${user.uid}`, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
@@ -34,9 +38,9 @@ export default function Login() {
       if (response.data) {
         const userData = response.data;
         
-        // 4. Store user info (and initial token as fallback) in localStorage
+        // 5. Store user info (and initial token as fallback) in localStorage
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", idToken); 
+        // localStorage.setItem("token", idToken); 
         
         toast.success(`مرحباً بك مجدداً يا ${userData.name} 👋`);
 
@@ -70,10 +74,10 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         <form
           onSubmit={handleLogin}
-          className="bg-white/80 backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col gap-6"
+          className="bg-white backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col gap-6"
         >
           <div className="text-center space-y-3 mb-2 flex flex-col items-center">
-            <div className="w-50 h-30 bg-white p-1.5 rounded-2xl border border-none flex items-center justify-center overflow-hidden mb-2 relative group">
+            <div onClick={()=>navigate('/')} className="cursor-pointer w-50 h-30 bg-white p-1.5 rounded-2xl border border-none flex items-center justify-center overflow-hidden mb-2 relative group">
               <img src="/images/logo.jpeg" alt="جيل ونص" className="w-full h-full object-contain rounded-xl" />
             </div>
             <h2 className="text-3xl font-black text-slate-800 tracking-tight">تسجيل الدخول</h2>

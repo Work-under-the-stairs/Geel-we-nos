@@ -1,58 +1,40 @@
-import { jwtDecode } from "jwt-decode";
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
-export const logout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  window.location.reload(); 
-};
-
-export const isAuthenticated = () => {
-  const token = localStorage.getItem("token");
-  
-  if (!token) return false;
-
+export const logout = async () => {
   try {
-    // فك تشفير التوكن لمعرفة بياناته
-    const decodedToken = jwtDecode(token);
-    // الوقت الحالي بالثواني
-    const currentTime = Date.now() / 1000;
-
-    // مقارنة الوقت الحالي بوقت انتهاء التوكن
-    if (decodedToken.exp < currentTime) {
-      // لو التوكن منتهي الصلاحية، نعمل تسجيل خروج فوراً
-      logout();
-      return false;
-    }
+    await signOut(auth);
     
-    return true; // التوكن موجود وصالح
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    
+    window.location.replace("/"); 
+    
   } catch (error) {
-    // لو التوكن مش سليم أو حصل خطأ في فك التشفير
-    logout();
-    return false;
+    console.error("حدث خطأ أثناء تسجيل الخروج:", error);
   }
 };
 
-/**
- * دالة لجلب بيانات المستخدم المخزنة
- */
+
+export const isAuthenticated = () => {
+  const user = localStorage.getItem("user");
+  return !!user;
+};
+
+
 export const getUserData = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
 };
 
-/**
- * دالة لجلب اسم المستخدم (Username)
- */
+
 export const getUsername = () => {
   const user = getUserData();
   return user ? user.name : null;
 };
 
-/**
- * دالة للتأكد هل المستخدم لديه صلاحية "مدير" (Admin)
- * نفترض أن الـ role مخزنة في بيانات المستخدم (userData.role)
- */
+
 export const isAdmin = () => {
   const user = getUserData();
-  return user ? user?.role === 'admin' : false;
+  return user ? user.role === 'admin' : false;
 };

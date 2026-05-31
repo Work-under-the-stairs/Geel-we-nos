@@ -102,7 +102,7 @@ export default function Register() {
       <div className="relative z-10 w-full max-w-md">
         <form
           onSubmit={handleSubmit}
-          className="bg-white/80 backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col gap-6"
+          className="bg-white backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col gap-6"
         >
           {/* الهيدر واللوجو */}
           <div className="text-center space-y-2 mb-1 flex flex-col items-center">
