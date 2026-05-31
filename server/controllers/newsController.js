@@ -1,17 +1,17 @@
 const News = require("../models/News");
 const Comment = require("../models/Comment");
 const Category = require("../models/Category");
+
 // ============================================================
 // 🏠 1. الروتس الخاصة بالصفحة الرئيسية (Home Page)
 // ============================================================
 
-// A. الأخبار المميزة (الكارد الكبيرة واللي تحتها) بناءً على الـ important_rate
 exports.getFeatured = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 3;
 
-    const featuredNews = await News.find()
-      .sort({ important_rate: -1, createdAt: -1 }) // الأعلى أهمية ثم الأحدث
+    const featuredNews = await News.find({ status: { $ne: "draft" } }) 
+      .sort({ important_rate: -1, createdAt: -1 })
       .limit(limit)
       .populate("writer", "name avatar")
       .populate("category", "name icon_name");
@@ -26,8 +26,8 @@ exports.getUrgent = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
 
-    const urgentNews = await News.find({ isUrgent: true })
-      .sort({ createdAt: -1 }) // الأحدث أولاً
+    const urgentNews = await News.find({ isUrgent: true, status: { $ne: "draft" } })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .populate("writer", "name avatar")
       .populate("category", "name icon_name");
@@ -38,18 +38,15 @@ exports.getUrgent = async (req, res, next) => {
   }
 };
 
-
-// B. الأكثر قراءة (Trending) للموقع كله
 exports.getTrending = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
 
-    const trendingNews = await News.find()
-      .sort({ views: -1, createdAt: -1 }) // الأكثر مشاهدة
+    const trendingNews = await News.find({ status: { $ne: "draft" } })
+      .sort({ views: -1, createdAt: -1 })
       .limit(limit)
-      .select("title images views category createdAt") // سحب الحقول المطلوبة فقط للـ Sidebar
+      .select("title images views category createdAt")
       .populate("category", "name icon_name");
-
 
     res.status(200).json({ status: "success", data: trendingNews });
   } catch (error) {
@@ -57,13 +54,12 @@ exports.getTrending = async (req, res, next) => {
   }
 };
 
-// C. أحدث الأخبار في الموقع كله (Latest)
 exports.getLatest = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 8;
 
-    const latestNews = await News.find()
-      .sort({ createdAt: -1 }) // الأحدث مطلقاً
+    const latestNews = await News.find({ status: { $ne: "draft" } })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .populate("writer", "name avatar")
       .populate("category", "name icon_name");
@@ -74,34 +70,31 @@ exports.getLatest = async (req, res, next) => {
   }
 };
 
-// D. التريكة الكبيرة: أحدث X أخبار من كل قسم في Call واحد (Grouped By Category)
 exports.getGroupedByCategory = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 4;
 
-    // بنستخدم الـ Aggregate علشان نلف على الأقسام ونجيب أحدث أخبار جواها بـ Request واحد
     const groupedData = await News.aggregate([
-      { $sort: { createdAt: -1 } }, // ترتيب الأخبار كلها من الأحدث للأقدم أولاً
+      { $match: { status: { $ne: "draft" } } },
+      { $sort: { createdAt: -1 } },
       {
         $group: {
-          _id: "$category", // التجميع بناءً على الـ category ID
-          news: { $push: "$$ROOT" }, // ضخ الأخبار المرتبة جوه مصفوفة للقسم
+          _id: "$category",
+          news: { $push: "$$ROOT" },
         },
       },
       {
         $project: {
-          news: { $slice: ["$news", limit] }, // أخذ أول X أخبار بس من المصفوفة بعد الترتيب
+          news: { $slice: ["$news", limit] },
         },
       },
     ]);
 
-    // Populate لبيانات الأقسام علشان نرجع اسم القسم بدل الـ ID بتاعه
     const populatedData = await Category.populate(groupedData, {
       path: "_id",
       select: "name icon_name",
     });
 
-    // تحويل الـ Response لـ Format شيك ومريح جداً للفرونت إند: { "اسم القسم": [الأخبار] }
     const responseData = {};
     populatedData.forEach((item) => {
       if (item._id) {
@@ -123,7 +116,6 @@ exports.getGroupedByCategory = async (req, res, next) => {
 // 🗂️ 2. الروتس الخاصة بصفحة القسم (Category Page)
 // ============================================================
 
-// A. أهم خبر في قسم معين (المميز داخل القسم)
 exports.getCategoryFeatured = async (req, res, next) => {
   try {
     const { categoryName } = req.params;
@@ -131,7 +123,7 @@ exports.getCategoryFeatured = async (req, res, next) => {
     const category = await Category.findOne({ name: categoryName });
     if (!category) return res.status(404).json({ message: "Category not found" });
 
-    const featured = await News.findOne({ category: category._id })
+    const featured = await News.findOne({ category: category._id, status: { $ne: "draft" } }) 
       .sort({ important_rate: -1, createdAt: -1 })
       .populate("writer", "name avatar")
       .populate("category", "name icon_name");
@@ -142,15 +134,13 @@ exports.getCategoryFeatured = async (req, res, next) => {
   }
 };
 
-// B. أخبار القسم مع الـ Pagination (عرض المزيد)
 exports.getCategoryNews = async (req, res, next) => {
   try {
     const { categoryName } = req.params;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6; // خلّي الافتراضي 6 متناسق مع الفرونت
+    const limit = parseInt(req.query.limit) || 6;
     const skip = (page - 1) * limit;
 
-    // بنقفل البحث بحيث يدعم لو مبعوت له اسم القسم "أو" الـ ID بتاعه للحماية التامة
     const category = await Category.findOne({
       $or: [
         { name: categoryName },
@@ -160,18 +150,16 @@ exports.getCategoryNews = async (req, res, next) => {
 
     if (!category) return res.status(404).json({ message: "Category not found" });
 
-    // 🌟 التريك الحاسم: حساب إجمالي المقالات في القسم ده عشان نطلع totalPages
-    const totalArticles = await News.countDocuments({ category: category._id });
+    const totalArticles = await News.countDocuments({ category: category._id, status: { $ne: "draft" } });
     const totalPages = Math.ceil(totalArticles / limit);
 
-    const news = await News.find({ category: category._id })
+    const news = await News.find({ category: category._id, status: { $ne: "draft" } }) 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("writer", "name avatar")
       .populate("category", "name icon_name");
 
-    // 🌟 بنرجع الـ totalPages والـ totalArticles ع الجاهز للفرونت إند
     res.status(200).json({
       status: "success",
       page,
@@ -185,7 +173,6 @@ exports.getCategoryNews = async (req, res, next) => {
   }
 };
 
-// C. الأكثر قراءة داخل قسم معين (للـ Sidebar الخاص بالقسم)
 exports.getCategoryTrending = async (req, res, next) => {
   try {
     const { categoryName } = req.params;
@@ -194,7 +181,7 @@ exports.getCategoryTrending = async (req, res, next) => {
     const category = await Category.findOne({ name: categoryName });
     if (!category) return res.status(404).json({ message: "Category not found" });
 
-    const trending = await News.find({ category: category._id })
+    const trending = await News.find({ category: category._id, status: { $ne: "draft" } }) 
       .sort({ views: -1 })
       .limit(limit)
       .select("title images views createdAt");
@@ -209,16 +196,15 @@ exports.getCategoryTrending = async (req, res, next) => {
 // 📄 3. الروتس الخاصة بصفحة الخبر نفسه (Article Page)
 // ============================================================
 
-// A. جلب تفاصيل الخبر (بدون كومنتات - خفيف وسريع)
 exports.getArticleById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const article = await News.findById(id)
+    const article = await News.findOne({ _id: id, status: { $ne: "draft" } })
       .populate("writer", "name avatar biography")
       .populate("category", "name icon_name");
 
-    if (!article) return res.status(404).json({ message: "Article not found" });
+    if (!article) return res.status(404).json({ message: "Article not found or is still a draft" });
 
     res.status(200).json({ status: "success", data: article });
   } catch (error) {
@@ -226,20 +212,20 @@ exports.getArticleById = async (req, res, next) => {
   }
 };
 
-// B. تسجيل مشاهدة (تشتغل بعد بقاء اليوزر 10 ثواني في الصفحة)
 exports.trackView = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // زيادة الـ views بمقدار 1 بشكل آمن وسريع جداً بفضل الـ Index
-    await News.findByIdAndUpdate(id, { $inc: { views: 1 } });
+    await News.findOneAndUpdate(
+      { _id: id, status: { $ne: "draft" } }, 
+      { $inc: { views: 1 } }
+    );
 
-    res.status(200).json({ status: "success", message: "View tracked successfully" });
+    res.status(200).json({ status: "success", message: "View tracked successfully (if published)" });
   } catch (error) {
     next(error);
   }
 };
-
 
 // ==========================================
 // ➕ 4. إنشاء خبر جديد
@@ -248,7 +234,6 @@ exports.createNews = async (req, res, next) => {
   try {
     let imageUrls = [];
 
-    // 1. معالجة الصور الجاية من الـ Body
     if (req.body.images) {
       try {
         const parsedImages = Array.isArray(req.body.images)
@@ -270,7 +255,6 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
-    // 2. معالجة الصور المرفوعة عبر الـ Multer
     if (req.files?.images) {
       for (const file of req.files.images) {
         const result = await uploadFile(file.buffer, "news/images", "image");
@@ -282,7 +266,6 @@ exports.createNews = async (req, res, next) => {
       }
     }
 
-    // معالجة الفيديوهات والهاشتاجات
     let videoUrls = req.body.videos ? (Array.isArray(req.body.videos) ? req.body.videos : [req.body.videos]) : [];
     let youtubeVideos = req.body.youtube_videos ? (Array.isArray(req.body.youtube_videos) ? req.body.youtube_videos : JSON.parse(req.body.youtube_videos)) : [];
     let hashtags = req.body.hashtags ? (Array.isArray(req.body.hashtags) ? req.body.hashtags : JSON.parse(req.body.hashtags)) : [];
@@ -321,7 +304,6 @@ exports.updateNews = async (req, res, next) => {
       return res.status(404).json({ status: "fail", message: "News not found" });
     }
 
-    // الصلاحيات
     if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ status: "fail", message: "You are not authorized" });
     }
@@ -329,7 +311,6 @@ exports.updateNews = async (req, res, next) => {
     const allowed = ["title", "content", "images", "videos", "youtube_videos", "category", "crossMediaId", "important_rate", "isUrgent", "hashtags", "contributors", "status"];
     const jsonFields = ["hashtags", "contributors", "youtube_videos", "images", "videos"];
 
-    // تحويل الـ JSON strings
     jsonFields.forEach((field) => {
       if (req.body[field] && typeof req.body[field] === "string") {
         try {
@@ -342,12 +323,10 @@ exports.updateNews = async (req, res, next) => {
       }
     });
 
-    // معالجة الـ crossMediaId
     if (req.body.crossMediaId !== undefined) {
       req.body.crossMediaId = req.body.crossMediaId === "" ? null : Number(req.body.crossMediaId);
     }
 
-    // تحديث البيانات
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) {
         article[field] = req.body[field];
@@ -371,12 +350,10 @@ exports.deleteNews = async (req, res, next) => {
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    // Authorization check
     if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "You are not authorized" });
     }
 
-    // 📸 Load imagekit here to break the circular dependency loop
     const imagekit = require('../utils/imagekit'); 
 
     if (article.images && article.images.length > 0) {
@@ -384,7 +361,6 @@ exports.deleteNews = async (req, res, next) => {
         article.images.map(async (img) => {
           if (img.fileId) {
             try {
-              // Now imagekit is guaranteed to be loaded
               await imagekit.deleteFile(img.fileId); 
               console.log(`Successfully deleted file: ${img.fileId}`);
             } catch (imgErr) {
@@ -402,7 +378,6 @@ exports.deleteNews = async (req, res, next) => {
   }
 };
 
-
 // ==========================================
 // 📊 7. جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
 // ==========================================
@@ -414,20 +389,16 @@ exports.getAllNews = async (req, res, next) => {
 
     const filter = {};
 
-    // 1. فلترة بالقسم
     if (req.query.category) filter.category = req.query.category;
 
-    // 2. فلترة بالحالة (منشور / مسودة)
     if (req.query.status) {
       if (req.query.status === "published") {
-        // 🌟 هنجيب أي مقال حالته لا تساوي "مسودة"
         filter.status = { $ne: "draft" };
       } else {
         filter.status = req.query.status;
       }
     }
 
-    // 3. البحث في العنوان والمحتوى
     if (req.query.search) {
       filter.$or = [
         { title: { $regex: req.query.search, $options: "i" } },
@@ -435,7 +406,6 @@ exports.getAllNews = async (req, res, next) => {
       ];
     }
 
-    // 4. الترتيب
     let sortQuery = { createdAt: -1 };
     if (req.query.sort === "-views") {
       sortQuery = { views: -1, createdAt: -1 };
@@ -443,7 +413,6 @@ exports.getAllNews = async (req, res, next) => {
       sortQuery = { createdAt: -1 };
     }
 
-    // التنفيذ
     const totalArticles = await News.countDocuments(filter);
     const totalPages = Math.ceil(totalArticles / limit);
 
