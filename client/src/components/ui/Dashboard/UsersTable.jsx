@@ -104,7 +104,7 @@ export default function UsersTable() {
           >
             <option value="">الكل</option>
             <option value="user">مستخدم عادي</option>
-            <option value="admin">مدير</option>
+            <option value="admin">أدمن</option>
           </select>
 
           <div className="relative w-full sm:w-64">
@@ -167,7 +167,7 @@ export default function UsersTable() {
                           user.role === 'writer' ? 'bg-teal-50 text-teal-600 border border-teal-100' :
                           'bg-slate-100 text-slate-600 border border-slate-200'
                         }`}>
-                          {user.role === 'admin' ? 'مدير' : 'مستخدم'}
+                          {user.role === 'admin' ? 'أدمن' : 'مستخدم'}
                         </span>
                       </td>
                       <td className="py-4 text-left pl-2">
@@ -262,7 +262,7 @@ export default function UsersTable() {
                   className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 transition-all cursor-pointer font-medium text-slate-700"
                 >
                   <option value="user">مستخدم عادي (قارئ)</option>
-                  <option value="admin">مدير (صلاحيات كاملة)</option>
+                  <option value="admin">أدمن (صلاحيات كاملة)</option>
                 </select>
               </div>
             </div>
