@@ -8,6 +8,9 @@ import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
 //import StoryModal from '../components/StoryModal'; 
 //import { stories } from "../data/stories";
+import YouTube from 'react-youtube';
+import { Plyr } from "plyr-react";
+import "plyr/dist/plyr.css";
 import { useNavigate } from "react-router-dom";
 import { 
   useArticle, 
