@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import BreakingNewsBar from '../components/ui/BreakingNewsBar';
 import PopularArticles from '../components/ui/PopularArticles';
 import CategoryHeroCard from '../components/ui/Category/CategoryHeroCard';
 import ArticleGridCard from '../components/ui/Category/ArticleGridCard';
-import StoryModal from '../components/StoryModal'; // تم إضافته
-import { stories } from '../data/stories'; // استيراد بيانات القصص
+import StoryModal from '../components/StoryModal'; 
+import { stories } from '../data/stories'; 
 import {
   useCategoryFeatured,
   useCategoryTrending,
@@ -15,16 +15,14 @@ import {
   useUrgent,
 } from '../hooks/useArticles';
 import { useCategories } from '../hooks/useAdmin';
-import { useEffect } from 'react';
 
 export default function Category() {
   const { category } = useParams();
   const navigate = useNavigate();
-  const [selectedStory, setSelectedStory] = useState(null); // حالة المودال
+  const [selectedStory, setSelectedStory] = useState(null);
   
   const catName = category ? decodeURIComponent(category) : '';
 
-  // 1. جلب الأقسام
   const { data: allCategories, isLoading: isCatLoading } = useCategories();
   const { data: urgentData, isLoading: loadUrgent } = useUrgent(5);
   
@@ -35,14 +33,12 @@ export default function Category() {
     ? categoriesList.find(c => c.name === catName || c._id === catName) 
     : null;
 
-  // 2. التحقق من وجود القسم
   useEffect(() => {
     if (!isCatLoading && !currentCategory) {
       navigate('/', { replace: true });
     }
   }, [currentCategory, isCatLoading, navigate]);
 
-  // 3. الـ Hooks للبيانات
   const canFetch = !!currentCategory;
 
   const { data: heroArticle, isLoading: loadHero } = useCategoryFeatured(
@@ -64,9 +60,7 @@ export default function Category() {
   const allArticles = infiniteData?.pages?.flatMap(page => page.data) ?? [];
   const gridArticles = allArticles.filter(art => art._id !== heroArticle?._id);
 
-  // 4. دالة التعامل مع النقر على المقال
   const handleArticleClick = (article) => {
-    // التحقق هل يوجد قصة تفاعلية مرتبطة بهذا المقال
     if (article.crossMediaId) {
       const story = stories.find(s => s.id === article.crossMediaId);
       if (story) {
@@ -74,7 +68,6 @@ export default function Category() {
         return;
       }
     }
-    // إذا لم توجد قصة، انتقل لصفحة المقال العادية
     navigate(`/article/${article._id}`);
   };
 
@@ -89,8 +82,9 @@ export default function Category() {
   return (
     <div className="min-h-screen bg-[var(--color-main-bg)]" dir="rtl">
       <header className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/3 to-transparent border-b border-gray-100 py-10">
-        <div className="absolute left-35 bottom-[0px] text-primary/5 rotate-12 pointer-events-none select-none hidden md:block">
-          <DynamicIcon name={currentCategory.icon_name} className="w-40 h-40 stroke-[1.5]" />
+        
+        <div className="absolute left-[20px] top-1/2 -translate-y-1/2 sm:left-10 md:left-35 md:top-auto md:bottom-0 md:translate-y-0 text-primary/5 rotate-12 pointer-events-none select-none">
+          <DynamicIcon name={currentCategory.icon_name} className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 stroke-[1.5]" />
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10 px-6 md:px-10">
@@ -180,7 +174,6 @@ export default function Category() {
         </div>
       </main>
 
-      {/* المودال */}
       <StoryModal 
         isOpen={!!selectedStory} 
         onClose={() => setSelectedStory(null)} 
