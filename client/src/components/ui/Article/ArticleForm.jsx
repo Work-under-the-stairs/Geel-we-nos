@@ -239,12 +239,12 @@ export default function ArticleForm({
       const firstImg = initialData.images[0];
       setFeaturedImage({
         url: firstImg?.url ?? firstImg,
-        fileId: null,
+        fileId: firstImg?.fileId ?? null,
         caption: firstImg?.caption ?? "",
       });
       const extraImages = initialData.images.slice(1).map((img) => ({
         url: img?.url ?? img,
-        fileId: null,
+        fileId: img?.fileId ?? null,
         caption: img?.caption ?? "",
       }));
       setGallery(extraImages);
@@ -286,14 +286,14 @@ export default function ArticleForm({
     // Mapping both gallery and featured image to ensure they contain fileId
     const formattedGallery = gallery.map((img) => ({ 
       url: img.url, 
-      fileId: img.fileId, 
+      fileId: img.fileId || "", 
       caption: img.caption || "" 
     }));
-
+    
     if (featuredImage?.url) {
       formattedGallery.unshift({ 
         url: featuredImage.url, 
-        fileId: featuredImage.fileId, 
+        fileId: featuredImage.fileId || "", 
         caption: "الصورة البارزة" 
       });
     }
