@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import AddArticle from './pages/AddArticle'
 import { isAuthenticated,isAdmin } from './utils/auth';
 import EditArticle from './pages/EditArticle'
+import ScrollToTop from './ScrollToTop'
 
 const App = () => {
   const userData = isAuthenticated();
@@ -34,7 +35,7 @@ const App = () => {
   }, []);
   return (
     <>
-      {/* إعداد الـ Toaster ليظهر في الأعلى بشكل جمالي */}
+      <ScrollToTop />
       <Toaster position="top-center" reverseOrder={false} />
       
       <Routes>
