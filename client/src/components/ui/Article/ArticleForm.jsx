@@ -151,7 +151,8 @@ export default function ArticleForm({
   const deleteMediaFromServer = async (fileId) => {
     if (!fileId) return;
     try {
-      const response = await fetch(`/api/imagekit/delete/${fileId}`, {
+      const apiBase = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : `${window.location.origin}/api`;
+      const response = await fetch(`${apiBase}/imagekit/delete/${fileId}`, {
         method: "DELETE",
       });
       const data = await response.json();
