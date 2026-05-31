@@ -1,55 +1,227 @@
 import React, { useState } from 'react';
-import { 
-  // الأيقونات الأساسية للواجهة
-  Folder, Plus, Edit, Trash2, Search, X,
-  
-  // --- الأيقونات القديمة (30 أيقونة) ---
-  Newspaper, Globe, TrendingUp, Landmark, Scale, 
-  Briefcase, Cpu, HeartPulse, Trophy, Film, 
-  Music, BookOpen, ShieldAlert, Zap, Flame,
-  Camera, Radio, Tv, MapPin, Stethoscope,
-  Activity, Laptop, Rocket, Palette, Coins,
-  Gavel, Siren, Target, Compass, Users,
+import {
+  Folder,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  X,
 
-  // --- الأيقونات الجديدة (21 أيقونة إضافية) ---
-  Sparkles,       // حصريات / تريند / ذكاء اصطناعي
-  Car,            // سيارات ومحركات
-  Banknote,       // اقتصاد / بنوك / عملات
-  Wallet,         // مالية / محافظ
-  Building2,      // عقارات / شركات
-  Plane,          // سفر / سياحة / طيران
-  Utensils,       // طبخ / مطاعم / غذاء
-  Dumbbell,       // لياقة بدنية / رياضة
-  Medal,          // بطولات / أولمبياد
-  AlertTriangle,  // حوادث / طوارئ
-  Skull,          // جرائم / حوادث خطيرة
-  BadgeAlert,     // أخبار عاجلة / أمنية
-  Home,           // أخبار محلية / شؤون المحافظات
-  CloudRain,      // طقس / مناخ
-  Thermometer,    // درجات الحرارة
-  Coffee,         // لايف ستايل / صباحيات
-  Shirt,          // أزياء / موضة
-  MessageSquare,  // مقالات رأي / نقاشات
-  PenTool,        // تحرير / كتابات
-  Mic,            // بودكاست / مقابلات
-  Baby            // أسرة / طفولة
-} from 'lucide-react';
+  // News & General
+  Newspaper,
+  Globe,
+  Earth,
+  Home,
+  Users,
 
-// قاموس الأيقونات (51 أيقونة مخصصة للأقسام)
+  // Politics
+  Landmark,
+  Scale,
+  Vote,
+  Flag,
+  Crown,
+
+  // Economy
+  TrendingUp,
+  TrendingDown,
+  Banknote,
+  Wallet,
+  Coins,
+  Bitcoin,
+  Receipt,
+
+  // Business
+  Briefcase,
+  Building2,
+  Factory,
+  Handshake,
+
+  // Technology
+  Cpu,
+  Laptop,
+  Smartphone,
+  Rocket,
+  Satellite,
+  MonitorPlay,
+  Sparkles,
+
+  // Sports
+  Trophy,
+  Volleyball,
+  Medal,
+  Dumbbell,
+  Gamepad2,
+
+  // Health
+  HeartPulse,
+  Stethoscope,
+  Activity,
+
+  // Education
+  GraduationCap,
+  School,
+  LibraryBig,
+  BookOpen,
+
+  // Travel
+  Plane,
+  Train,
+  Ship,
+  MapPin,
+
+  // Environment
+  Leaf,
+  Trees,
+  CloudRain,
+  Thermometer,
+
+  // Security
+  ShieldAlert,
+  BadgeAlert,
+  AlertTriangle,
+  Skull,
+  Siren,
+
+  // Entertainment
+  Film,
+  Clapperboard,
+  Music,
+  Tv,
+  Radio,
+  Camera,
+
+  // Lifestyle
+  Coffee,
+  Shirt,
+  Utensils,
+  Baby,
+
+  // Writing
+  MessageSquare,
+  PenTool,
+
+  // Misc
+  Palette,
+  Flame,
+  Zap,
+  Target,
+  Compass,
+  Gem,
+  Mic,
+  Gavel,
+  Car,
+  ShoppingBag,
+  Package,
+} from "lucide-react";
+
 const ICONS_DICTIONARY = {
-  // القديم
-  Newspaper, Globe, TrendingUp, Landmark, Scale, 
-  Briefcase, Cpu, HeartPulse, Trophy, Film, 
-  Music, BookOpen, ShieldAlert, Zap, Flame,
-  Camera, Radio, Tv, MapPin, Stethoscope,
-  Activity, Laptop, Rocket, Palette, Coins,
-  Gavel, Siren, Target, Compass, Users,
-  
-  // الجديد
-  Sparkles, Car, Banknote, Wallet, Building2, 
-  Plane, Utensils, Dumbbell, Medal, AlertTriangle, 
-  Skull, BadgeAlert, Home, CloudRain, Thermometer, 
-  Coffee, Shirt, MessageSquare, PenTool, Mic, Baby
+  Folder,
+
+  // News & General
+  Newspaper,
+  Globe,
+  Earth,
+  Home,
+  Users,
+
+  // Politics
+  Landmark,
+  Scale,
+  Vote,
+  Flag,
+  Crown,
+
+  // Economy
+  TrendingUp,
+  TrendingDown,
+  Banknote,
+  Wallet,
+  Coins,
+  Bitcoin,
+  Receipt,
+
+  // Business
+  Briefcase,
+  Building2,
+  Factory,
+  Handshake,
+
+  // Technology
+  Cpu,
+  Laptop,
+  Smartphone,
+  Rocket,
+  Satellite,
+  MonitorPlay,
+  Sparkles,
+
+  // Sports
+  Trophy,
+  Volleyball,
+  Medal,
+  Dumbbell,
+  Gamepad2,
+
+  // Health
+  HeartPulse,
+  Stethoscope,
+  Activity,
+
+  // Education
+  GraduationCap,
+  School,
+  LibraryBig,
+  BookOpen,
+
+  // Travel
+  Plane,
+  Train,
+  Ship,
+  MapPin,
+
+  // Environment
+  Leaf,
+  Trees,
+  CloudRain,
+  Thermometer,
+
+  // Security
+  ShieldAlert,
+  BadgeAlert,
+  AlertTriangle,
+  Skull,
+  Siren,
+
+  // Entertainment
+  Film,
+  Clapperboard,
+  Music,
+  Tv,
+  Radio,
+  Camera,
+
+  // Lifestyle
+  Coffee,
+  Shirt,
+  Utensils,
+  Baby,
+
+  // Writing
+  MessageSquare,
+  PenTool,
+
+  // Misc
+  Palette,
+  Flame,
+  Zap,
+  Target,
+  Compass,
+  Gem,
+  Mic,
+  Gavel,
+  Car,
+  ShoppingBag,
+  Package,
 };
 
 export default function CategoriesTable({ 
