@@ -282,19 +282,29 @@ const [search, setSearch] = useState('');
         <p className="text-xs text-slate-600">سيتم حذف القسم وتحويل جميع الأخبار المرتبطة به إلى "قسم عام".</p>
         <div className="flex gap-2 mt-2">
           <button 
-            onClick={() => {
-              onDeleteCategory(id);
+            onClick={async () => {
               toast.dismiss(t.id);
-              toast.success("تم حذف القسم والاخبار الخاصة به اصبحت غير مصنفة او عامة");
+              
+              try {
+                await onDeleteCategory(id);
+                toast.success("تم حذف القسم والأخبار الخاصة به أصبحت غير مصنفة");
+              } catch (error) {
+                toast.error("فشل حذف القسم");
+              }
             }}
             className="bg-red-500 text-white px-3 py-1 rounded-md text-xs font-bold"
           >
             تأكيد الحذف
           </button>
-          <button onClick={() => toast.dismiss(t.id)} className="bg-slate-200 px-3 py-1 rounded-md text-xs font-bold">تراجع</button>
+          <button 
+            onClick={() => toast.dismiss(t.id)} 
+            className="bg-slate-200 px-3 py-1 rounded-md text-xs font-bold"
+          >
+            تراجع
+          </button>
         </div>
       </div>
-    ), { duration: 5000 });
+    ), { duration: Infinity });
   };
 
   return (

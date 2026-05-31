@@ -232,7 +232,7 @@ export default function ArticleForm({
     isContentHydratingRef.current = true;
 
     setTitle(initialData.title || "");
-    setCategory(initialData.category || "");
+    setCategory(initialData.category?._id || initialData.category || "");
     setImportance(initialData.important_rate || 5);
     setIsUrgent(initialData.isUrgent || false);
     setHashtags(initialData.hashtags || []);
@@ -245,31 +245,35 @@ export default function ArticleForm({
     if (initialData.images?.length > 0) {
       const firstImg = initialData.images[0];
       setFeaturedImage({
-        url: firstImg?.url ?? firstImg,
-        fileId: firstImg?.fileId || null, 
+        url: firstImg?.url ?? "",
+        // 🌟 هنا التأكد: لو مفيش fileId ابعت قيمة تانية أو null
+        fileId: firstImg?.fileId || "legacy_image", 
         caption: firstImg?.caption ?? "",
       });
+      
       const extraImages = initialData.images.slice(1).map((img) => ({
-        url: img?.url ?? img,
-        fileId: img?.fileId || null,   
+        url: img?.url ?? "",
+        fileId: img?.fileId || "legacy_image", 
         caption: img?.caption ?? "",
       }));
       setGallery(extraImages);
     }
 
     if (initialData.videos?.length > 0) {
-      setVideoPreview({ url: initialData.videos[0], fileId: initialData.videos[0]?.fileId || null });
+      setVideoPreview({ 
+        url: initialData.videos[0], 
+        fileId: initialData.videoFileId || "legacy_video" // لو الـ ID مش موجود
+      });
     }
 
     if (initialData.content) {
-  editor.commands.setContent(preprocessContentHTML(initialData.content));
-}
+      editor.commands.setContent(preprocessContentHTML(initialData.content));
+    }
 
     setTimeout(() => {
       isContentHydratingRef.current = false;
     }, 100);
   }, [initialData, editor, isEditMode]);
-
   // ── الإرسال (Submit) ──────────────────────────────────────────
   const handleSubmitArticle = (targetStatus) => {
     // 1. Validation

@@ -116,9 +116,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
             {filters.sort === '-views' ? 'الأكثر مشاهدة' : 'الأحدث'}
           </button>
 
-          <button onClick={() => navigate('/add-article')} className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
-            <Plus size={18} /> مقال جديد
-          </button>
         </div>
       </div>
 

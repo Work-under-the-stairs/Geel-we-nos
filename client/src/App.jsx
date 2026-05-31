@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import {Toaster} from 'react-hot-toast'
+import toast, {Toaster} from 'react-hot-toast'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Register from './pages/Register'
 import CrossMediaPage from './pages/CrossMediaPage'
@@ -36,7 +36,12 @@ const App = () => {
   return (
     <>
       <ScrollToTop />
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} 
+      toastOptions={{duration: 3000, limit: 3,onClick: (t) => toast.dismiss(t.id),
+          style: {
+            cursor: 'pointer',
+          }, 
+      }} />
       
       <Routes>
         <Route path="/register" element={<Register />} />
