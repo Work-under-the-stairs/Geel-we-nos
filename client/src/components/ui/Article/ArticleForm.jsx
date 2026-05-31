@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import UnderlineExtension from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from "@tiptap/extension-text-align";
 import Youtube from "@tiptap/extension-youtube";
 import { mergeAttributes } from "@tiptap/core";
@@ -71,6 +72,11 @@ const preprocessContentHTML = (html) => {
 
 const editorExtensions = [
   StarterKit,
+  Placeholder.configure({
+    placeholder: 'ابدأ بكتابة المقال...',
+    // This ensures the placeholder only shows when the editor is empty
+    emptyEditorClass: 'is-editor-empty', 
+  }),
   UnderlineExtension,
   Link.configure({
     openOnClick: false,
@@ -194,12 +200,12 @@ export default function ArticleForm({
   // ── إعداد Tiptap ──────────────────────────────────────────────
   const editor = useEditor({
     extensions: editorExtensions,
-    content: "<h2>ابدأ بكتابة المقال...</h2>",
-    editorProps: {
-      attributes: {
-        class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
-      },
+    content: '', // Set to empty string
+  editorProps: {
+    attributes: {
+      class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
     },
+  },
     onUpdate: ({ editor }) => {
       if (isContentHydratingRef.current) return;
       const currentHTML = editor.getHTML();
@@ -240,12 +246,12 @@ export default function ArticleForm({
       const firstImg = initialData.images[0];
       setFeaturedImage({
         url: firstImg?.url ?? firstImg,
-        fileId: firstImg?.fileId ?? null,
+        fileId: null,
         caption: firstImg?.caption ?? "",
       });
       const extraImages = initialData.images.slice(1).map((img) => ({
         url: img?.url ?? img,
-        fileId: img?.fileId ?? null,
+        fileId: null,
         caption: img?.caption ?? "",
       }));
       setGallery(extraImages);
@@ -255,7 +261,9 @@ export default function ArticleForm({
       setVideoPreview({ url: initialData.videos[0], fileId: null });
     }
 
-    editor.commands.setContent(preprocessContentHTML(initialData.content || "<h2>ابدأ بكتابة المقال...</h2>"));
+    if (initialData.content) {
+  editor.commands.setContent(preprocessContentHTML(initialData.content));
+}
 
     setTimeout(() => {
       isContentHydratingRef.current = false;
@@ -287,14 +295,14 @@ export default function ArticleForm({
     // Mapping both gallery and featured image to ensure they contain fileId
     const formattedGallery = gallery.map((img) => ({ 
       url: img.url, 
-      fileId: img.fileId || "", 
+      fileId: img.fileId, 
       caption: img.caption || "" 
     }));
-    
+
     if (featuredImage?.url) {
       formattedGallery.unshift({ 
         url: featuredImage.url, 
-        fileId: featuredImage.fileId || "", 
+        fileId: featuredImage.fileId, 
         caption: "الصورة البارزة" 
       });
     }
@@ -544,14 +552,34 @@ export default function ArticleForm({
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fb] p-3 sm:p-6" style={{ fontFamily: "Tajawal, sans-serif" }}>
       <style>{`
-        .ProseMirror h1 { font-size:28px; font-weight:800; margin-bottom:18px; }
-        .ProseMirror h2 { font-size:22px; font-weight:700; margin-bottom:14px; }
-        .ProseMirror p  { margin-bottom:14px; }
-        .ProseMirror ul { list-style:disc; padding-right:20px; }
-        .ProseMirror ol { list-style:decimal; padding-right:20px; }
-        .ProseMirror blockquote { border-right:4px solid var(--color-primary,#0D4C54); padding:14px; background:#f8fafc; border-radius:12px; margin:16px 0; }
-        .ProseMirror img, .ProseMirror video, .ProseMirror iframe { border-radius:18px; margin:18px 0; width:100%; }
-      `}</style>
+  .ProseMirror h1 { font-size:28px; font-weight:800; margin-bottom:18px; }
+  .ProseMirror h2 { font-size:22px; font-weight:700; margin-bottom:14px; }
+  .ProseMirror p  { margin-bottom:14px; }
+
+  .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  float: right;
+  pointer-events: none;
+  height: 0;
+
+  font-size: 24px;     /* حجم أكبر */
+  font-weight: 700;    /* خط عريض */
+  line-height: 1.5;
+}
+
+.ProseMirror.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  float: right;
+  pointer-events: none;
+  height: 0;
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+`}</style>
 
       {isSubmitting && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-[9999] flex items-center justify-center">
