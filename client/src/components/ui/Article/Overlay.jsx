@@ -38,11 +38,10 @@ export function ToolbarButton({ active, onClick, children, title }) {
       type="button"
       onClick={onClick}
       title={title}
-      className={`w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl border transition flex items-center justify-center shrink-0 ${
-        active
+      className={`w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl border transition flex items-center justify-center shrink-0 ${active
           ? "bg-[var(--color-primary,#0D4C54)] text-white border-[var(--color-primary,#0D4C54)]"
           : "bg-white border-slate-200 hover:border-[var(--color-primary,#0D4C54)] hover:text-[var(--color-primary,#0D4C54)]"
-      }`}
+        }`}
     >
       {children}
     </button>
@@ -70,7 +69,7 @@ export function SidebarStepper({ basicInfoRef, contentRef, mediaRef, importanceR
 
   return (
     <div className="w-full bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm flex flex-col pb-5" dir="rtl">
-      
+
       {/* هيدر المراحل */}
       <div className="bg-[var(--color-primary,#0D4C54)] p-4 sm:p-5 text-white text-center rounded-t-[27px] mb-4">
         <h2 className="text-lg sm:text-xl font-black">المراحل</h2>
@@ -167,8 +166,27 @@ export function BasicInfoSection({
         </div>
       </div>
 
-<div className="mt-4">
-  <label className="block mb-2 text-sm font-bold text-slate-700">الهاشتاجات</label>
+      <div className="mt-4">
+  {/* حاوية العنوان والزر */}
+  <div className="flex items-center justify-between mb-2">
+    <label className="text-sm font-bold text-slate-700">الهاشتاجات</label>
+    
+    {/* زر الإضافة يظهر في الجهة اليسرى */}
+    {hashtagInput.trim().length > 0 && (
+      <button
+        type="button"
+        onClick={() => {
+          const e = { key: 'Enter', preventDefault: () => { } };
+          handleHashtagKeyDown(e);
+        }}
+        className="h-8 px-4 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white text-xs font-bold hover:opacity-90 transition shadow-sm"
+      >
+        إضافة
+      </button>
+    )}
+  </div>
+
+  {/* حاوية الهاشتاجات وحقل الإدخال */}
   <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
     {hashtags.map((tag, i) => (
       <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
@@ -177,33 +195,14 @@ export function BasicInfoSection({
       </div>
     ))}
     
-    {/* تم إضافة container مرن هنا ليحتوي حقل الإدخال والزر */}
-    <div className="flex-1 min-w-[150px] flex items-center gap-1">
-      <input
-        type="text"
-        value={hashtagInput}
-        onChange={(e) => setHashtagInput(e.target.value)}
-        onKeyDown={handleHashtagKeyDown}
-        placeholder="اكتب هاشتاج..."
-        className="flex-1 h-10 outline-none text-sm px-2"
-      />
-      
-      {/* زر الإضافة الذي يظهر فقط عند الكتابة */}
-      {hashtagInput.trim().length > 0 && (
-        <button
-          type="button"
-          onClick={() => {
-            // استدعاء نفس منطق إضافة الهاشتاج الموجود في handleHashtagKeyDown
-            // تأكد من تمرير حدث وهمي أو تعديل منطق الإضافة ليعمل هنا
-            const e = { key: 'Enter', preventDefault: () => {} };
-            handleHashtagKeyDown(e); 
-          }}
-          className="h-9 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
-        >
-          إضافة
-        </button>
-      )}
-    </div>
+    <input
+      type="text"
+      value={hashtagInput}
+      onChange={(e) => setHashtagInput(e.target.value)}
+      onKeyDown={handleHashtagKeyDown}
+      placeholder="اكتب هاشتاج واضغط Enter أو زر إضافة..."
+      className="flex-1 min-w-[150px] h-10 outline-none text-sm px-2"
+    />
   </div>
 </div>
 
@@ -254,10 +253,10 @@ export function EditorSection({
       toast.error("يرجى إدخال رابط صحيح");
       return;
     }
-    
+
     editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
     toast.success("تم إضافة الرابط بنجاح");
-    
+
     setShowLinkInput(false);
     setLinkUrl("");
   };
@@ -267,10 +266,10 @@ export function EditorSection({
     toast.success("تم إزالة الرابط");
   };
 
-return (
+  return (
     <div ref={innerRef} className="bg-white rounded-[28px] border border-slate-200 shadow-sm scroll-mt-24 relative">
       {/* 🌟 تم مسح كلاس overflow-hidden من الـ div الأب لكي يعمل الـ sticky */}
-      
+
       {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
 
       {/* 🌟 ضفنا rounded-t-[28px] عشان نحافظ على شكل التصميم، وخلينا z-20 */}
@@ -290,7 +289,7 @@ return (
         <ToolbarButton title="قائمة نقطية" onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={17} /></ToolbarButton>
         <ToolbarButton title="قائمة رقمية" onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={17} /></ToolbarButton>
         <ToolbarButton title="اقتباس" onClick={() => editor?.chain().focus().toggleBlockquote().run()}><Quote size={17} /></ToolbarButton>
-        
+
         <ToolbarButton title="محاذاة لليمين" onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
         <ToolbarButton title="محاذاة للوسط" onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
         <ToolbarButton title="محاذاة لليسار" onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
@@ -305,9 +304,9 @@ return (
           <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
         </label>
 
-        <ToolbarButton 
+        <ToolbarButton
           title="إضافة أو إزالة رابط"
-          active={editor?.isActive("link")} 
+          active={editor?.isActive("link")}
           onClick={() => {
             if (!editor) return;
             if (editor.isActive("link")) {
@@ -335,13 +334,13 @@ return (
             dir="ltr"
             className="flex-1 h-10 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary,#0D4C54)] text-sm text-left"
           />
-          <button 
+          <button
             onClick={handleSaveLink}
             className="h-10 px-5 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white text-sm font-bold hover:opacity-90 transition"
           >
             إضافة
           </button>
-          <button 
+          <button
             onClick={() => setShowLinkInput(false)}
             className="h-10 px-5 rounded-xl bg-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-300 transition"
           >
@@ -351,8 +350,8 @@ return (
       )}
 
       <div className="p-4 sm:p-6 min-h-[300px]">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className="outline-none prose max-w-none text-slate-800
             [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-blue-800 [&_a]:cursor-pointer
             [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-slate-200 [&_img]:shadow-sm [&_img]:mx-auto
