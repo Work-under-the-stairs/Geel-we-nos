@@ -167,25 +167,45 @@ export function BasicInfoSection({
         </div>
       </div>
 
-      <div className="mt-4">
-        <label className="block mb-2 text-sm font-bold text-slate-700">الهاشتاجات</label>
-        <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
-          {hashtags.map((tag, i) => (
-            <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
-              <span>{tag}</span>
-              <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
-            </div>
-          ))}
-          <input
-            type="text"
-            value={hashtagInput}
-            onChange={(e) => setHashtagInput(e.target.value)}
-            onKeyDown={handleHashtagKeyDown}
-            placeholder="اكتب هاشتاج واضغط Enter"
-            className="flex-1 min-w-[180px] h-10 outline-none text-sm"
-          />
-        </div>
+<div className="mt-4">
+  <label className="block mb-2 text-sm font-bold text-slate-700">الهاشتاجات</label>
+  <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
+    {hashtags.map((tag, i) => (
+      <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
+        <span>{tag}</span>
+        <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
       </div>
+    ))}
+    
+    {/* تم إضافة container مرن هنا ليحتوي حقل الإدخال والزر */}
+    <div className="flex-1 min-w-[150px] flex items-center gap-1">
+      <input
+        type="text"
+        value={hashtagInput}
+        onChange={(e) => setHashtagInput(e.target.value)}
+        onKeyDown={handleHashtagKeyDown}
+        placeholder="اكتب هاشتاج..."
+        className="flex-1 h-10 outline-none text-sm px-2"
+      />
+      
+      {/* زر الإضافة الذي يظهر فقط عند الكتابة */}
+      {hashtagInput.trim().length > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            // استدعاء نفس منطق إضافة الهاشتاج الموجود في handleHashtagKeyDown
+            // تأكد من تمرير حدث وهمي أو تعديل منطق الإضافة ليعمل هنا
+            const e = { key: 'Enter', preventDefault: () => {} };
+            handleHashtagKeyDown(e); 
+          }}
+          className="h-9 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+        >
+          إضافة
+        </button>
+      )}
+    </div>
+  </div>
+</div>
 
       <div className="mt-6">
         <label className="block mb-2 text-sm font-bold text-slate-700">الصورة البارزة</label>
