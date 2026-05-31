@@ -28,43 +28,53 @@ export default function MultimediaHub({ multimediaArticles: categoryObject }) {
 
         {/* ======= Content Grid ======= */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {displayArticles.map((art) => (
-            <Link
-              key={art._id}
-              to={`/news/${art._id}`}
-              className="group relative flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer"
-            >
-              {/* Thumbnail Container with Play Overlay */}
-              <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-white/5 mb-4">
-                <img
-                  src={art.images?.[0]}
-                  alt={art.title}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
-                  onError={(e) => { e.target.src = "/default-podcast.png"; }} // حماية ضد الـ 404
-                />
-                {/* Glowing Audio/Video Play Button */}
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:bg-secondary/90 transition-all duration-300">
-                    <Play size={20} fill="currentColor" className="mr-0.5" />
+          {displayArticles.map((art) => {
+            // ✅ استخراج آمن تماماً لرابط صورة البودكاست (يدعم كائن الباك إند الجديد والنصوص القديمة)
+            const artImg = art.images?.[0];
+            const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
+
+            return (
+              <Link
+                key={art._id}
+                to={`/news/${art._id}`}
+                className="group relative flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+              >
+                {/* Thumbnail Container with Play Overlay */}
+                <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-white/5 mb-4">
+                  <img
+                    // ✅ تم التعديل هنا لربط الرابط المستخرج والجاهز
+                    src={artImgUrl || "/default-podcast.png"}
+                    alt={art.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                    onError={(e) => { 
+                      e.target.onerror = null; // حماية لقطع اللوب اللانهائي لو الصورة الافتراضية بها مشكلة بالسيرفر
+                      e.target.src = "/default-podcast.png"; 
+                    }} 
+                  />
+                  {/* Glowing Audio/Video Play Button */}
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:bg-secondary/90 transition-all duration-300">
+                      <Play size={20} fill="currentColor" className="mr-0.5" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Text Info */}
-              <div className="flex flex-col gap-2 flex-1 justify-center">
-                <span className="text-secondary text-[11px] font-black tracking-widest uppercase">
-                  استمع الآن ✦
-                </span>
-                <h3 className="font-extrabold text-[15px] sm:text-[16px] leading-snug line-clamp-2 text-white group-hover:text-secondary transition-colors">
-                  {art.title}
-                </h3>
-                {/* تأمين طباعة اسم الكاتب سواء كان أوبجكت بعد الـ Populate أو نص عادي */}
-                <span className="text-white/50 text-xs font-medium">
-                  {art.writer?.name || "جيل ونص"}
-                </span>
-              </div>
-            </Link>
-          ))}
+                {/* Text Info */}
+                <div className="flex flex-col gap-2 flex-1 justify-center">
+                  <span className="text-secondary text-[11px] font-black tracking-widest uppercase">
+                    استمع الآن ✦
+                  </span>
+                  <h3 className="font-extrabold text-[15px] sm:text-[16px] leading-snug line-clamp-2 text-white group-hover:text-secondary transition-colors">
+                    {art.title}
+                  </h3>
+                  {/* تأمين طباعة اسم الكاتب سواء كان أوبجكت بعد الـ Populate أو نص عادي */}
+                  <span className="text-white/50 text-xs font-medium">
+                    {art.writer?.name || "جيل ونص"}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
       </div>

@@ -21,7 +21,7 @@ export default function ArticleDetail() {
   const { id } = useParams();
 
   // === 1. تفعيل الهوكس الخاصة بالباك إند ===
-  useTrackView(id); // الهوك العبقري هيسجل المشاهدة بعد 10 ثواني في صمت
+  useTrackView(id); // الهوك يسجل المشاهدة بعد 10 ثواني في صمت
   
   const { data: article, isLoading: loadArticle } = useArticle(id);
   const { data: commentsData, isLoading: loadComments } = useComments(id);
@@ -33,12 +33,17 @@ export default function ArticleDetail() {
   const [activeMedia, setActiveMedia] = useState(null);
   const [newComment, setNewComment] = useState("");
 
-  // لضبط الميديا الافتراضية أول ما الخبر يجي من الباك إند
+  // ✅ تعديل: لضبط الميديا الافتراضية مع دعم هيكل الـ Object الجديد للصور
   useEffect(() => {
     if (article?.images?.length > 0) {
-      setActiveMedia({ type: 'image', url: article.images[0] });
+      const firstImg = article.images[0];
+      // فحص احتياطي إذا كانت الصورة كائن أو نص عادي (لدعم المقالات القديمة والجديدة معاً)
+      const imgUrl = typeof firstImg === 'object' ? firstImg?.url : firstImg;
+      const imgCaption = typeof firstImg === 'object' ? firstImg?.caption : '';
+      
+      setActiveMedia({ type: 'image', url: imgUrl, caption: imgCaption });
     } else if (article?.image) {
-      setActiveMedia({ type: 'image', url: article.image });
+      setActiveMedia({ type: 'image', url: article.image, caption: '' });
     } else if (article?.videos?.length > 0) {
       setActiveMedia({ type: 'video', url: article.videos[0] });
     } else if (article?.youtube_videos?.length > 0) {
@@ -115,11 +120,19 @@ export default function ArticleDetail() {
               <div className="space-y-4">
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-gray-950 shadow-md">
                   {activeMedia.type === 'image' ? (
-                    <img 
-                      src={activeMedia.url} 
-                      alt={article.title} 
-                      className="w-full h-full object-cover transition-opacity duration-300"
-                    />
+                    <div className="w-full h-full relative">
+                      <img 
+                        src={activeMedia.url} 
+                        alt={article.title} 
+                        className="w-full h-full object-cover transition-opacity duration-300"
+                      />
+                      {/* ✅ إضافة ذكية: عرض التعليق التوضيحي للصورة إذا كان متوفراً */}
+                      {activeMedia.caption && activeMedia.caption.trim() !== "" && (
+                        <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium backdrop-blur-xs">
+                          {activeMedia.caption}
+                        </div>
+                      )}
+                    </div>
                   ) : activeMedia.type === 'video' ? (
                     <video 
                       src={activeMedia.url} 
@@ -127,7 +140,7 @@ export default function ArticleDetail() {
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    /* مشغل يوتيوب الأنيق مع إعدادات التشغيل الفوري النظيف وحظر المقترحات الخارجية واللوجو الخاص بها */
+                    /* مشغل يوتيوب الأنيق */
                     <iframe
                       src={`https://www.youtube.com/embed/${activeMedia.id}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&controls=1`}
                       title={article.title}
@@ -143,18 +156,25 @@ export default function ArticleDetail() {
                 {totalMediaCount > 1 && (
                   <div className="flex flex-wrap gap-3 overflow-x-auto py-1 custom-scrollbar">
                     
-                    {/* أ. عرض الصور أولاً */}
-                    {article.images?.map((imgUrl, idx) => (
-                      <button
-                        key={`img-${idx}`}
-                        onClick={() => setActiveMedia({ type: 'image', url: imgUrl })}
-                        className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden bg-gray-100 border-2 transition-all shrink-0 ${
-                          activeMedia?.type === 'image' && activeMedia?.url === imgUrl ? 'border-[var(--color-secondary)] scale-95 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={imgUrl} alt="" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
+                    {/* ✅ أ. عرض الصور أولاً (تم التعديل لاستخراج الروابط كـ Object) */}
+                    {article.images?.map((img, idx) => {
+                      const imgUrl = typeof img === 'object' ? img?.url : img;
+                      const imgCaption = typeof img === 'object' ? img?.caption : '';
+                      
+                      return (
+                        <button
+                          key={`img-${idx}`}
+                          onClick={() => setActiveMedia({ type: 'image', url: imgUrl, caption: imgCaption })}
+                          className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden bg-gray-100 border-2 transition-all shrink-0 ${
+                            activeMedia?.type === 'image' && activeMedia?.url === imgUrl 
+                              ? 'border-[var(--color-secondary)] scale-95 shadow-sm' 
+                              : 'border-transparent opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      );
+                    })}
 
                     {/* ب. عرض فيديوهات ImageKit تالياً */}
                     {article.videos?.map((vidUrl, idx) => (
@@ -172,7 +192,7 @@ export default function ArticleDetail() {
                       </button>
                     ))}
 
-                    {/* ج. عرض فيديوهات يوتيوب في نهاية الشريط مع الصور المصغرة المباشرة لها من يوتيوب */}
+                    {/* ج. عرض فيديوهات يوتيوب في نهاية الشريط */}
                     {article.youtube_videos?.map((videoId, idx) => (
                       <button
                         key={`yt-${idx}`}
@@ -197,12 +217,14 @@ export default function ArticleDetail() {
               </div>
             )}
 
+            {/* محتوى المقال النصي الرئيسي */}
             <div 
               style={{ fontFamily: "'Cairo', sans-serif" }}
               className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
+            {/* الهاشتاجات */}
             {article.hashtags && article.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
                 {article.hashtags.map((tag, index) => (
@@ -246,7 +268,7 @@ export default function ArticleDetail() {
                 </div>
               </form>
 
-              {/* قائمة التعليقات بالردود بتاعتها */}
+              {/* قائمة التعليقات */}
               <div className="space-y-4">
                 {loadComments ? (
                   <div className="flex justify-center py-4"><Loader2 className="animate-spin text-gray-400" /></div>

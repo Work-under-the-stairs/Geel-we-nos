@@ -12,10 +12,10 @@ function SidebarCarousel({ sidebarArticles }) {
   const [translateY, setTranslateY] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
+  // ✅ توحيد الحسبة هنا وفي الدالة السفلية لضمان سلاسة الأنميشن (120px height + 16px margin = 136px)
+  const cardHeightWithMargin = 136; 
+
   useEffect(() => {
-    // Height of ONE card including its margin bottom (100px height + 16px margin = 116px)
-    const cardHeightWithMargin = 136; 
-    
     const interval = setInterval(() => {
       setIsTransitioning(true);
       // Slide up by exactly one card height
@@ -23,11 +23,10 @@ function SidebarCarousel({ sidebarArticles }) {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [cardHeightWithMargin]);
 
   // Reset positioning silently when reaching the end of the original list
   const handleTransitionEnd = () => {
-    const cardHeightWithMargin = 116;
     const maxScroll = sidebarArticles.length * cardHeightWithMargin;
     
     if (Math.abs(translateY) >= maxScroll) {
@@ -47,46 +46,52 @@ function SidebarCarousel({ sidebarArticles }) {
       </div>
 
       {/* ======= Vertical Sliding Carousel Container ======= */}
-      {/* FIXED: Height for 3 larger cards -> (3 * 100px) + (2 * 16px) = 332px */}
       <div className="overflow-hidden relative h-[420px] w-full pt-5">
         <div 
           className={`flex flex-col ${isTransitioning ? 'transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1)' : ''}`}
           style={{ transform: `translateY(${translateY}px)` }}
           onTransitionEnd={handleTransitionEnd}
         >
-          {doubledArticles.map((art, idx) => (
-            <Link
-              key={`${art._id}-${idx}`}
-              to={`/news/${art._id}`}
-              className="h-[120px] mb-4 flex items-center gap-4 bg-transparent border-b border-slate-100 pb-4 last:border-0 last:mb-0 group cursor-pointer flex-shrink-0"
-            >
-              {/* Enlarged Image Container */}
-              <div className="w-34 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50 shadow-sm">
-                <img
-                  src={art.images?.[0]}
-                  alt={art.title}
-                  className="w-full h-full object-cover ..."
-                  onError={(e) => { 
-                    e.target.onerror = null;
-                    e.target.src = "/default-news.png"; 
-                  }}/>
-              </div>
+          {doubledArticles.map((art, idx) => {
+            // ✅ استخراج آمن لرابط الصورة بالكاروسيل الجانبي
+            const artImg = art.images?.[0];
+            const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
-              {/* Enhanced Content area with comfortable line heights */}
-              <div className="flex flex-col gap-1 flex-1 min-w-0 py-0.5">
-                <span className="text-secondary font-black text-[11px] uppercase tracking-wider">
-                  {art.category?.name || 'عام'}
-                </span>
-                <h4 className="text-primary font-extrabold text-[14px] sm:text-[15px] leading-snug 
-                               line-clamp-2 group-hover:text-secondary transition-colors duration-200">
-                  {art.title}
-                </h4>
-                <span className="text-slate-400 text-[12px] font-medium">
-                  {formatDate(art.createdAt)}
-                </span>
-              </div>
-            </Link>
-          ))}
+            return (
+              <Link
+                key={`${art._id}-${idx}`}
+                to={`/news/${art._id}`}
+                className="h-[120px] mb-4 flex items-center gap-4 bg-transparent border-b border-slate-100 pb-4 last:border-0 last:mb-0 group cursor-pointer flex-shrink-0"
+              >
+                {/* Enlarged Image Container */}
+                <div className="w-34 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50 shadow-sm">
+                  <img
+                    src={artImgUrl || "/default-news.png"}
+                    alt={art.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { 
+                      e.target.onerror = null;
+                      e.target.src = "/default-news.png"; 
+                    }}
+                  />
+                </div>
+
+                {/* Enhanced Content area with comfortable line heights */}
+                <div className="flex flex-col gap-1 flex-1 min-w-0 py-0.5">
+                  <span className="text-secondary font-black text-[11px] uppercase tracking-wider">
+                    {art.category?.name || 'عام'}
+                  </span>
+                  <h4 className="text-primary font-extrabold text-[14px] sm:text-[15px] leading-snug 
+                                 line-clamp-2 group-hover:text-secondary transition-colors duration-200">
+                    {art.title}
+                  </h4>
+                  <span className="text-slate-400 text-[12px] font-medium">
+                    {formatDate(art.createdAt)}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -101,6 +106,10 @@ export default function HeroSection({ articles = [] }) {
 
   if (!mainArticle) return null
 
+  // ✅ استخراج آمن لرابط صورة المقال الرئيسي الكبير
+  const mainImg = mainArticle.images?.[0];
+  const mainImgUrl = typeof mainImg === 'object' ? mainImg?.url : mainImg;
+
   return (
     <section className="max-w-7xl mx-auto py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -113,16 +122,16 @@ export default function HeroSection({ articles = [] }) {
                        aspect-[16/10] sm:aspect-[16/8] lg:aspect-[16/9.3] cursor-pointer group shadow-sm"
           >
             {/* Background Image */}
-            {mainArticle.images?.[0] ? (
-            <img
-              src={articles[0]?.images?.[0] || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='9' cy='9' r='2'%3E%3C/circle%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'%3E%3C/path%3E%3C/svg%3E"}
-              alt={articles[0]?.title}
-              className="..."
-              onError={(e) => { 
-                e.target.onerror = null;
-                e.target.src = "/default-news.png"; 
-              }}
-            />
+            {mainImgUrl ? (
+              <img
+                src={mainImgUrl}
+                alt={mainArticle.title}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-102"
+                onError={(e) => { 
+                  e.target.onerror = null;
+                  e.target.src = "/default-news.png"; 
+                }}
+              />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary to-primary/60" />
             )}
@@ -144,7 +153,7 @@ export default function HeroSection({ articles = [] }) {
                              max-w-2xl drop-shadow-md">
                 {mainArticle.title}
               </h1>
-              <p className="text-gray-500 text-sm mt-2 line-clamp-2 font-light flex-1">
+              <p className="text-gray-300 text-sm mt-1 line-clamp-2 font-light flex-1">
                 {stripHtml(mainArticle.content)}
               </p>
               <div className="flex items-center gap-2 text-white/75 text-[13px] font-medium">

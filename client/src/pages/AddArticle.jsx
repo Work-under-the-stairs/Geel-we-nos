@@ -7,7 +7,7 @@ import UnderlineExtension from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-
+import { mergeAttributes } from "@tiptap/core";
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
 
@@ -23,6 +23,49 @@ import {
   ActionButtonsSection
 } from "../components/ui/Article/Overlay";
 
+// 🌟 تعريف امتداد مخصص للصور يدعم الكابشن
+const ImageWithCaption = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      caption: {
+        default: null,
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { caption, ...rest } = HTMLAttributes;
+    
+    // لو فيه كابشن، اعرض الصورة جوه <figure> مع <figcaption>
+    if (caption) {
+      return [
+        'figure', 
+        { class: 'editor-figure my-4 block text-center' },
+        ['img', mergeAttributes(this.options.HTMLAttributes, rest)],
+        ['figcaption', { class: 'text-xs text-slate-500 mt-2 font-medium bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-100 inline-block' }, caption],
+      ];
+    }
+
+    // لو مفيش كابشن، اعرض الصورة عادية
+    return ['img', mergeAttributes(this.options.HTMLAttributes, rest)];
+  },
+});
+
+const editorExtensions = [
+  StarterKit,
+  UnderlineExtension,
+  Link.configure({ 
+    openOnClick: false,
+    HTMLAttributes: {
+      class: "text-[var(--color-secondary,#FF5A00)] underline cursor-pointer hover:text-[var(--color-primary,#0D4C54)] transition"
+    }
+  }),
+  ImageWithCaption.configure({ 
+    HTMLAttributes: { class: "editor-uploaded-img rounded-2xl w-full my-2" } 
+  }),
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
+];
+
 export default function AddArticle() {
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
   const createArticleMutation = useCreateArticle();
@@ -34,6 +77,10 @@ export default function AddArticle() {
   const [isUrgent, setIsUrgent] = useState(false);
   const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
+
+  // قوائم طاقم العمل العامة للمقال ككل
+  const [writers, setWriters] = useState([]);
+  const [photographers, setPhotographers] = useState([]);
 
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
@@ -72,7 +119,7 @@ export default function AddArticle() {
   const deleteMediaFromServer = async (fileId) => {
     if (!fileId) return;
     try {
-      const response = await fetch(`/api/imagekit/delete/${fileId}`, {
+      const response = await fetch(`http://localhost:5000/api/imagekit/delete/${fileId}`, {
         method: "DELETE",
       });
       const data = await response.json();
@@ -132,33 +179,12 @@ export default function AddArticle() {
   // -------------------------
 
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      UnderlineExtension,
-      Link.configure({ openOnClick: false }),
-      Image.configure({ HTMLAttributes: { class: "editor-uploaded-img" } }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-    ],
+    extensions: editorExtensions, 
     content: "<h2>ابدأ بكتابة المقال...</h2>",
     editorProps: {
       attributes: {
         class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
       },
-    },
-    onUpdate: ({ editor }) => {
-      const currentHTML = editor.getHTML();
-      setEditorMediaList((prevList) => {
-        const remainingMedia = [];
-        prevList.forEach((media) => {
-          const cleanUrl = media.url.split("?")[0];
-          if (currentHTML.includes(cleanUrl) || (media.fileId && currentHTML.includes(media.fileId))) {
-            remainingMedia.push(media);
-          } else {
-            deleteMediaFromServer(media.fileId);
-          }
-        });
-        return remainingMedia;
-      });
     },
   });
 
@@ -181,26 +207,40 @@ export default function AddArticle() {
       return;
     }
 
-    const allImages = [];
-    if (featuredImage?.url) allImages.push(featuredImage.url);
-    gallery.forEach((img) => { if (img.url) allImages.push(img.url); });
+    // 1️⃣ تجهيز مصفوفة معرض الصور العادية أولاً
+    const formattedGallery = gallery.map((img) => ({
+      url: img.url,
+      fileId: img.fileId, 
+      caption: img.caption || ""
+    }));
+
+    // 2️⃣ الحل السحري: إذا قام المستخدم برفع صورة بارزة، نضعها كأول صورة في مصفوفة الـ images
+    if (featuredImage?.url) {
+      formattedGallery.unshift({
+        url: featuredImage.url,
+        fileId: featuredImage.fileId,
+        caption: "الصورة البارزة" // كابشن تلقائي لتمييزها في قاعدة البيانات والفرونت إند
+      });
+    }
 
     const allVideos = [];
     if (videoPreview?.url) allVideos.push(videoPreview.url);
 
-    // تجهيز مصفوفة أيديهات يوتيوب
     const youtubeIdsArray = youtubeLinks.map(item => item.id);
 
+    // 3️⃣ بناء الـ Payload النهائي لإرساله للباك إند
     const articlePayload = {
       title: title.trim(),
       content: contentHTML,
       category: category,
       important_rate: importance,
       isUrgent: isUrgent,
-      images: allImages,
+      images: formattedGallery,  // ستتضمن الصورة البارزة المرفوعة في مجلد featured + صور المعرض
       videos: allVideos,
-      youtube_videos: youtubeIdsArray, // إرسال أيديهات يوتيوب للباك اند
+      youtube_videos: youtubeIdsArray, 
       hashtags: hashtags,
+      writers: writers,
+      photographers: photographers,
       contributors: contributors, 
       status: targetStatus,
     };
@@ -222,6 +262,8 @@ export default function AddArticle() {
     setFeaturedImage(null);
     setVideoPreview(null);
     setGallery([]);
+    setWriters([]);
+    setPhotographers([]);
     setEditorMediaList([]);
     setTitle("");
     setCategory("");
@@ -315,7 +357,8 @@ export default function AddArticle() {
           const base = (i / files.length) * 100;
           setGalleryProgress(Math.round(base + pct / files.length));
         });
-        uploaded.push(mediaData);
+        // إضافة هيكلية الـ Caption الافتراضي لكل صورة مرفوعة في المعرض الإضافي
+        uploaded.push({ ...mediaData, caption: "" });
       } catch (err) { console.error(err); }
     }
     if (uploaded.length > 0) {
@@ -343,18 +386,31 @@ export default function AddArticle() {
     }
   };
 
+  // 📝 إضافة الصورة للمحرر مع نافذة إدخال النص التوضيحي (Caption) الفوري المدمج
   const addImageToEditor = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     setEditorUploading(true);
     setEditorUploadLabel("جاري رفع الصورة للمحرر...");
     setEditorProgress(0);
+    
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, (pct) => setEditorProgress(pct));
       if (mediaData?.url) {
-        editor.chain().focus().setImage({ src: mediaData.url }).run();
+        
+        // طلب إدخال الكابشن من المستخدم
+        const userCaption = window.prompt("اكتب تعليقاً توضيحياً (Caption) أسفل الصورة (اختياري):") || "";
+        
+        editor.commands.focus();
+        
+        // 👇 استخدام commands.setImage مع تمرير الكابشن
+        editor.chain().focus().setImage({ 
+          src: mediaData.url, 
+          caption: userCaption.trim() !== "" ? userCaption : null 
+        }).run();
+
         setEditorMediaList((prev) => [...prev, mediaData]);
-        toast.success("تم إدراج الصورة", { id: "editor-img-success" });
+        toast.success("تم إدراج الصورة بنجاح", { id: "editor-img-success" });
       }
     } catch (err) {
       toast.error("فشل رفع الصورة للمحرر", { id: "editor-img-error" });
@@ -411,6 +467,7 @@ export default function AddArticle() {
         .ProseMirror ol { list-style:decimal; padding-right:20px; }
         .ProseMirror blockquote { border-right:4px solid var(--color-primary,#0D4C54); padding:14px; background:#f8fafc; border-radius:12px; margin:16px 0; }
         .ProseMirror img, .ProseMirror video { border-radius:18px; margin:18px 0; width:100%; }
+        .ProseMirror .editor-figure { margin: 18px 0; }
       `}</style>
 
       {createArticleMutation.isPending && (
@@ -448,6 +505,8 @@ export default function AddArticle() {
             hashtagInput={hashtagInput} setHashtagInput={setHashtagInput} handleHashtagKeyDown={handleHashtagKeyDown}
             removeHashtag={removeHashtag} featuredUploading={featuredUploading} featuredProgress={featuredProgress}
             featuredImage={featuredImage} handleRemoveFeatured={handleRemoveFeatured} handleFeaturedImage={handleFeaturedImage}
+            writers={writers} setWriters={setWriters}                         // مصفوفة الكتاب التفاعلية
+            photographers={photographers} setPhotographers={setPhotographers} // مصفوفة المصورين التفاعلية
           />
 
           {/* قسم فريق العمل */}
@@ -497,6 +556,7 @@ export default function AddArticle() {
             innerRef={mediaRef} videoUploading={videoUploading} videoProgress={videoProgress} videoPreview={videoPreview}
             handleRemoveVideo={handleRemoveVideo} handleVideoUpload={handleVideoUpload} galleryUploading={galleryUploading}
             galleryProgress={galleryProgress} handleGalleryUpload={handleGalleryUpload} gallery={gallery} handleRemoveGalleryItem={handleRemoveGalleryItem}
+            setGallery={setGallery} // تمرير الـ Setter لتمكين إضافة الـ captions داخل الـ MediaSection بكفاءة
           />
 
           {/* --- قسم روابط يوتيوب الإضافية --- */}
