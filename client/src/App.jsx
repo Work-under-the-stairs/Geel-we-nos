@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import {Toaster} from 'react-hot-toast'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Register from './pages/Register'
+import CrossMediaPage from './pages/CrossMediaPage'
 import Login from './pages/Login'
 import Category from './pages/Category'
 import Layout from './components/layout/Layout'
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />
         <Route path="/edit/article/:id" element={isAdmin() ? <EditArticle/> : <Navigate to="/" replace />} />
+        <Route path="/cross-media" element={<CrossMediaPage/>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
