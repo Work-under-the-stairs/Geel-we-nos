@@ -3,7 +3,8 @@ const CONFIG = {
   publicKey: import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY,
   urlEndpoint: import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT,
   useUnsignedUpload: false,
-  authEndpoint: "/api/imagekit/auth"
+  // Use VITE_API_URL if provided (production), otherwise fall back to same-origin /api
+  authEndpoint: (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/imagekit/auth` : (typeof window !== 'undefined' ? `${window.location.origin}/api/imagekit/auth` : ''))
 };
 
 /**

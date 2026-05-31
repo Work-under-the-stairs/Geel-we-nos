@@ -3,10 +3,14 @@ import { auth } from '../firebase'; // Make sure the path to your firebase.js is
 import { logout } from '../utils/auth';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : undefined),
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
+
+if (!import.meta.env.VITE_API_URL) {
+  console.warn('[client] VITE_API_URL is not set — falling back to same-origin /api. If your backend is hosted elsewhere, set VITE_API_URL.');
+}
 
 // 1. Request Interceptor: Attach fresh Firebase token to every outgoing request
 api.interceptors.request.use(async (config) => {
