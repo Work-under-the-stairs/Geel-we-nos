@@ -78,10 +78,6 @@ export default function AddArticle() {
   const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
 
-  // قوائم طاقم العمل العامة للمقال ككل
-  const [writers, setWriters] = useState([]);
-  const [photographers, setPhotographers] = useState([]);
-
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
   const [featuredProgress, setFeaturedProgress] = useState(0);
@@ -100,11 +96,16 @@ export default function AddArticle() {
   const [editorProgress, setEditorProgress] = useState(0);
 
   const [contributors, setContributors] = useState([]); 
-  const [newContributor, setNewContributor] = useState({ name: "", role: "writer" }); 
+  const [newContributor, setNewContributor] = useState({ name: "", role: "photographer" }); 
 
   // --- حالات وروابط يوتيوب الجديدة ---
   const [youtubeLinks, setYoutubeLinks] = useState([]); // سيحفظ { id: "...", url: "..." }
   const [youtubeInput, setYoutubeInput] = useState("");
+
+  // --- حالات مودال الكابشن الجديد للصورة داخل المحرر ---
+  const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
+  const [pendingEditorImageData, setPendingEditorImageData] = useState(null);
+  const [editorImageCaption, setEditorImageCaption] = useState("");
 
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
@@ -137,7 +138,7 @@ export default function AddArticle() {
       return;
     }
     setContributors((prev) => [...prev, newContributor]);
-    setNewContributor({ name: "", role: "writer" }); 
+    setNewContributor({ name: "", role: "photographer" }); 
   };
 
   const removeContributor = (index) => {
@@ -146,7 +147,6 @@ export default function AddArticle() {
 
   // --- دوال معالجة يوتيوب ---
   const extractYouTubeId = (url) => {
-    // Regex لاستخراج ID الفيديو من معظم صيغ روابط يوتيوب
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
@@ -161,7 +161,6 @@ export default function AddArticle() {
       return;
     }
 
-    // التأكد من عدم تكرار الفيديو
     const isExist = youtubeLinks.some(link => link.id === videoId);
     if (isExist) {
       toast.error("تمت إضافة هذا الفيديو مسبقاً!");
@@ -176,7 +175,6 @@ export default function AddArticle() {
   const handleRemoveYoutubeLink = (idToRemove) => {
     setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
   };
-  // -------------------------
 
   const editor = useEditor({
     extensions: editorExtensions, 
@@ -207,19 +205,17 @@ export default function AddArticle() {
       return;
     }
 
-    // 1️⃣ تجهيز مصفوفة معرض الصور العادية أولاً
     const formattedGallery = gallery.map((img) => ({
       url: img.url,
       fileId: img.fileId, 
       caption: img.caption || ""
     }));
 
-    // 2️⃣ الحل السحري: إذا قام المستخدم برفع صورة بارزة، نضعها كأول صورة في مصفوفة الـ images
     if (featuredImage?.url) {
       formattedGallery.unshift({
         url: featuredImage.url,
         fileId: featuredImage.fileId,
-        caption: "الصورة البارزة" // كابشن تلقائي لتمييزها في قاعدة البيانات والفرونت إند
+        caption: "الصورة البارزة" 
       });
     }
 
@@ -228,19 +224,16 @@ export default function AddArticle() {
 
     const youtubeIdsArray = youtubeLinks.map(item => item.id);
 
-    // 3️⃣ بناء الـ Payload النهائي لإرساله للباك إند
     const articlePayload = {
       title: title.trim(),
       content: contentHTML,
       category: category,
       important_rate: importance,
       isUrgent: isUrgent,
-      images: formattedGallery,  // ستتضمن الصورة البارزة المرفوعة في مجلد featured + صور المعرض
+      images: formattedGallery,  
       videos: allVideos,
       youtube_videos: youtubeIdsArray, 
       hashtags: hashtags,
-      writers: writers,
-      photographers: photographers,
       contributors: contributors, 
       status: targetStatus,
     };
@@ -262,8 +255,6 @@ export default function AddArticle() {
     setFeaturedImage(null);
     setVideoPreview(null);
     setGallery([]);
-    setWriters([]);
-    setPhotographers([]);
     setEditorMediaList([]);
     setTitle("");
     setCategory("");
@@ -271,7 +262,7 @@ export default function AddArticle() {
     setImportance(5);
     setIsUrgent(false);
     setContributors([]);
-    setYoutubeLinks([]); // تفريغ الروابط
+    setYoutubeLinks([]); 
     setYoutubeInput("");
     editor?.commands.setContent("<h2>ابدأ بكتابة المقال...</h2>");
   };
@@ -357,7 +348,6 @@ export default function AddArticle() {
           const base = (i / files.length) * 100;
           setGalleryProgress(Math.round(base + pct / files.length));
         });
-        // إضافة هيكلية الـ Caption الافتراضي لكل صورة مرفوعة في المعرض الإضافي
         uploaded.push({ ...mediaData, caption: "" });
       } catch (err) { console.error(err); }
     }
@@ -386,7 +376,7 @@ export default function AddArticle() {
     }
   };
 
-  // 📝 إضافة الصورة للمحرر مع نافذة إدخال النص التوضيحي (Caption) الفوري المدمج
+  // 📝 فتح المودال عند اكتمال رفع الصورة بدلاً من الـ prompt البذيء
   const addImageToEditor = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -397,20 +387,10 @@ export default function AddArticle() {
     try {
       const mediaData = await uploadToImageKit(file, IK_FOLDERS.editor, (pct) => setEditorProgress(pct));
       if (mediaData?.url) {
-        
-        // طلب إدخال الكابشن من المستخدم
-        const userCaption = window.prompt("اكتب تعليقاً توضيحياً (Caption) أسفل الصورة (اختياري):") || "";
-        
-        editor.commands.focus();
-        
-        // 👇 استخدام commands.setImage مع تمرير الكابشن
-        editor.chain().focus().setImage({ 
-          src: mediaData.url, 
-          caption: userCaption.trim() !== "" ? userCaption : null 
-        }).run();
-
-        setEditorMediaList((prev) => [...prev, mediaData]);
-        toast.success("تم إدراج الصورة بنجاح", { id: "editor-img-success" });
+        // حفظ البيانات مؤقتاً وفتح المودال المخصص
+        setPendingEditorImageData(mediaData);
+        setEditorImageCaption("");
+        setIsCaptionModalOpen(true);
       }
     } catch (err) {
       toast.error("فشل رفع الصورة للمحرر", { id: "editor-img-error" });
@@ -418,6 +398,26 @@ export default function AddArticle() {
       setEditorUploading(false);
       e.target.value = "";
     }
+  };
+
+  // دالة تأكيد إدراج الصورة من داخل المودال الجديد
+  const handleConfirmEditorImageCaption = () => {
+    if (!pendingEditorImageData || !editor) return;
+
+    editor.commands.focus();
+    
+    editor.chain().focus().setImage({ 
+      src: pendingEditorImageData.url, 
+      caption: editorImageCaption.trim() !== "" ? editorImageCaption.trim() : null 
+    }).run();
+
+    setEditorMediaList((prev) => [...prev, pendingEditorImageData]);
+    toast.success("تم إدراج الصورة بنجاح", { id: "editor-img-success" });
+
+    // تفريغ الحالات وإغلاق المودال
+    setIsCaptionModalOpen(false);
+    setPendingEditorImageData(null);
+    setEditorImageCaption("");
   };
 
   const addVideoToEditor = async (e) => {
@@ -479,6 +479,49 @@ export default function AddArticle() {
         </div>
       )}
 
+      {/* 🌟 مودال الكابشن العصري الجديد 🌟 */}
+      {isCaptionModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-3xl shadow-xl max-w-md w-full space-y-4 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-800">إضافة نص توضيحي للصورة</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                اكتب تعليقاً توضيحياً (Caption) ليظهر بشكل منظم أسفل الصورة داخل المقال (اختياري).
+              </p>
+            </div>
+            
+            <input
+              type="text"
+              className="w-full p-3.5 rounded-xl border border-slate-200 outline-none text-sm font-medium focus:border-[var(--color-secondary,#FF5A00)] focus:ring-1 focus:ring-[var(--color-secondary,#FF5A00)] transition"
+              placeholder="مثال: لقطة من المؤتمر الصحفي اليوم..."
+              value={editorImageCaption}
+              onChange={(e) => setEditorImageCaption(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmEditorImageCaption()}
+              autoFocus
+            />
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={handleConfirmEditorImageCaption}
+                className="h-11 px-5 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900 transition shadow-sm"
+              >
+                إدراج الصورة
+              </button>
+              <button
+                onClick={() => {
+                  setIsCaptionModalOpen(false);
+                  setPendingEditorImageData(null);
+                  setEditorImageCaption("");
+                }}
+                className="h-11 px-5 rounded-xl border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-[325px_1fr] gap-4 sm:gap-6 items-start">
         {/* SIDEBAR CONTAINER */}
         <div className="w-full xl:sticky xl:top-5 z-10">
@@ -505,8 +548,6 @@ export default function AddArticle() {
             hashtagInput={hashtagInput} setHashtagInput={setHashtagInput} handleHashtagKeyDown={handleHashtagKeyDown}
             removeHashtag={removeHashtag} featuredUploading={featuredUploading} featuredProgress={featuredProgress}
             featuredImage={featuredImage} handleRemoveFeatured={handleRemoveFeatured} handleFeaturedImage={handleFeaturedImage}
-            writers={writers} setWriters={setWriters}                         // مصفوفة الكتاب التفاعلية
-            photographers={photographers} setPhotographers={setPhotographers} // مصفوفة المصورين التفاعلية
           />
 
           {/* قسم فريق العمل */}
@@ -525,7 +566,7 @@ export default function AddArticle() {
                 value={newContributor.role}
                 onChange={(e) => setNewContributor({...newContributor, role: e.target.value})}
               >
-                <option value="writer">كاتب (Writer)</option>
+
                 <option value="photographer">مصور (Photographer)</option>
                 <option value="editor">محرر (Editor)</option>
               </select>
@@ -556,7 +597,7 @@ export default function AddArticle() {
             innerRef={mediaRef} videoUploading={videoUploading} videoProgress={videoProgress} videoPreview={videoPreview}
             handleRemoveVideo={handleRemoveVideo} handleVideoUpload={handleVideoUpload} galleryUploading={galleryUploading}
             galleryProgress={galleryProgress} handleGalleryUpload={handleGalleryUpload} gallery={gallery} handleRemoveGalleryItem={handleRemoveGalleryItem}
-            setGallery={setGallery} // تمرير الـ Setter لتمكين إضافة الـ captions داخل الـ MediaSection بكفاءة
+            setGallery={setGallery} 
           />
 
           {/* --- قسم روابط يوتيوب الإضافية --- */}
@@ -603,7 +644,6 @@ export default function AddArticle() {
               </div>
             )}
           </div>
-          {/* ---------------------------------- */}
 
           <ImportanceSection
             innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent}

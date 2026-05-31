@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2 } from 'lucide-react';
+import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2, PenLine, Camera, Edit3 } from 'lucide-react';
 import PopularArticles from '../components/ui/PopularArticles';
 import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
@@ -19,15 +19,21 @@ import {
   useTrending 
 } from '../hooks/useArticles';
 
+// خريطة الأدوار: مفتاح اللغة → تسمية عربية + أيقونة
+const ROLE_MAP = {
+  writer:       { label: "كاتب",    Icon: PenLine  },
+  photographer: { label: "مصور",    Icon: Camera   },
+  editor:       { label: "محرر",    Icon: Edit3    },
+};
+
 export default function ArticleDetail() {
   const { id } = useParams();
 
-  useTrackView(id); 
+  useTrackView(id);
   
   const { data: article, isLoading: loadArticle } = useArticle(id);
   const { data: commentsData, isLoading: loadComments } = useComments(id);
   const { data: popularArticlesData } = useTrending(5);
-
   const { mutate: submitComment, isPending: isCommenting } = useAddComment(id);
 
   const [activeMedia, setActiveMedia] = useState(null);
@@ -88,10 +94,7 @@ export default function ArticleDetail() {
       return;
     }
     if (!newComment.trim()) return;
-
-    submitComment({ content: newComment }, {
-      onSuccess: () => setNewComment("")
-    });
+    submitComment({ content: newComment }, { onSuccess: () => setNewComment("") });
   };
 
   if (loadArticle) return <Loading />;
@@ -100,9 +103,17 @@ export default function ArticleDetail() {
   const articleDate = new Date(article.createdAt || Date.now());
   const formattedDate = articleDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   const formattedTime = articleDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
-  
   const commentsList = commentsData || [];
   const totalMediaCount = (article.images?.length || 0) + (article.videos?.length || 0) + (article.youtube_videos?.length || 0);
+
+  // تجميع المساهمين حسب الدور
+  const contributors = article.contributors || [];
+  const groupedContributors = contributors.reduce((acc, c) => {
+    const role = c.role || 'writer';
+    if (!acc[role]) acc[role] = [];
+    acc[role].push(c.name);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen bg-white antialiased text-gray-900" dir="rtl">
@@ -111,6 +122,7 @@ export default function ArticleDetail() {
           
           <div className="lg:col-span-2 space-y-8">
             
+            {/* 1. رأس الخبر */}
             <div className="space-y-4">
               <div className="inline-flex items-center gap-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-bold px-3 py-1.5 rounded-md">
                 <FolderOpen size={14} />
@@ -134,6 +146,25 @@ export default function ArticleDetail() {
                   الساعة {formattedTime}
                 </span>
               </div>
+
+              {/* ✅ فريق العمل */}
+              {contributors.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {Object.entries(groupedContributors).map(([role, names]) => {
+                    const { label, Icon } = ROLE_MAP[role] || { label: role, Icon: User };
+                    return names.map((name, i) => (
+                      <div
+                        key={`${role}-${i}`}
+                        className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full"
+                      >
+                        <Icon size={13} className="text-[var(--color-secondary)]" />
+                        <span>{name}</span>
+                        <span className="text-slate-400 font-normal">· {label}</span>
+                      </div>
+                    ));
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -266,12 +297,12 @@ export default function ArticleDetail() {
 
             <hr className="border-gray-100 my-8" />
 
+            {/* التعليقات */}
             <div className="space-y-6">
               <h3 className="text-xl font-extrabold flex items-center gap-2 text-gray-900">
                 <MessageSquare size={22} className="text-[var(--color-primary)]" />
                 <span>التعليقات ({commentsList.length})</span>
               </h3>
-
               <form onSubmit={handleCommentSubmit} className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <label className="block text-sm font-bold text-gray-700">اترك تعليقاً:</label>
                 <div className="relative">
@@ -291,7 +322,6 @@ export default function ArticleDetail() {
                   </button>
                 </div>
               </form>
-
               <div className="space-y-4">
                 {loadComments ? (
                   <div className="flex justify-center py-4"><Loader2 className="animate-spin text-gray-400" /></div>
@@ -303,10 +333,10 @@ export default function ArticleDetail() {
                   <p className="text-center text-sm text-gray-400 py-6">لا توجد تعليقات بعد، كن أول المعلقين!</p>
                 )}
               </div>
-
             </div>
           </div>
 
+          {/* الأكثر قراءة */}
           <div className="lg:col-span-1">
             <PopularArticles articles={popularArticlesData || []} />
           </div>
