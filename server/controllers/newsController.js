@@ -200,7 +200,7 @@ exports.getArticleById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const article = await News.findOne({ _id: id, status: { $ne: "draft" } })
+    const article = await News.findOne({ _id: id })
       .populate("writer", "name avatar biography")
       .populate("category", "name icon_name");
 
