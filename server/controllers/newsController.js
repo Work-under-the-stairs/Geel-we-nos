@@ -297,6 +297,7 @@ exports.createNews = async (req, res, next) => {
       // 🛡️ حماية: ربط المقال بـ ID المستخدم مسجل الدخول من التوكن
       writer: req.user._id, 
       category: req.body.category,
+      crossMediaId: req.body.crossMediaId ? Number(req.body.crossMediaId) : null, // 👈 أضيفي هذا السطر
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
       images: imageUrls,
@@ -321,27 +322,18 @@ exports.updateNews = async (req, res, next) => {
     const article = await News.findById(req.params.id);
     if (!article) return res.status(404).json({ message: "News not found" });
 
-    // 🛡️ حماية: لو اللي بيعدل كاتب، نتأكد إنه صاحب الخبر (الأدمن يعدل أي حاجة)
     if (req.user.role === "writer" && article.writer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "You are not authorized to edit this article" });
     }
 
-    // القائمة البيضاء للحقول المسموح بتعديلها
+    // 1. إضافة crossMediaId للقائمة البيضاء
     const allowed = [
-      "title", 
-      "content", 
-      "images", 
-      "videos", 
-      "youtube_videos", // إضافة الحقل هنا ليدعم التعديل
-      "category", 
-      "important_rate", 
-      "isUrgent",
-      "hashtags",
-      "contributors",
-      "status"
+      "title", "content", "images", "videos", "youtube_videos", 
+      "category", "important_rate", "isUrgent", "hashtags", 
+      "contributors", "status", "crossMediaId" // تمت الإضافة هنا
     ];
 
-    // معالجة الحقول التي قد تأتي مدمجة بنظام نصي (في حال استخدام FormData بالفرونت إند)
+    // معالجة الحقول النصية (التي تأتي من FormData)
     const jsonFields = ["hashtags", "contributors", "youtube_videos", "images", "videos"];
     jsonFields.forEach((field) => {
       if (req.body[field] && typeof req.body[field] === "string") {
@@ -354,6 +346,11 @@ exports.updateNews = async (req, res, next) => {
         }
       }
     });
+
+    // 2. معالجة خاصة للـ crossMediaId (تحويله لرقم إذا كان موجوداً)
+    if (req.body.crossMediaId !== undefined) {
+      req.body.crossMediaId = req.body.crossMediaId === "" ? null : Number(req.body.crossMediaId);
+    }
 
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) article[field] = req.body[field];

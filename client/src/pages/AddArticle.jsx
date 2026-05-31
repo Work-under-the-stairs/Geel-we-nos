@@ -13,6 +13,7 @@ import { uploadToImageKit, IK_FOLDERS } from "../services/Useimagekit";
 
 import { useCreateArticle } from "../hooks/useAdmin";
 import { useCategories } from "../hooks/useArticles";
+import { stories } from "../data/stories"; // استيراد البيانات
 
 import {
   SidebarStepper,
@@ -58,7 +59,7 @@ export default function AddArticle() {
   // --- حالات وروابط يوتيوب الجديدة ---
   const [youtubeLinks, setYoutubeLinks] = useState([]); // سيحفظ { id: "...", url: "..." }
   const [youtubeInput, setYoutubeInput] = useState("");
-
+  const [crossMediaId, setCrossMediaId] = useState(""); // لإضافة رقم القصة
   // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
@@ -195,6 +196,7 @@ export default function AddArticle() {
       title: title.trim(),
       content: contentHTML,
       category: category,
+      crossMediaId: crossMediaId ? Number(crossMediaId) : null, // 👈 التعديل هنا
       important_rate: importance,
       isUrgent: isUrgent,
       images: allImages,
@@ -225,6 +227,7 @@ export default function AddArticle() {
     setEditorMediaList([]);
     setTitle("");
     setCategory("");
+    setCrossMediaId(""); // 👈 إضافة هذا السطر
     setHashtags([]);
     setImportance(5);
     setIsUrgent(false);
@@ -544,6 +547,33 @@ export default function AddArticle() {
             )}
           </div>
           {/* ---------------------------------- */}
+
+         <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
+  <h2 className="text-lg font-bold text-slate-800 mb-1">الربط التفاعلي (Cross-Media)</h2>
+  <p className="text-sm text-slate-500 mb-4">
+    اختر القصة التفاعلية المرتبطة بهذا الخبر (اختياري). عند اختيار قصة، سيتم تفعيل المودال تلقائياً في صفحة القسم.
+  </p>
+  
+  <select 
+    className="w-full sm:w-1/2 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer focus:ring-2 focus:ring-secondary/20 transition"
+    value={crossMediaId}
+    onChange={(e) => setCrossMediaId(e.target.value)}
+  >
+    <option value="">لا يوجد (خبر عادي)</option>
+    {stories.map((story) => (
+      <option key={story.id} value={story.id}>
+        {story.name} - {story.title}
+      </option>
+    ))}
+  </select>
+
+  {/* عرض تنبيه بسيط إذا تم اختيار قصة */}
+  {crossMediaId && (
+    <div className="mt-3 p-3 bg-orange-50 text-secondary text-sm rounded-xl font-medium border border-orange-100">
+      ✅ تم الربط مع قصة: {stories.find(s => s.id == crossMediaId)?.title}
+    </div>
+  )}
+</div>
 
           <ImportanceSection
             innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent}

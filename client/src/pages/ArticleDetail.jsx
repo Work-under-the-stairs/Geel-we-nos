@@ -6,6 +6,8 @@ import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
+import StoryModal from '../components/StoryModal'; 
+import { stories } from "../data/stories";
 import { 
   useArticle, 
   useComments, 
@@ -32,6 +34,7 @@ export default function ArticleDetail() {
   // === 2. حالات التحكم في الصفحة ===
   const [activeMedia, setActiveMedia] = useState(null);
   const [newComment, setNewComment] = useState("");
+  const [selectedStory, setSelectedStory] = useState(null);
 
   // لضبط الميديا الافتراضية أول ما الخبر يجي من الباك إند
   useEffect(() => {
@@ -202,6 +205,31 @@ export default function ArticleDetail() {
               className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
+
+            {/* --- بداية كود الربط التفاعلي --- */}
+{article.crossMediaId && (
+  <div className="my-10 p-8 bg-gradient-to-r from-red-600 to-red-700 rounded-3xl text-white shadow-xl flex flex-col items-center text-center transform transition hover:scale-[1.01]">
+    <h3 className="text-2xl font-black mb-3">هل تريد معرفة المزيد؟</h3>
+    <p className="text-red-100 mb-6 font-medium opacity-90">هذا الخبر مرتبط بقصة تفاعلية بصرية، اضغط هنا للمشاهدة.</p>
+    <button 
+      onClick={() => {
+        const story = stories.find(s => s.id == article.crossMediaId);
+        setSelectedStory(story);
+      }}
+      className="bg-white text-red-600 px-10 py-4 rounded-full font-black text-lg hover:bg-slate-50 transition-all shadow-md"
+    >
+      اضغط هنا لمعرفة المزيد
+    </button>
+  </div>
+)}
+{/* --- نهاية كود الربط التفاعلي --- */}
+
+{/* إضافة المودال في نهاية الملف */}
+<StoryModal 
+  isOpen={!!selectedStory} 
+  onClose={() => setSelectedStory(null)} 
+  story={selectedStory} 
+/>
 
             {article.hashtags && article.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
