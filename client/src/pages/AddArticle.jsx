@@ -561,7 +561,7 @@ export default function AddArticle() {
 
           {/* --- قسم روابط يوتيوب الإضافية --- */}
           <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm mt-6">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب (اختياري)</h2>
+            <h2 className="text-lg font-bold text-slate-800 mb-1">فيديوهات يوتيوب</h2>
             <p className="text-sm text-slate-500 mb-4">أضف روابط الفيديوهات الخارجية كبديل للرفع المباشر.</p>
             
             <div className="flex flex-wrap gap-3 mb-4">
