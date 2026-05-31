@@ -179,7 +179,7 @@ export default function CategoriesTable({
                       </td>
                       <td className="py-3.5 font-semibold text-slate-800">{cat.name}</td>
                       <td className="py-3.5 text-slate-500 text-xs">
-                        {new Date(cat.createdAt).toLocaleDateString('ar-EG')}
+                        {new Date(cat.createdAt || cat.updatedAt).toLocaleDateString('ar-EG')}
                       </td>
                       <td className="py-3.5 text-left pl-4">
                         <div className="flex items-center justify-end gap-1">

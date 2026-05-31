@@ -23,6 +23,23 @@ exports.getFeatured = async (req, res, next) => {
   }
 };
 
+exports.getUrgent = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+
+    const urgentNews = await News.find({ isUrgent: true })
+      .sort({ createdAt: -1 }) // الأحدث أولاً
+      .limit(limit)
+      .populate("writer", "name avatar")
+      .populate("category", "name icon_name");
+
+    res.status(200).json({ status: "success", data: urgentNews });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // B. الأكثر قراءة (Trending) للموقع كله
 exports.getTrending = async (req, res, next) => {
   try {

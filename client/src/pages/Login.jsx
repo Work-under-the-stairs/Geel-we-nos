@@ -19,14 +19,14 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. تسجيل الدخول عبر Firebase
+      // 1. Authenticate with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // الحصول على التوكين (ID Token) لإرساله للسيرفر
+      // 2. Get the initial ID Token
       const idToken = await user.getIdToken();
 
-      // 2. جلب بيانات المستخدم من MongoDB
+      // 3. Fetch user data from MongoDB (Interceptor will automatically attach the token now, but we pass it just in case)
       const response = await api.get(`/users/me/${user.uid}`, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
@@ -34,9 +34,9 @@ export default function Login() {
       if (response.data) {
         const userData = response.data;
         
-        // 3. تخزين البيانات والتوكن في localStorage
+        // 4. Store user info (and initial token as fallback) in localStorage
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", idToken);
+        localStorage.setItem("token", idToken); 
         
         toast.success(`مرحباً بك مجدداً يا ${userData.name} 👋`);
 
@@ -47,11 +47,13 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
-        toast.error("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-        setError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+        const msg = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        toast.error(msg);
+        setError(msg);
       } else {
-        toast.error("حدث خطأ أثناء تسجيل الدخول.");
-        setError("حدث خطأ أثناء محاولة تسجيل الدخول.");
+        const msg = "حدث خطأ أثناء محاولة تسجيل الدخول.";
+        toast.error(msg);
+        setError(msg);
       }
     } finally {
       setLoading(false);
@@ -60,6 +62,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 font-['Cairo']" dir="rtl">
+      {/* Background Effects */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       <div className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-[var(--color-primary)] opacity-[0.15] blur-[120px] rounded-full pointer-events-none animate-pulse duration-1000"></div>
       <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-[var(--color-secondary)] opacity-[0.15] blur-[100px] rounded-full pointer-events-none animate-pulse duration-1000 delay-500"></div>

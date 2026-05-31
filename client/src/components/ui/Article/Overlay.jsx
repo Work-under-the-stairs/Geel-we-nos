@@ -4,7 +4,8 @@ import {
   List, ListOrdered, Quote, Image as ImageIcon, Video, X, Trash2,
   Upload, Flame, Loader2, Save, ChevronLeft,
   AlignRight, AlignCenter, AlignLeft, Check,
-  Link, LinkIcon
+  Link, LinkIcon,
+  TvMinimalPlay
 } from "lucide-react";
 import { EditorContent } from "@tiptap/react";
 import toast from "react-hot-toast";
@@ -31,11 +32,12 @@ export function UploadOverlay({ progress, label }) {
 // =============================================================
 // TOOLBAR BUTTON
 // =============================================================
-export function ToolbarButton({ active, onClick, children }) {
+export function ToolbarButton({ active, onClick, children, title }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      title={title}
       className={`w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl border transition flex items-center justify-center shrink-0 ${
         active
           ? "bg-[var(--color-primary,#0D4C54)] text-white border-[var(--color-primary,#0D4C54)]"
@@ -222,7 +224,7 @@ export function BasicInfoSection({
 // =============================================================
 export function EditorSection({
   innerRef, editorUploading, editorProgress, editorUploadLabel, editor,
-  addImageToEditor, addVideoToEditor
+  addImageToEditor, addVideoToEditor, addYoutubeVideoToEditor
 }) {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -245,42 +247,46 @@ export function EditorSection({
     toast.success("تم إزالة الرابط");
   };
 
-  return (
-    <div ref={innerRef} className="bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm scroll-mt-24 relative">
+return (
+    <div ref={innerRef} className="bg-white rounded-[28px] border border-slate-200 shadow-sm scroll-mt-24 relative">
+      {/* 🌟 تم مسح كلاس overflow-hidden من الـ div الأب لكي يعمل الـ sticky */}
+      
       {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
 
-      <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50 relative">
-        <ToolbarButton active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}>
+      {/* 🌟 ضفنا rounded-t-[28px] عشان نحافظ على شكل التصميم، وخلينا z-20 */}
+      <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50 sticky top-0 z-20 shadow-sm rounded-t-[27px]">
+        <ToolbarButton title="نص عريض" active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}>
           <Bold size={17} />
         </ToolbarButton>
-        <ToolbarButton active={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()}>
+        <ToolbarButton title="نص مائل" active={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()}>
           <Italic size={17} />
         </ToolbarButton>
-        <ToolbarButton active={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()}>
+        <ToolbarButton title="تسطير" active={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()}>
           <Underline size={17} />
         </ToolbarButton>
 
-        <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>H1</ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H2</ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={17} /></ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={17} /></ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().toggleBlockquote().run()}><Quote size={17} /></ToolbarButton>
+        <ToolbarButton title="عنوان رئيسي (H1)" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>H1</ToolbarButton>
+        <ToolbarButton title="عنوان فرعي (H2)" onClick={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}>H2</ToolbarButton>
+        <ToolbarButton title="قائمة نقطية" onClick={() => editor?.chain().focus().toggleBulletList().run()}><List size={17} /></ToolbarButton>
+        <ToolbarButton title="قائمة رقمية" onClick={() => editor?.chain().focus().toggleOrderedList().run()}><ListOrdered size={17} /></ToolbarButton>
+        <ToolbarButton title="اقتباس" onClick={() => editor?.chain().focus().toggleBlockquote().run()}><Quote size={17} /></ToolbarButton>
         
-        <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
-        <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
+        <ToolbarButton title="محاذاة لليمين" onClick={() => editor?.chain().focus().setTextAlign("right").run()}><AlignRight size={17} /></ToolbarButton>
+        <ToolbarButton title="محاذاة للوسط" onClick={() => editor?.chain().focus().setTextAlign("center").run()}><AlignCenter size={17} /></ToolbarButton>
+        <ToolbarButton title="محاذاة لليسار" onClick={() => editor?.chain().focus().setTextAlign("left").run()}><AlignLeft size={17} /></ToolbarButton>
 
-        <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-[var(--color-primary,#0D4C54)] hover:text-[var(--color-primary,#0D4C54)] transition flex items-center justify-center cursor-pointer shrink-0">
+        <label title="إدراج صورة" className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-[var(--color-primary,#0D4C54)] hover:text-[var(--color-primary,#0D4C54)] transition flex items-center justify-center cursor-pointer shrink-0">
           <ImageIcon size={17} />
           <input type="file" hidden accept="image/*" onChange={addImageToEditor} />
         </label>
 
-        <label className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-[var(--color-primary,#0D4C54)] hover:text-[var(--color-primary,#0D4C54)] transition flex items-center justify-center cursor-pointer shrink-0">
+        <label title="إدراج فيديو" className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:border-[var(--color-primary,#0D4C54)] hover:text-[var(--color-primary,#0D4C54)] transition flex items-center justify-center cursor-pointer shrink-0">
           <Video size={17} />
           <input type="file" hidden accept="video/*" onChange={addVideoToEditor} />
         </label>
 
         <ToolbarButton 
+          title="إضافة أو إزالة رابط"
           active={editor?.isActive("link")} 
           onClick={() => {
             if (!editor) return;
@@ -293,10 +299,14 @@ export function EditorSection({
         >
           <LinkIcon size={17} />
         </ToolbarButton>
+
+        <ToolbarButton title="إدراج فيديو يوتيوب" onClick={addYoutubeVideoToEditor}>
+          <TvMinimalPlay size={17} />
+        </ToolbarButton>
       </div>
 
       {showLinkInput && (
-        <div className="bg-slate-100 p-3 flex gap-2 border-b border-slate-200 transition-all">
+        <div className="bg-slate-100 p-3 flex gap-2 border-b border-slate-200 transition-all sticky top-[68px] z-20">
           <input
             type="url"
             value={linkUrl}

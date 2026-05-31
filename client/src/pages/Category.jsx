@@ -12,6 +12,7 @@ import {
   useCategoryFeatured,
   useCategoryTrending,
   useCategoryNewsInfinite,
+  useUrgent,
 } from '../hooks/useArticles';
 import { useCategories } from '../hooks/useAdmin';
 import { useEffect } from 'react';
@@ -25,6 +26,9 @@ export default function Category() {
 
   // 1. جلب الأقسام
   const { data: allCategories, isLoading: isCatLoading } = useCategories();
+  const { data: urgentData, isLoading: loadUrgent } = useUrgent(5);
+  
+  const urgent = urgentData || [];
   const categoriesList = allCategories?.data || (Array.isArray(allCategories) ? allCategories : []);
   
   const currentCategory = !isCatLoading 
@@ -110,11 +114,7 @@ export default function Category() {
       </header>
 
       <BreakingNewsBar
-        breakingArticles={
-          gridArticles.length > 0 ? gridArticles.slice(0, 3)
-          : heroArticle ? [heroArticle]
-          : []
-        }
+        breakingArticles={urgent}
       />
 
       <main className="max-w-7xl mx-auto px-6 md:px-10 py-12">
