@@ -6,6 +6,11 @@ import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
+
+// استيراد مكتبة Plyr والـ CSS الخاص بها
+import { Plyr } from "plyr-react";
+import "plyr/dist/plyr.css";
+
 import { 
   useArticle, 
   useComments, 
@@ -50,6 +55,23 @@ export default function ArticleDetail() {
       setActiveMedia({ type: 'youtube', id: article.youtube_videos[0] });
     }
   }, [article]);
+
+  // إعدادات Plyr لإخفاء كل ما يخص يوتيوب قدر الإمكان وتشغيل الفيديو تلقائياً
+  const plyrOptions = {
+    autoplay: true, // تشغيل تلقائي بمجرد اختيار الفيديو
+    youtube: { 
+      noCookie: true,    // أمان أفضل ويمنع تتبع الإعلانات
+      rel: 0,            // منع الفيديوهات المقترحة من قنوات أخرى
+      modestbranding: 1, // إخفاء لوجو يوتيوب قدر الإمكان
+      iv_load_policy: 3, // إخفاء البطاقات التفاعلية
+      controls: 0,       // إخفاء تحكم يوتيوب الأصلي لترك التحكم لـ Plyr فقط
+      disablekb: 1,      // تعطيل اختصارات كيبورد يوتيوب
+      playsinline: 1     // تشغيل داخل الإطار في الموبايل
+    },
+    controls: [
+      'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
+    ],
+  };
 
   // === 3. إضافة تعليق جديد رئيسي ===
   const handleCommentSubmit = (e) => {
@@ -134,21 +156,27 @@ export default function ArticleDetail() {
                       )}
                     </div>
                   ) : activeMedia.type === 'video' ? (
-                    <video 
-                      src={activeMedia.url} 
-                      controls autoPlay
-                      className="w-full h-full object-contain"
-                    />
+                    /* استخدام Plyr للفيديوهات المرفوعة العادية لتوحيد الشكل */
+                    <div className="w-full h-full text-left" dir="ltr">
+                      <Plyr 
+                        source={{
+                          type: 'video',
+                          sources: [{ src: activeMedia.url }]
+                        }} 
+                        options={plyrOptions} 
+                      />
+                    </div>
                   ) : (
-                    /* مشغل يوتيوب الأنيق */
-                    <iframe
-                      src={`https://www.youtube.com/embed/${activeMedia.id}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&controls=1`}
-                      title={article.title}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
+                    /* استخدام Plyr لفيديوهات يوتيوب بدون أي قص للشاشة */
+                    <div className="w-full h-full text-left" dir="ltr">
+                      <Plyr 
+                        source={{
+                          type: 'video',
+                          sources: [{ src: activeMedia.id, provider: 'youtube' }]
+                        }} 
+                        options={plyrOptions} 
+                      />
+                    </div>
                   )}
                 </div>
 
@@ -206,7 +234,7 @@ export default function ArticleDetail() {
                           alt="youtube thumbnail" 
                           className="w-full h-full object-cover" 
                         />
-                        <div className="absolute inset-0 bg-red-600/10 flex items-center justify-center group-hover:bg-black/40">
+                        <div className="absolute inset-0 bg-red-600/10 flex items-center justify-center group-hover:bg-black/40 transition-colors">
                           <Play size={18} className="text-white fill-red-600 stroke-red-600" />
                         </div>
                       </button>
