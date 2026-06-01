@@ -3,7 +3,7 @@ import { Search, Filter, Trash2, Edit, Eye, AlertTriangle, Plus, ChevronRight, C
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAdminArticles } from '../../../hooks/useAdmin'; 
-
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function ManageArticles({ categories = [], onDeleteArticle, isDeletingArticle }) {
   const navigate = useNavigate();
   
@@ -33,7 +33,7 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
   const totalPages = articlesData?.totalPages || 1;
 
   // صورة افتراضية آمنة للجدول
-  const fallbackPlaceholder = 'https://via.placeholder.com/150';
+  const fallbackPlaceholder = FALLBACK_IMAGE;
 
   // ================= دوال التغيير =================
   const handlePageChange = (newPage) => {
@@ -144,7 +144,7 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
               {articles.length > 0 ? articles.map((art) => {
                 
                 // ✅ تأمين رابط الصورة (سواء الكائن الجديد أو النص القديم) قبل رندرة العنصر
-                const artImg = art.images?.[0];
+                const artImg = art.images?.[0] || FALLBACK_IMAGE;
                 const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
                 return (
@@ -155,12 +155,12 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                       <div className="flex items-center gap-3">
                         <img 
                           // ✅ استخدام الرابط الآمن والمستخلص بشكل صحيح
-                          src={artImgUrl || fallbackPlaceholder} 
+                          src={artImgUrl || FALLBACK_IMAGE} 
                           alt={art.title} 
                           className="w-14 h-14 rounded-xl object-cover border border-slate-100 shrink-0" 
                           onError={(e) => {
                             e.target.onerror = null; // تفادي تكرار الخطأ اللانهائي
-                            e.target.src = fallbackPlaceholder;
+                            e.target.src = FALLBACK_IMAGE;
                           }}
                         />
                         <div className="min-w-0 max-w-[250px] md:max-w-[300px]">

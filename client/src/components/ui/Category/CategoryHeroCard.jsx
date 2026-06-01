@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../../utils/dateFormatter'
 import { stripHtml } from '../../../utils/textUtils'
-
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function CategoryHeroCard({ article }) {
   if (!article) return null;
 
-  const artImg = article.images?.[0];
+  const artImg = article.images?.[0] || FALLBACK_IMAGE;
   const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
   return (
@@ -14,12 +14,12 @@ export default function CategoryHeroCard({ article }) {
       className="relative block w-full rounded-3xl overflow-hidden aspect-[4/3] sm:aspect-[16/9] cursor-pointer group shadow-sm bg-slate-100"
     >
       <img
-        src={artImgUrl || "/default-news.png"}
+        src={artImgUrl || FALLBACK_IMAGE}
         alt={article.title}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-102"
         onError={(e) => { 
           e.target.onerror = null;
-          e.target.src = "/default-news.png"; 
+          e.target.src = FALLBACK_IMAGE; 
         }}
       />
 

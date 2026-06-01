@@ -1,5 +1,6 @@
 // src/components/ui/PopularArticles.jsx
 import React, { useState } from 'react';
+import { FALLBACK_IMAGE } from '../../constants/Fall_Back_Image';
 
 export default function PopularArticles({ articles }) {
   // نقل حالة التتبع (hover) لداخل المكون ليكون مستقل بذاته
@@ -28,8 +29,7 @@ export default function PopularArticles({ articles }) {
           const articleId = article._id || article.id;
           const isHovered = hoveredArticleId === articleId;
 
-          // ✅ خط الدفاع المشترك: استخراج رابط الصورة بأمان تام (سواء أوبجكت الباك إند الجديد أو النص القديم)
-          const artImg = article.images?.[0] || article.image;
+          const artImg = article.images?.[0] || FALLBACK_IMAGE;
           const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
           // 1. الخبر الأول يظهر دائماً بصورته مسبقاً كما هو

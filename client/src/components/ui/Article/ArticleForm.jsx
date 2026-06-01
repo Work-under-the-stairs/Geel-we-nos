@@ -14,6 +14,7 @@ import { mergeAttributes } from "@tiptap/core";
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../../../services/Useimagekit";
 import { useCategories } from "../../../hooks/useArticles";
+import { FALLBACK_IMAGE } from "../../../constants/Fall_Back_Image";
 
 import {
   SidebarStepper,
@@ -243,10 +244,9 @@ export default function ArticleForm({
     }
 
     if (initialData.images?.length > 0) {
-      const firstImg = initialData.images[0];
+      const firstImg = initialData.images[0] || FALLBACK_IMAGE;
       setFeaturedImage({
         url: firstImg?.url ?? "",
-        // 🌟 هنا التأكد: لو مفيش fileId ابعت قيمة تانية أو null
         fileId: firstImg?.fileId || "legacy_image", 
         caption: firstImg?.caption ?? "",
       });

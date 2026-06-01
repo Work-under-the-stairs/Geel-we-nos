@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../../utils/dateFormatter'
 import { stripHtml } from '../../../utils/textUtils';
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 
 // ======= SUB-COMPONENT: Sidebar Vertical Sliding Carousel =======
 function SidebarCarousel({ sidebarArticles }) {
@@ -12,7 +13,6 @@ function SidebarCarousel({ sidebarArticles }) {
   const [translateY, setTranslateY] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
-  // ✅ توحيد الحسبة هنا وفي الدالة السفلية لضمان سلاسة الأنميشن (120px height + 16px margin = 136px)
   const cardHeightWithMargin = 136; 
 
   useEffect(() => {
@@ -53,8 +53,7 @@ function SidebarCarousel({ sidebarArticles }) {
           onTransitionEnd={handleTransitionEnd}
         >
           {doubledArticles.map((art, idx) => {
-            // ✅ استخراج آمن لرابط الصورة بالكاروسيل الجانبي
-            const artImg = art.images?.[0];
+            const artImg = art.images?.[0] || FALLBACK_IMAGE;
             const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
             return (
@@ -66,12 +65,12 @@ function SidebarCarousel({ sidebarArticles }) {
                 {/* Enlarged Image Container */}
                 <div className="w-34 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50 shadow-sm">
                   <img
-                    src={artImgUrl || "/default-news.png"}
+                    src={artImgUrl || FALLBACK_IMAGE}
                     alt={art.title}
                     className="w-full h-full object-cover"
                     onError={(e) => { 
                       e.target.onerror = null;
-                      e.target.src = "/default-news.png"; 
+                      e.target.src = FALLBACK_IMAGE; 
                     }}
                   />
                 </div>
@@ -104,7 +103,7 @@ export default function HeroSection({ articles = [] }) {
 
   if (!mainArticle) return null
 
-  const mainImg = mainArticle.images?.[0];
+  const mainImg = mainArticle.images?.[0] || FALLBACK_IMAGE;
   const mainImgUrl = typeof mainImg === 'object' ? mainImg?.url : mainImg;
 
   return (
@@ -114,7 +113,6 @@ export default function HeroSection({ articles = [] }) {
         <div className="lg:col-span-2 flex">
           <Link
             to={`/news/${mainArticle._id}`}
-            // 🌟 التعديل هنا: aspect-[4/3] للموبايل بيخلي الكارد أكبر وأوضح
             className="relative block w-full rounded-3xl overflow-hidden aspect-[4/3] sm:aspect-[16/9] cursor-pointer group shadow-sm bg-slate-100"
           >
             {mainImgUrl ? (
@@ -124,7 +122,7 @@ export default function HeroSection({ articles = [] }) {
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-102"
                 onError={(e) => { 
                   e.target.onerror = null;
-                  e.target.src = "/default-news.png"; 
+                  e.target.src = FALLBACK_IMAGE; 
                 }}
               />
             ) : (
@@ -138,7 +136,6 @@ export default function HeroSection({ articles = [] }) {
                 {mainArticle.category?.name || 'عام'}
               </span>
 
-              {/* 🌟 التعديل هنا: استخدام line-clamp للتحكم في طول العنوان */}
               <h1 className="text-white font-extrabold leading-snug text-xl sm:text-2xl md:text-[30px] max-w-3xl drop-shadow-md line-clamp-2 md:line-clamp-3">
                 {mainArticle.title}
               </h1>

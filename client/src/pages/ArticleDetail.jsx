@@ -19,7 +19,7 @@ import {
   useTrackView,
   useTrending 
 } from '../hooks/useArticles';
-
+import { FALLBACK_IMAGE } from '../constants/Fall_Back_Image';
 // خريطة الأدوار: مفتاح اللغة → تسمية عربية + أيقونة
 const ROLE_MAP = {
   writer:       { label: "كاتب",    Icon: PenLine  },
@@ -50,7 +50,7 @@ export default function ArticleDetail() {
   useEffect(() => {
     if (article && !activeMedia) {
       if (article?.images?.length > 0) {
-        const firstImg = article.images[0];
+        const firstImg = article.images[0] || FALLBACK_IMAGE;
         const imgUrl = typeof firstImg === 'object' ? firstImg?.url : firstImg;
         const imgCaption = typeof firstImg === 'object' ? firstImg?.caption : '';
         setActiveMedia({ type: 'image', url: imgUrl, caption: imgCaption });

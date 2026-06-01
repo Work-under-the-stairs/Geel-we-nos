@@ -1,12 +1,12 @@
 // src/components/ui/Category/ArticleGridCard.jsx
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../../utils/dateFormatter'
-
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function ArticleGridCard({ article }) {
   if (!article) return null;
 
   // ✅ استخراج ذكي وآمن لرابط الصورة
-  const artImg = article.images?.[0];
+  const artImg = article.images?.[0] || FALLBACK_IMAGE;
   const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
   return (
@@ -17,12 +17,12 @@ export default function ArticleGridCard({ article }) {
       {/* Image Wrapper */}
       <div className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative">
         <img
-          src={artImgUrl || "/default-news.png"}
+          src={artImgUrl || FALLBACK_IMAGE}
           alt={article.title}
           className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 ease-out"
           onError={(e) => { 
             e.target.onerror = null;
-            e.target.src = "/default-news.png"; 
+            e.target.src = FALLBACK_IMAGE; 
           }}
         />
       </div>

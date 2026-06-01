@@ -1,7 +1,7 @@
 // src/components/sections/CategoriesGrid.jsx
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../../utils/dateFormatter'
-
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function CategoriesGrid({ articles = {} }) {
   
   // الاستخراج المباشر والذكي للأخبار من الأوبجكت المبعوث من الباك إند
@@ -26,7 +26,7 @@ export default function CategoriesGrid({ articles = {} }) {
           const subPosts = sec.data.slice(1, 3)
 
           // ✅ استخراج الرابط بشكل آمن (يدعم الأوبجكت الجديد والاسترينج القديم)
-          const mainPostImg = mainPost?.images?.[0];
+          const mainPostImg = mainPost?.images?.[0] || FALLBACK_IMAGE;
           const mainPostImgUrl = typeof mainPostImg === 'object' ? mainPostImg?.url : mainPostImg;
 
           return (
@@ -44,11 +44,11 @@ export default function CategoriesGrid({ articles = {} }) {
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-50 shadow-sm mb-3">
                     <img
                       // ✅ تم التعديل هنا لقراءة الـ URL المتقشر وجاهز
-                      src={mainPostImgUrl || "/default-news.png"}
+                      src={mainPostImgUrl || FALLBACK_IMAGE}
                       alt={mainPost.title}
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                       onError={(e) => { 
-                        e.target.src = "/default-news.png"; 
+                        e.target.src = FALLBACK_IMAGE; 
                         e.target.onerror = null; // منع اللوب اللانهائي لو الصورة البديلة مش موجودة
                       }} 
                     />
