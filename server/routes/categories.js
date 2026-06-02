@@ -3,7 +3,6 @@ const router = express.Router();
 const Category = require("../models/Category");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
-// GET /api/categories - جلب كل الأقسام للجميع
 router.get("/", async (req, res, next) => {
   try {
     const categories = await Category.find().sort("name");
@@ -13,7 +12,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// GET /api/categories/:id - جلب قسم بالـ ID مع الأخبار بتاعته (لوحة التحكم)
 router.get("/:id", async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -34,8 +32,6 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// POST /api/categories - إضافة قسم جديد (أدمن فقط)
-// router.post("/", protect, restrictTo("admin"), async (req, res, next) => {
 router.post("/", protect, restrictTo("admin"),async (req, res, next) => {
   try {
     const { name, icon_name } = req.body;
@@ -46,8 +42,6 @@ router.post("/", protect, restrictTo("admin"),async (req, res, next) => {
   }
 });
 
-// PATCH /api/categories/:id - تعديل قسم (أدمن فقط)
-// router.patch("/:id", protect, restrictTo("admin"), async (req, res, next) => {
 router.patch("/:id", protect, restrictTo("admin"), async (req, res, next) => {
   try {
     const { name, icon_name } = req.body;
@@ -63,8 +57,6 @@ router.patch("/:id", protect, restrictTo("admin"), async (req, res, next) => {
   }
 });
 
-// DELETE /api/categories/:id - حذف قسم (أدمن فقط)
-// router.delete("/:id", protect, restrictTo("admin"), async (req, res, next) => {
 router.delete("/:id", protect, restrictTo("admin"), async (req, res, next) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);

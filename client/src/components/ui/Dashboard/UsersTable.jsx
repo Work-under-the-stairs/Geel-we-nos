@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import { Search, User, Trash2, Edit, X, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAdminUsers, useUpdateUser, useDeleteUser } from '../../../hooks/useAdmin'; // 👈 استدعاء هوك الحذف
+import { useAdminUsers, useUpdateUser, useDeleteUser } from '../../../hooks/useAdmin';
 
 export default function UsersTable() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
 
-  // States الخاصة بالمودال (نافذة التعديل)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState('');
 
-  // الهوكس
   const { data, isLoading, isError } = useAdminUsers({ page, limit: 10, search, role: roleFilter });
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
-  const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser(); // 👈 تفعيل هوك الحذف
+  const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(1); 
   };
 
-  // ====== دوال التعديل ======
   const openEditModal = (user) => {
     setSelectedUser(user);
     setNewRole(user.role);
@@ -49,7 +46,6 @@ export default function UsersTable() {
     });
   };
 
-  // ====== دالة الحذف (Custom Toast) ======
   const handleDeleteUser = (user) => {
     toast((t) => (
       <div className="flex flex-col gap-3" dir="rtl">
@@ -63,8 +59,7 @@ export default function UsersTable() {
         <div className="flex gap-2 justify-end mt-2">
           <button
             onClick={() => {
-              toast.dismiss(t.id); // إغلاق التوست
-              // تنفيذ الحذف
+              toast.dismiss(t.id);
               deleteUser(user._id, {
                 onSuccess: () => toast.success("تم حذف المستخدم بنجاح"),
                 onError: (error) => toast.error(error.response?.data?.message || "حدث خطأ أثناء الحذف")
@@ -179,7 +174,6 @@ export default function UsersTable() {
                           >
                             <Edit size={16} />
                           </button>
-                          {/* 👈 زر الحذف هنا */}
                           <button 
                             onClick={() => handleDeleteUser(user)}
                             disabled={isDeleting}
@@ -226,12 +220,10 @@ export default function UsersTable() {
         </>
       )}
 
-      {/* ======================= نافذة التعديل (Modal) ======================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             
-            {/* رأس النافذة */}
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h3 className="font-bold text-slate-800">تعديل رتبة المستخدم</h3>
               <button 
@@ -242,7 +234,6 @@ export default function UsersTable() {
               </button>
             </div>
 
-            {/* محتوى النافذة */}
             <div className="p-5 space-y-5">
               <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-bold shrink-0">
@@ -267,7 +258,6 @@ export default function UsersTable() {
               </div>
             </div>
 
-            {/* أزرار الحفظ والإلغاء */}
             <div className="px-5 py-4 border-t border-slate-100 flex items-center gap-3 bg-slate-50/50">
               <button 
                 onClick={handleSaveRole}

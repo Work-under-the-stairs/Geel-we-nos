@@ -4,9 +4,9 @@ const commentSchema = new mongoose.Schema(
   {
     newsId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "News", // ربط التعليق بالمقال
+      ref: "News",
       required: [true, "Comment must belong to an article (newsId)"],
-      index: true, // أضفنا index هنا لتسريع البحث عن تعليقات مقال محدد
+      index: true,
     },
     content: {
       type: String,
@@ -16,7 +16,7 @@ const commentSchema = new mongoose.Schema(
     },
     writer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // ربط التعليق بالمستخدم
+      ref: "User",
       required: [true, "Comment writer is required"],
     },
     replies: [
@@ -29,7 +29,7 @@ const commentSchema = new mongoose.Schema(
         },
         writer: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // ربط الرد بالمستخدم
+          ref: "User",
           required: true,
         },
         createdAt: { type: Date, default: Date.now },
@@ -39,7 +39,6 @@ const commentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index مركب لجلب تعليقات المقال مرتبة من الأحدث للأقدم بسرعة عالية
 commentSchema.index({ newsId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Comment", commentSchema);

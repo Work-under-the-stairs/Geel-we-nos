@@ -7,7 +7,6 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
 
   const latestArticles = breakingArticles
 
-  // Calculate dynamic duration based on items length for a constant scrolling speed
   const animationDuration = `${latestArticles.length * 20}s`
 
   return (
@@ -15,7 +14,6 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex items-center relative">
         
-        {/* Fixed "Breaking" badge with pulse effect */}
         <div className="flex items-center gap-1.5 flex-shrink-0 bg-white text-orange4 text-[13px] font-black px-4 py-1.5 rounded-lg shadow-lg z-10 border border-orange-100">
           <Flame size={16} className="fill-orange-600 text-orange3 animate-pulse" />
           <span>عاجل</span>
@@ -25,23 +23,19 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
           </span>
         </div>
 
-        {/* Scrolling news ticker container */}
         <div className="flex flex-1 overflow-hidden relative mr-4 md:mr-6 group">
           
-          {/* Infinite marquee - pauses on hover */}
           <div 
             className="flex items-center gap-12 whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] cursor-pointer"
             style={{ animationDuration }}
           >
             
-            {/* First batch of articles */}
             {latestArticles.map((art) => (
               <Link
                 key={`first-${art._id}`}
                 to={`/news/${art._id}`}
                 className="flex items-center gap-2 hover:text-yellow-300 transition-colors duration-200"
               >
-                {/* <span className="text-yellow-400 font-extrabold text-[15px]">✦</span> */}
                 <span className="text-yellow-400 font-extrabold text-[15px]">🔥</span>
                 <p className="text-[14px] sm:text-[15px] font-bold tracking-wide">
                   {art.title}
@@ -49,7 +43,6 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
               </Link>
             ))}
 
-            {/* Duplicated batch for a seamless infinite loop */}
             {latestArticles.map((art) => (
               <Link
                 key={`second-${art._id}`}
@@ -65,7 +58,6 @@ export default function BreakingNewsBar({ breakingArticles = [] }) {
 
           </div>
 
-          {/* Gradient overlays for smooth fading edges */}
           <div className="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-orange4 to-transparent pointer-events-none" />
           <div className="absolute top-0 left-0 h-full w-8 bg-gradient-to-r from-orange2 to-transparent pointer-events-none" />
 

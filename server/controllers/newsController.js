@@ -2,10 +2,6 @@ const News = require("../models/News");
 const Comment = require("../models/Comment");
 const Category = require("../models/Category");
 
-// ============================================================
-// 🏠 1. الروتس الخاصة بالصفحة الرئيسية (Home Page)
-// ============================================================
-
 exports.getFeatured = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 3;
@@ -112,10 +108,6 @@ exports.getGroupedByCategory = async (req, res, next) => {
   }
 };
 
-// ============================================================
-// 🗂️ 2. الروتس الخاصة بصفحة القسم (Category Page)
-// ============================================================
-
 exports.getCategoryFeatured = async (req, res, next) => {
   try {
     const { categoryName } = req.params;
@@ -192,9 +184,6 @@ exports.getCategoryTrending = async (req, res, next) => {
   }
 };
 
-// ============================================================
-// 📄 3. الروتس الخاصة بصفحة الخبر نفسه (Article Page)
-// ============================================================
 
 exports.getArticleById = async (req, res, next) => {
   try {
@@ -227,9 +216,7 @@ exports.trackView = async (req, res, next) => {
   }
 };
 
-// ==========================================
-// ➕ 4. إنشاء خبر جديد
-// ==========================================
+
 exports.createNews = async (req, res, next) => {
   try {
     let imageUrls = [];
@@ -293,9 +280,6 @@ exports.createNews = async (req, res, next) => {
   }
 };
 
-// ==========================================
-// ✏️ 5. تعديل الخبر
-// ==========================================
 exports.updateNews = async (req, res, next) => {
   try {
     const article = await News.findById(req.params.id);
@@ -341,9 +325,6 @@ exports.updateNews = async (req, res, next) => {
   }
 };
 
-// ==========================================
-// 🗑️ 6. حذف الخبر
-// ==========================================
 
 exports.deleteNews = async (req, res, next) => {
   try {
@@ -378,9 +359,7 @@ exports.deleteNews = async (req, res, next) => {
   }
 };
 
-// ==========================================
-// 📊 7. جلب كل المقالات للوحة التحكم (مع فلاتر وبحث)
-// ==========================================
+
 exports.getAllNews = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;

@@ -2,11 +2,9 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tansta
 import { useEffect } from 'react'
 import { articleService } from '../services/articleService'
 
-// ============================================================
-// QUERY KEYS
-// ============================================================
+
 export const KEYS = {
-  categories:          ()              => ['categories'], // ← مفتاح الأقسام العامة
+  categories:          ()              => ['categories'],
   featured:            (limit)         => ['featured', limit],
   trending:            (limit)         => ['trending', limit],
   latest:              (limit)         => ['latest', limit],
@@ -30,23 +28,21 @@ export const KEYS = {
 //               res.data.totalPages = number
 // ============================================================
 
-// ============ الأقسام العامة ============
 
 export const useCategories = () =>
   useQuery({
     queryKey: KEYS.categories(),
     queryFn:  () => articleService.getAllCategories()
-                    .then(res => res.data.data), // ← مصفوفة تحتوي على كل الأقسام
-    staleTime: 1000 * 60 * 30, // 30 دقيقة لأن الأقسام نادراً ما تتغير
+                    .then(res => res.data.data), 
+    staleTime: 1000 * 60 * 30,
   })
 
-// ============ الصفحة الرئيسية ============
 
 export const useFeatured = (limit = 3) =>
   useQuery({
     queryKey: KEYS.featured(limit),
     queryFn:  () => articleService.getFeatured(limit)
-                    .then(res => res.data.data), // ← object واحد
+                    .then(res => res.data.data), 
     staleTime: 1000 * 60 * 5,
   })
 
@@ -54,7 +50,7 @@ export const useUrgent = (limit = 5) =>
   useQuery({
     queryKey: KEYS.urgent(limit),
     queryFn:  () => articleService.getUrgent(limit)
-                    .then(res => res.data.data), // ← array
+                    .then(res => res.data.data), 
     staleTime: 1000 * 60 * 5,
   })
 
@@ -62,7 +58,7 @@ export const useTrending = (limit = 5) =>
   useQuery({
     queryKey: KEYS.trending(limit),
     queryFn:  () => articleService.getTrending(limit)
-                    .then(res => res.data.data), // ← array
+                    .then(res => res.data.data), 
     staleTime: 1000 * 60 * 10,
   })
 
@@ -70,7 +66,7 @@ export const useLatest = (limit = 8) =>
   useQuery({
     queryKey: KEYS.latest(limit),
     queryFn:  () => articleService.getLatest(limit)
-                    .then(res => res.data.data), // ← array
+                    .then(res => res.data.data), 
     staleTime: 1000 * 60 * 2,
   })
 
@@ -82,13 +78,12 @@ export const useGroupedByCategory = (limit = 4) =>
     staleTime: 1000 * 60 * 3,
   })
 
-// ============ صفحة القسم ============
 
 export const useCategoryFeatured = (category) =>
   useQuery({
     queryKey: KEYS.categoryFeatured(category),
     queryFn:  () => articleService.getCategoryFeatured(category)
-                    .then(res => res.data.data), // ← object واحد
+                    .then(res => res.data.data), 
     enabled:  !!category,
     staleTime: 1000 * 60 * 5,
   })
@@ -97,7 +92,7 @@ export const useCategoryTrending = (category, limit = 5) =>
   useQuery({
     queryKey: KEYS.categoryTrending(category, limit),
     queryFn:  () => articleService.getCategoryTrending(category, limit)
-                    .then(res => res.data.data), // ← array
+                    .then(res => res.data.data), 
     enabled:  !!category,
     staleTime: 1000 * 60 * 10,
   })
@@ -108,8 +103,6 @@ export const useCategoryNewsInfinite = (category, limit = 6) =>
     queryFn:   ({ pageParam = 1 }) =>
                  articleService.getCategoryNews(category, pageParam, limit)
                    .then(res => res.data),
-                 // ↑ هنا بنرجع res.data كاملة عشان محتاجين page وtotalPages
-                 // النتيجة: { data: [...], page: 1, totalPages: 2, totalArticles: 11 }
     getNextPageParam: (lastPage) =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
     initialPageParam: 1,
@@ -117,13 +110,12 @@ export const useCategoryNewsInfinite = (category, limit = 6) =>
     staleTime: 1000 * 60 * 2,
   })
 
-// ============ صفحة الخبر ============
 
 export const useArticle = (id) =>
   useQuery({
     queryKey: KEYS.article(id),
     queryFn:  () => articleService.getById(id)
-                    .then(res => res.data.data), // ← object واحد
+                    .then(res => res.data.data),
     enabled:  !!id,
     staleTime: 1000 * 60 * 5,
   })
@@ -132,12 +124,11 @@ export const useComments = (articleId) =>
   useQuery({
     queryKey: KEYS.comments(articleId),
     queryFn:  () => articleService.getComments(articleId)
-                    .then(res => res.data.data), // ← array
+                    .then(res => res.data.data),
     enabled:  !!articleId,
     staleTime: 1000 * 30,
   })
 
-// ============ Track View ============
 
 export const useTrackView = (articleId) => {
   useEffect(() => {
@@ -150,7 +141,6 @@ export const useTrackView = (articleId) => {
   }, [articleId])
 }
 
-// ============ Mutations ============
 
 export const useAddComment = (articleId) => {
   const queryClient = useQueryClient()

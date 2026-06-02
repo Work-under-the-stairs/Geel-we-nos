@@ -12,20 +12,19 @@ export const FEATURED_NEWS = [
 
   من جهة أخرى، أبدى بعض الخبراء مخاوفهم بشأن أخلاقيات الاعتماد الكامل على الآلة، مشددين على ضرورة وضع مواثيق شرف أكاديمية تضمن عدم اعتماد الطلاب على الذكاء الاصطناعي في الغش أو تزييف الأبحاث العلمية، وهو التحدي الأكبر الذي تواجهه لجان التطوير التعليمي حالياً في صياغة اللوائح الجديدة.`,
     writer: 'أ. محمد السيد',
-    // كتابة التاريخ والصيغة كاملة لتدعم الـ Date Parsing في الكومبونانت
     createdAt: '2026-05-14T09:30:00Z', 
     date: '14 مايو 2026',
     images: [
-      'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop&q=80', // الصورة الأساسية (ذكاء اصطناعي وتعليم)
-      'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80', // مدرج جامعي حديث تكنولوجيا
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80', // طلاب يدرسون على أجهزة لوحية
-      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80'  // نقاش وورشة عمل طلابية
+      'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80'
     ],
     videos: [
-      'https://ik.imagekit.io/tasneemalaa/sample-video.mp4?updatedAt=1768838598515' // رابط فيديو تجريبي يظهر كـ Thumbnail رابع في الكومبونانت
+      'https://ik.imagekit.io/tasneemalaa/sample-video.mp4?updatedAt=1768838598515'
     ],
     category: 'تعليم وثقافة',
-    important_rate: 9, // رفع التقييم لأنه خبر رئيسي ومهم
+    important_rate: 9, 
     comments: [
       {
         _id: 'c1',
@@ -269,7 +268,7 @@ export const FEATURED_NEWS = [
     content: 'تشير الدراسات الحديثة إلى أن دمج القراءة الرقمية مع المناهج التقليدية يساهم في زيادة تفاعل الطلاب بنسبة تتجاوز الـ 40%، مما يفتح آفاقاً جديدة للتعليم الذاتي وتطوير المهارات البحثية لدى الأجيال الناشئة.',
     writer: 'أ. مها الشربيني',
     date: '2026-05-15',
-    images: ['https://images.unsplash.com/photo-1568667256549-094345857637?w=800&auto=format&fit=crop&q=80'], // تم تغيير الصورة المكررة
+    images: ['https://images.unsplash.com/photo-1568667256549-094345857637?w=800&auto=format&fit=crop&q=80'],
     videos: [],
     category: 'تعليم وثقافة',
     important_rate: 5,
@@ -293,7 +292,7 @@ export const FEATURED_NEWS = [
     content: 'شهد الربع الأول من العام الحالي تدفقات تمويلية قياسية للشركات الناشئة، مدفوعة بطلب متزايد على خدمات الدفع الرقمي والحلول البنكية الذكية التي تسهل حياة الأفراد والشركات الصغيرة.',
     writer: 'عمر القاضي',
     date: '2026-05-17',
-    images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80'], // تم تغيير الصورة المكررة
+    images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80'], 
     videos: [],
     category: 'اقتصاد',
     important_rate: 4,
@@ -365,7 +364,7 @@ export const FEATURED_NEWS = [
     content: 'في هذه الحلقة من بودكاست جيل ونص، نناقش كيف يمكن للذكاء العاطفي أن يكون الفارق الأساسي بين الموظف التقليدي والقائد الناجح، وكيفية التعامل الذكي مع ضغوطات العمل اليومية.',
     writer: 'فريق الإعداد',
     date: '2026-05-16',
-    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=800&auto=format&fit=crop&q=80'], // تم تغيير الصورة المكررة
+    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd6a?w=800&auto=format&fit=crop&q=80'],
     videos: [],
     category: 'بودكاست',
     important_rate: 4,
@@ -377,7 +376,7 @@ export const FEATURED_NEWS = [
     content: 'استمع الآن إلى نقاش شيق وعميق حول فلسفة التصميم الحديث (Sleek & Creative Minimalist Layouts) وكيف يؤثر التصميم البصري المريح والمودرن على سلوك وبقاء الزائر داخل المنصات الإخبارية والعلمية.',
     writer: 'فريق الإعداد',
     date: '2026-05-13',
-    images: ['https://images.unsplash.com/photo-1484755560693-a4074577af3a?w=800&auto=format&fit=crop&q=80'], // تم تغيير الصورة المكررة
+    images: ['https://images.unsplash.com/photo-1484755560693-a4074577af3a?w=800&auto=format&fit=crop&q=80'],
     videos: [],
     category: 'بودكاست',
     important_rate: 4,
@@ -553,44 +552,6 @@ export const FEATURED_NEWS = [
   }
 ];
 
-// export const FEATURED_NEWS = [
-//   {
-//     _id: '1',
-//     title: 'الذكاء الاصطناعي يُحدث ثورة في أساليب التعليم الجامعي بالجامعات العربية',
-//     content: 'محتوى الخبر...',
-//     writer: 'أ. محمد السيد',
-//     date: '2025-05-14',
-//     images: ['https://media.istockphoto.com/id/2236195120/photo/student-using-ai-chatbot-on-smartphone-while-studying-with-calculator-and-notes.jpg?s=612x612&w=0&k=20&c=pOIEq9qiF7a-hcCw7TgUJKFVjKAtSgjYyZE-_al86aM='],
-//     videos: [],
-//     category: 'تعليم وثقافة',
-//     important_rate: 5,
-//     comments: [],
-//   },
-//   {
-//     _id: '2',
-//     title: 'أسواق الخليج ترتفع بعد إعلانات الميزانية السنوية',
-//     content: 'محتوى الخبر...',
-//     writer: 'رنا حسن',
-//     date: '2025-05-15',
-//     images: ['https://media.istockphoto.com/id/2207666672/photo/senior-arabic-tour-guide-walking-with-mid-adult-couple-in-historic-old-dubai-alley.jpg?s=1024x1024&w=is&k=20&c=P1Cam9K9eyRqvnhns28OmFS4HQMDtPGWTcGILAf6XSs='],
-//     videos: [],
-//     category: 'اقتصاد',
-//     important_rate: 4,
-//     comments: [],
-//   },
-//   {
-//     _id: '3',
-//     title: 'دراسة جديدة: النوم المبكر يرفع الإنتاجية بنسبة ٤٠٪',
-//     content: 'محتوى الخبر...',
-//     writer: 'د. سارة عمر',
-//     date: '2025-05-12',
-//     images: ['https://plus.unsplash.com/premium_photo-1661397087554-2774b7e7332f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2xlZXBpbmd8ZW58MHx8MHx8fDA%3D'],
-//     videos: [],
-//     category: 'صحة',
-//     important_rate: 4,
-//     comments: [],
-//   },
-// ]
 
 export const LATEST_NEWS = [
   {

@@ -6,8 +6,6 @@ import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getUsername, isAdmin } from "../utils/auth";
 import CommentItem from '../components/ui/Article/CommentItem';
-//import StoryModal from '../components/StoryModal'; 
-//import { stories } from "../data/stories";
 import YouTube from 'react-youtube';
 import { Plyr } from "plyr-react";
 import "plyr/dist/plyr.css";
@@ -39,7 +37,6 @@ export default function ArticleDetail() {
 
   const [activeMedia, setActiveMedia] = useState(null);
   const [newComment, setNewComment] = useState("");
-  //const [selectedStory, setSelectedStory] = useState(null);
 
   const handleMediaSelect = (mediaObj) => {
     if (activeMedia?.url === mediaObj.url && activeMedia?.id === mediaObj.id) return;
@@ -63,7 +60,6 @@ export default function ArticleDetail() {
     }
   }, [article]);
 
-  // ✅ إعدادات Plyr للفيديو العادي فقط
   const plyrOptions = {
     autoplay: true,
     controls: [
@@ -71,21 +67,18 @@ export default function ArticleDetail() {
     ],
   };
 
-  // ✅ إعدادات YouTube - مخفي أقصى قدر ممكن
   const youtubeOpts = {
     width: '100%',
     height: '100%',
     playerVars: {
       autoplay: 1,
-      rel: 0,           // لا فيديوهات مقترحة
-      modestbranding: 1, // إخفاء لوجو يوتيوب قدر المستطاع
-      iv_load_policy: 3, // إخفاء الـ annotations
+      rel: 0,
+      modestbranding: 1, 
+      iv_load_policy: 3, 
       playsinline: 1,
-      disablekb: 1,      // تعطيل الكيبورد shortcuts
-      fs: 1,             // السماح بالفول سكرين
-      controls: 0,       // ⚠️ إخفاء كونترولز يوتيوب الافتراضية (اختياري)
-      // ملاحظة: controls: 0 بيخفي كل شيء لكن ممكن يسبب مشكلة في بعض المتصفحات
-      // لو حصلت مشكلة غيّره لـ 1
+      disablekb: 1,
+      fs: 1,
+      controls: 1,
     },
   };
 
@@ -108,7 +101,6 @@ export default function ArticleDetail() {
   const commentsList = commentsData || [];
   const totalMediaCount = (article.images?.length || 0) + (article.videos?.length || 0) + (article.youtube_videos?.length || 0);
 
-  // تجميع المساهمين حسب الدور
   const contributors = article.contributors || [];
   const groupedContributors = contributors.reduce((acc, c) => {
     const role = c.role || 'writer';
@@ -124,7 +116,6 @@ export default function ArticleDetail() {
           
           <div className="lg:col-span-2 space-y-8">
             
-            {/* 1. رأس الخبر */}
             <div className="space-y-4">
               <div className="inline-flex items-center gap-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-bold px-3 py-1.5 rounded-md">
                 <FolderOpen size={14} />
@@ -149,7 +140,6 @@ export default function ArticleDetail() {
                 </span>
               </div>
 
-              {/* ✅ فريق العمل */}
               {contributors.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {Object.entries(groupedContributors).map(([role, names]) => {
@@ -203,7 +193,6 @@ export default function ArticleDetail() {
                   </div>
                 )}
 
-                {/* ✅ YouTube بدون Plyr - نظيف بدون مشاكل DOM */}
                 {activeMedia?.type === 'youtube' && (
                   <div 
                     key={`youtube-${activeMedia.id}`}
@@ -278,34 +267,24 @@ export default function ArticleDetail() {
               )}
             </div>
 
-            {/* <div 
-              style={{ fontFamily: "'Cairo', sans-serif" }}
-              className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            /> */}
             <div 
               style={{ fontFamily: "'Cairo', sans-serif" }}
               className="article-content text-lg text-gray-800 leading-relaxed font-normal space-y-4 prose prose-lg prose-slate max-w-none prose-headings:text-[var(--color-primary)] prose-a:text-[var(--color-secondary)] prose-img:rounded-xl"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
-            {/* --- بداية كود الربط التفاعلي --- */}
-{article.crossMediaId && (
-  <div className="my-10 p-8 bg-gradient-to-r from-red-600 to-red-700 rounded-3xl text-white shadow-xl flex flex-col items-center text-center transform transition hover:scale-[1.01]">
-    <h3 className="text-2xl font-black mb-3">هل تريد معرفة المزيد؟</h3>
-    <p className="text-red-100 mb-6 font-medium opacity-90">هذا الخبر مرتبط بقصة تفاعلية بصرية، اضغط هنا للمشاهدة.</p>
-    <button 
-      onClick={() => navigate(`/cross-media?storyId=${article.crossMediaId}`)}
-      className="bg-white text-red-600 px-10 py-4 rounded-full font-black text-lg hover:bg-slate-50 transition-all shadow-md"
-    >
-      اضغط هنا لمعرفة المزيد
-    </button>
-  </div>
-)}
-{/* --- نهاية كود الربط التفاعلي --- */}
-
-{/* إضافة المودال في نهاية الملف */}
- 
+            {article.crossMediaId && (
+              <div className="my-10 p-8 bg-gradient-to-r from-red-600 to-red-700 rounded-3xl text-white shadow-xl flex flex-col items-center text-center transform transition hover:scale-[1.01]">
+                <h3 className="text-2xl font-black mb-3">هل تريد معرفة المزيد؟</h3>
+                <p className="text-red-100 mb-6 font-medium opacity-90">هذا الخبر مرتبط بقصة تفاعلية بصرية، اضغط هنا للمشاهدة.</p>
+                <button 
+                  onClick={() => navigate(`/cross-media?storyId=${article.crossMediaId}`)}
+                  className="bg-white text-red-600 px-10 py-4 rounded-full font-black text-lg hover:bg-slate-50 transition-all shadow-md"
+                >
+                  اضغط هنا لمعرفة المزيد
+                </button>
+              </div>
+            )}
 
             {article.hashtags && article.hashtags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
@@ -322,7 +301,6 @@ export default function ArticleDetail() {
 
             <hr className="border-gray-100 my-8" />
 
-            {/* التعليقات */}
             <div className="space-y-6">
               <h3 className="text-xl font-extrabold flex items-center gap-2 text-gray-900">
                 <MessageSquare size={22} className="text-[var(--color-primary)]" />
@@ -361,7 +339,6 @@ export default function ArticleDetail() {
             </div>
           </div>
 
-          {/* الأكثر قراءة */}
           <div className="lg:col-span-1">
             <PopularArticles articles={popularArticlesData || []} />
           </div>

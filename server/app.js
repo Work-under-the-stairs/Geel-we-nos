@@ -34,17 +34,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── MONGODB CONNECTION ───────────────────────────────────────────
-// تم تعديل هذا الجزء لحفظ الـ Promise لمنع محاولات الاتصال المتكررة في نفس المايكروثانية
 let databasePromise = null;
 
 const connectDB = async () => {
-  // 1. إذا كان الاتصال قائماً بالفعل، اخرج فوراً
   if (mongoose.connection.readyState === 1) return;
 
-  // 2. إذا كان هناك اتصال قيد التنفيذ الآن، انتظر نفس الوعد ولا تفتح اتصالاً جديداً
   if (!databasePromise) {
     databasePromise = mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: true, // تفعيلها يحمي الاستعلامات المتزامنة من السقوط الفوري
+      bufferCommands: true,
     });
   }
 
@@ -52,7 +49,7 @@ const connectDB = async () => {
     await databasePromise;
     console.log("✅ MongoDB Connected");
   } catch (err) {
-    databasePromise = null; // إعادة التعيين في حالة الفشل لكي يحاول مجدداً مع الطلب القادم
+    databasePromise = null; 
     console.error("❌ MongoDB Error:", err);
     throw err;
   }
@@ -117,10 +114,8 @@ app.delete("/api/imagekit/delete/:fileId", async (req, res) => {
       return res.status(500).json({ message: "المفتاح السري لـ ImageKit مفقود" });
     }
 
-    // تشفير الـ Private Key باستخدام Base64
     const authToken = Buffer.from(privateKey + ":").toString("base64");
 
-    // ✅ تم تصحيح الرابط المباشر هنا وحذف localhost:5000 الخطأ
     const response = await fetch(`https://api.imagekit.io/v1/files/${fileId}`, {
       method: "DELETE",
       headers: {

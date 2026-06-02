@@ -288,7 +288,6 @@ const StoryCard = ({ story, onClick, index }) => (
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function CrossMediaPage() {
-  // داخل المكون (قبل جملة الـ return):
 const [searchParams] = useSearchParams();
 const storyIdFromUrl = searchParams.get("storyId");
 

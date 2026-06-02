@@ -18,21 +18,18 @@ const newsSchema = new mongoose.Schema(
       ref: "User",
       required: [false, "Writer is required"],
     },
-    // مصفوفات النصوص لاستقبال روابط الـ Front-end (ImageKit) أو روابط الميديا المباشرة
     images: [
       {
         url: { type: String, required: true, trim: true },
-        fileId: { type: String, required: true, trim: true }, // Added field
+        fileId: { type: String, required: true, trim: true }, 
         caption: { type: String, trim: true, default: "" },
       },
     ],
     videos: [{ type: String, trim: true }],
     youtube_videos: [{ type: String, trim: true }],
 
-    // قائمة الهاشتاجات المضافة للمقال
     hashtags: [{ type: String, trim: true }],
 
-    // فريق العمل: كل شخص بيكون ليه اسم ودور
     contributors: [
       {
         name: { type: String, trim: true, required: true },
@@ -44,7 +41,6 @@ const newsSchema = new mongoose.Schema(
       },
     ],
 
-    // حالة المقال: منشور أو مسودة
     status: {
       type: String,
       enum: {
@@ -60,7 +56,7 @@ const newsSchema = new mongoose.Schema(
     },
     crossMediaId: {
       type: Number,
-      required: false, // ليس إجبارياً، فقط للمقالات التي لها قصص
+      required: false,
     },
     important_rate: {
       type: Number,
@@ -80,11 +76,10 @@ const newsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🚀 تحسين الـ Indexes لأعلى أداء في الصفحة الرئيسية والأقسام
 newsSchema.index({ category: 1, createdAt: -1 });
 newsSchema.index({ isUrgent: -1, createdAt: -1 });
 newsSchema.index({ views: -1 });
 newsSchema.index({ important_rate: -1, createdAt: -1 });
-newsSchema.index({ title: "text", content: "text", hashtags: "text" }); // تم تضمين الهاشتاجات في محرك البحث
+newsSchema.index({ title: "text", content: "text", hashtags: "text" });
 
 module.exports = mongoose.model("News", newsSchema);

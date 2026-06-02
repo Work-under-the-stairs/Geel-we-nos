@@ -4,12 +4,10 @@ import { motion } from 'framer-motion';
 import { X, Mic, MapPin, Quote } from 'lucide-react';
 
 const StoryModal = ({ isOpen, onClose, story }) => {
-  // إذا لم يكن المودال مفتوحاً أو لا توجد قصة، لا تعرض شيئاً
   if (!isOpen || !story) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10">
-      {/* الخلفية المضببة */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -18,14 +16,12 @@ const StoryModal = ({ isOpen, onClose, story }) => {
         className="absolute inset-0 bg-black/90 backdrop-blur-md"
       />
 
-      {/* محتوى النافذة */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 50 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 50 }}
         className="relative bg-neutral-900 w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
       >
-        {/* زر الإغلاق */}
         <button 
           onClick={onClose}
           className="absolute top-5 right-5 z-50 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition"
@@ -33,7 +29,6 @@ const StoryModal = ({ isOpen, onClose, story }) => {
           <X size={24} />
         </button>
 
-        {/* الجانب الأيسر: الصورة والوسائط */}
         <div className="w-full md:w-2/5 h-64 md:h-auto relative">
           <img 
             src={story.image} 
@@ -49,9 +44,7 @@ const StoryModal = ({ isOpen, onClose, story }) => {
           </div>
         </div>
 
-        {/* الجانب الأيمن: النص والإنفوجرافيك */}
         <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto custom-scrollbar bg-neutral-900">
-          {/* مشغل الصوت */}
           <div className="mb-8 p-4 bg-white/5 rounded-2xl flex items-center gap-4 border border-white/10">
             <div className="bg-red-600 p-3 rounded-full animate-pulse">
               <Mic size={20} className="text-white" />
@@ -65,7 +58,6 @@ const StoryModal = ({ isOpen, onClose, story }) => {
             </audio>
           </div>
 
-          {/* محتوى القصة */}
           <div className="prose prose-invert max-w-none">
             <div className="flex gap-2 mb-4">
                <Quote className="text-red-600 rotate-180" size={32} />
@@ -81,7 +73,6 @@ const StoryModal = ({ isOpen, onClose, story }) => {
             ))}
           </div>
 
-          {/* قسم الإنفوجرافيك الصغير */}
           <div className="mt-10 pt-10 border-t border-white/10">
             <h4 className="text-white font-bold mb-4 flex items-center gap-2">
               <div className="w-2 h-2 bg-red-600 rounded-full" />

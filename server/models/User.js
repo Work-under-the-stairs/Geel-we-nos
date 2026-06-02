@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    // ✅ جديد
     firebaseUid: {
       type: String,
       default: "",
@@ -18,10 +17,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: false,      // ✅ عدّلنا من true لـ false
-      default: "",          // ✅ أضفنا default
+      required: false, 
+      default: "", 
       select: false,
-      // ✅ شلنا minlength لأن Firebase users مش بيبعتوا password
     },
     email: {
       type: String,
@@ -50,15 +48,13 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ عدّلنا الـ pre-save بحيث يتخطى الهاش لو password فاضي
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  if (!this.password || this.password === "") return next(); // ✅ Firebase users
+  if (!this.password || this.password === "") return next(); 
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

@@ -32,11 +32,11 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, se
             href="#"
             onClick={(e) => {
                 e.preventDefault();
-                setActiveTab(link.name); // تغيير الصفحة
-                if(window.innerWidth < 1024) setIsSidebarOpen(false); // قفل القائمة في الموبايل
+                setActiveTab(link.name); 
+                if(window.innerWidth < 1024) setIsSidebarOpen(false);
             }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                activeTab === link.name // 👈 التعديل هنا
+                activeTab === link.name
                 ? "bg-[var(--color-secondary)] text-white shadow-lg shadow-orange-600/10"
                 : "text-slate-300 hover:bg-[#134E5E] hover:text-white"
             }`}

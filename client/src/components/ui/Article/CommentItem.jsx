@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { isAuthenticated, getUsername, isAdmin } from "../../../utils/auth";
-// استدعاء الهوكس الحقيقية بتاعتك
 import { 
   useAddReply, 
 } from '../../../hooks/useArticles';
@@ -14,7 +13,6 @@ const CommentItem = ({ comment, articleId }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
 
-  // استدعاء هوك إضافة الرد وتمرير الـ ID بتاع التعليق ده بالتحديد
   const { mutate: submitReply, isPending: isReplyingPending } = useAddReply(articleId, comment._id);
 
   const handleReplySubmit = (e) => {
@@ -25,22 +23,19 @@ const CommentItem = ({ comment, articleId }) => {
     }
 
     const username = getUsername();
-    // console.log("المعلق الحالي هو:", username);
 
     if (!replyText.trim()) return;
 
-    // افترضت إن الباك إند بيستقبل حقل اسمه text أو commentText (عدليها حسب الـ Schema بتاعتك)
     submitReply({ content: replyText }, {
       onSuccess: () => {
         setReplyText("");
-        setIsReplying(false); // نقفل مربع الرد بعد النجاح
+        setIsReplying(false);
       }
     });
   };
 
   return (
     <div className="bg-white border border-gray-100 p-4 rounded-2xl transition-all hover:border-gray-200">
-      {/* التعليق الأساسي */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="font-bold text-sm text-gray-800">{comment.writer?.name || "مستخدم"}</span>
@@ -52,7 +47,6 @@ const CommentItem = ({ comment, articleId }) => {
           {comment.content}
         </p>
         
-        {/* زرار الرد */}
         <button 
           onClick={() => setIsReplying(!isReplying)}
           className="text-[11px] font-bold text-gray-400 hover:text-[var(--color-primary)] flex items-center gap-1 transition-colors mt-2"
@@ -62,7 +56,6 @@ const CommentItem = ({ comment, articleId }) => {
         </button>
       </div>
 
-      {/* مربع كتابة الرد (يظهر فقط عند الضغط على زر رد) */}
       {isReplying && (
         <form onSubmit={handleReplySubmit} className="mt-3 relative">
           <input
@@ -83,7 +76,6 @@ const CommentItem = ({ comment, articleId }) => {
         </form>
       )}
 
-      {/* عرض الردود السابقة (Nested Replies) */}
       {comment.replies && comment.replies.length > 0 && (
         <div className="mt-4 mr-4 pr-3 border-r-2 border-[var(--color-primary)]/20 space-y-3">
           {comment.replies.map((reply) => (

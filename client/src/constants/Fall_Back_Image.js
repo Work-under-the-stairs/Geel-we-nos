@@ -1,1 +1,1 @@
-export const FALLBACK_IMAGE = "/default-news.png"; // موحد لكل المشروع
+export const FALLBACK_IMAGE = "/images/image_placeholder.jpg";

@@ -70,12 +70,10 @@ export function SidebarStepper({ basicInfoRef, contentRef, mediaRef, importanceR
   return (
     <div className="w-full bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm flex flex-col pb-5" dir="rtl">
 
-      {/* هيدر المراحل */}
       <div className="bg-[var(--color-primary,#0D4C54)] p-4 sm:p-5 text-white text-center rounded-t-[27px] mb-4">
         <h2 className="text-lg sm:text-xl font-black">المراحل</h2>
       </div>
 
-      {/* قائمة الخطوات */}
       <div className="px-4 sm:px-5 flex flex-row xl:flex-col gap-3.5 overflow-x-auto xl:overflow-x-visible scrollbar-none snap-x mb-2">
         {steps.map((item, index) => (
           <button
@@ -94,7 +92,6 @@ export function SidebarStepper({ basicInfoRef, contentRef, mediaRef, importanceR
         ))}
       </div>
 
-      {/* صندوق نصائح الكاتب المحدث لتبدأ العناصر من اليمين تماماً */}
       <div className="mx-4 sm:mx-5 bg-[var(--color-secondary-bg,#FFF8F2)] rounded-2xl border border-[var(--color-secondary-border,#FFE1CC)] p-5 shadow-xs mt-3" dir="rtl">
         <div className="text-right mb-4">
           <h3 className="font-black text-sm sm:text-base text-[var(--color-secondary,#FF5A00)] tracking-wide">
@@ -104,9 +101,7 @@ export function SidebarStepper({ basicInfoRef, contentRef, mediaRef, importanceR
         <ul className="space-y-3 text-right">
           {tips.map((tip, index) => (
             <div key={index} className="flex items-start justify-start gap-3 text-right">
-              {/* أيقونة الصح في اليمين دائماً */}
               <Check size={18} className="text-[var(--color-secondary,#FF5A00)] shrink-0 mt-0.5" />
-              {/* النص بجانب الأيقونة مباشرة متجهاً لليسار */}
               <span className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                 {tip}
               </span>
@@ -167,44 +162,41 @@ export function BasicInfoSection({
       </div>
 
       <div className="mt-4">
-  {/* حاوية العنوان والزر */}
-  <div className="flex items-center justify-between mb-2">
-    <label className="text-sm font-bold text-slate-700">الهاشتاجات</label>
-    
-    {/* زر الإضافة يظهر في الجهة اليسرى */}
-    {hashtagInput.trim().length > 0 && (
-      <button
-        type="button"
-        onClick={() => {
-          const e = { key: 'Enter', preventDefault: () => { } };
-          handleHashtagKeyDown(e);
-        }}
-        className="h-8 px-4 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white text-xs font-bold hover:opacity-90 transition shadow-sm"
-      >
-        إضافة
-      </button>
-    )}
-  </div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-bold text-slate-700">الهاشتاجات</label>
+          
+          {hashtagInput.trim().length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const e = { key: 'Enter', preventDefault: () => { } };
+                handleHashtagKeyDown(e);
+              }}
+              className="h-8 px-4 rounded-xl bg-[var(--color-primary,#0D4C54)] text-white text-xs font-bold hover:opacity-90 transition shadow-sm"
+            >
+              إضافة
+            </button>
+          )}
+        </div>
 
-  {/* حاوية الهاشتاجات وحقل الإدخال */}
-  <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
-    {hashtags.map((tag, i) => (
-      <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
-        <span>{tag}</span>
-        <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
+        <div className="w-full min-h-[60px] rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-2">
+          {hashtags.map((tag, i) => (
+            <div key={i} className="h-10 px-4 rounded-xl bg-[var(--color-secondary,#FF5A00)] text-white flex items-center gap-2 text-sm font-medium">
+              <span>{tag}</span>
+              <button type="button" onClick={() => removeHashtag(tag)}><X size={14} /></button>
+            </div>
+          ))}
+          
+          <input
+            type="text"
+            value={hashtagInput}
+            onChange={(e) => setHashtagInput(e.target.value)}
+            onKeyDown={handleHashtagKeyDown}
+            placeholder="اكتب هاشتاج واضغط Enter أو زر إضافة..."
+            className="flex-1 min-w-[150px] h-10 outline-none text-sm px-2"
+          />
+        </div>
       </div>
-    ))}
-    
-    <input
-      type="text"
-      value={hashtagInput}
-      onChange={(e) => setHashtagInput(e.target.value)}
-      onKeyDown={handleHashtagKeyDown}
-      placeholder="اكتب هاشتاج واضغط Enter أو زر إضافة..."
-      className="flex-1 min-w-[150px] h-10 outline-none text-sm px-2"
-    />
-  </div>
-</div>
 
       <div className="mt-6">
         <label className="block mb-2 text-sm font-bold text-slate-700">الصورة البارزة</label>
@@ -268,11 +260,9 @@ export function EditorSection({
 
   return (
     <div ref={innerRef} className="bg-white rounded-[28px] border border-slate-200 shadow-sm scroll-mt-24 relative">
-      {/* 🌟 تم مسح كلاس overflow-hidden من الـ div الأب لكي يعمل الـ sticky */}
 
       {editorUploading && <UploadOverlay progress={editorProgress} label={editorUploadLabel} />}
 
-      {/* 🌟 ضفنا rounded-t-[28px] عشان نحافظ على شكل التصميم، وخلينا z-20 */}
       <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2 bg-slate-50 sticky top-0 z-20 shadow-sm rounded-t-[27px]">
         <ToolbarButton title="نص عريض" active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()}>
           <Bold size={17} />

@@ -7,10 +7,8 @@ export default function StoriesPage() {
   const [selectedStory, setSelectedStory] = useState(null);
   const [filter, setFilter] = useState('الكل');
 
-  // استخراج المواقع الفريدة للفلترة (غزة، السودان، إلخ)
   const locations = ['الكل', ...new Set(stories.map(s => s.location))];
 
-  // تصفية القصص بناءً على الاختيار
   const filteredStories = filter === 'الكل' 
     ? stories 
     : stories.filter(s => s.location === filter);
@@ -19,7 +17,6 @@ export default function StoriesPage() {
     <div className="min-h-screen bg-neutral-950 py-16 px-4" dir="rtl">
       <div className="max-w-6xl mx-auto">
         
-        {/* الهيدر */}
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-6">
             أصوات من وسط الركام
@@ -28,7 +25,6 @@ export default function StoriesPage() {
             قصص أطفال تحدوا الحرب، فقدوا الكثير، لكنهم ما زالوا يحلمون بالغد.
           </p>
 
-          {/* أزرار الفلترة */}
           <div className="flex flex-wrap justify-center gap-3">
             {locations.map((loc) => (
               <button
@@ -46,7 +42,6 @@ export default function StoriesPage() {
           </div>
         </header>
 
-        {/* شبكة عرض القصص */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredStories.length > 0 ? (
             filteredStories.map((story) => (
@@ -77,7 +72,6 @@ export default function StoriesPage() {
         </div>
       </div>
 
-      {/* المودال الموحد - يفتح بناءً على القصة المختارة */}
       <StoryModal 
         isOpen={!!selectedStory} 
         onClose={() => setSelectedStory(null)} 

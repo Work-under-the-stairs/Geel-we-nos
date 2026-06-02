@@ -8,13 +8,11 @@ export default function TrendingRibbon({ trendingArticles = [] }) {
     <div className="w-full bg-slate-50 border-y border-gray-200 py-4 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex items-center gap-6 overflow-x-auto scrollbar-none touch-pan-x">
         
-        {/* ======= Badge Label ======= */}
         <div className="flex items-center gap-2 flex-shrink-0 bg-secondary text-white text-[12px] font-black px-3 py-1 rounded-md shadow-sm">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
           الأكثر قراءة
         </div>
 
-        {/* ======= Trending Items Loop ======= */}
         <div className="flex items-center gap-8 min-w-max">
           {Array.isArray(trendingArticles) && trendingArticles.map((art, idx) => (
             <Link

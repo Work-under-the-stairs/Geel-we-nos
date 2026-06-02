@@ -2,7 +2,7 @@ import React from 'react';
 import { FileText, Eye, Edit, Trash2, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
+import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function DashboardContent({ 
   recentArticles = [], 
   topViewed = [], 
@@ -11,7 +11,6 @@ export default function DashboardContent({
   isDeletingArticle 
 }) {
   const navigate = useNavigate();
-  const fallbackPlaceholder = '/images/image_placeholder.jpg';
 
   const handleDelete = (id) => {
     toast((t) => (
@@ -89,8 +88,6 @@ export default function DashboardContent({
     <div className="space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
-        {/* جدول آخر المقالات */}
-        {/* ✅ ضفنا min-w-0 هنا لمنع الـ Flexbox من تشويه عرض الشاشة */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 xl:col-span-2 flex flex-col justify-between shadow-sm min-w-0">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -100,13 +97,10 @@ export default function DashboardContent({
               </h3>
             </div>
             
-            {/* ✅ الحاوية دي هي المسؤولة عن السكرول الأفقي النظيف */}
             <div className="w-full overflow-x-auto pb-2 custom-scrollbar">
-              {/* ✅ كبرنا الحد الأدنى للعرض لـ 800px عشان مفيش حاجة تضغط التانية */}
               <table className="w-full text-right border-collapse min-w-[800px]">
                 <thead>
                   <tr className="border-b-2 border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    {/* ✅ whitespace-nowrap بتمنع النص ينزل على سطرين */}
                     <th className="pb-3 font-semibold whitespace-nowrap">المقال</th>
                     <th className="pb-3 font-semibold whitespace-nowrap">التصنيف</th>
                     <th className="pb-3 font-semibold whitespace-nowrap">التاريخ</th>
@@ -119,9 +113,9 @@ export default function DashboardContent({
                   {recentArticles.length > 0 ? recentArticles.map((art, idx) => {
                     const statusBadge = getStatusBadge(art.status);
                     
-                    const artImg = art.image || art.images?.[0];
+                    const artImg = art.image || art.images?.[0] || FALLBACK_IMAGE;
                     let artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
-                    if (artImgUrl?.includes('via.placeholder.com')) artImgUrl = fallbackPlaceholder;
+                    if (artImgUrl?.includes('via.placeholder.com')) artImgUrl = FALLBACK_IMAGE;
 
                     const categoryName = typeof art.category === 'object' ? art.category?.name : (art.category || 'عام');
 
@@ -143,12 +137,12 @@ export default function DashboardContent({
                         <td className="py-4">
                           <div className="flex items-center gap-3">
                             <img 
-                              src={artImgUrl || fallbackPlaceholder} 
+                              src={artImgUrl || FALLBACK_IMAGE} 
                               alt={art.title} 
                               className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100 bg-slate-50" 
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = fallbackPlaceholder;
+                                e.target.src = FALLBACK_IMAGE;
                               }}
                             />
                             <div className="min-w-0">
@@ -208,7 +202,6 @@ export default function DashboardContent({
           </div>
         </div>
 
-        {/* الأكثر مشاهدة */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col shadow-sm min-w-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
@@ -220,7 +213,7 @@ export default function DashboardContent({
             {topViewed.length > 0 ? topViewed.map((item, idx) => {
               const itemViewedImg = item.image || item.images?.[0];
               let itemViewedImgUrl = typeof itemViewedImg === 'object' ? itemViewedImg?.url : itemViewedImg;
-              if (itemViewedImgUrl?.includes('via.placeholder.com')) itemViewedImgUrl = fallbackPlaceholder;
+              if (itemViewedImgUrl?.includes('via.placeholder.com')) itemViewedImgUrl = FALLBACK_IMAGE;
 
               const itemId = item.id;
 
@@ -234,12 +227,12 @@ export default function DashboardContent({
                     {item.rank || (idx + 1)}
                   </span>
                   <img 
-                    src={itemViewedImgUrl || fallbackPlaceholder} 
+                    src={itemViewedImgUrl || FALLBACK_IMAGE} 
                     alt={item.title} 
                     className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm bg-slate-50" 
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = fallbackPlaceholder;
+                      e.target.src = FALLBACK_IMAGE;
                     }}
                   />
                   <div className="flex-1 min-w-0">
@@ -255,7 +248,6 @@ export default function DashboardContent({
         </div>
       </div>
 
-      {/* ================= الصف الثاني: توزيع المقالات (الدائرة + البارات) ================= */}
       <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-4xl">
         <h3 className="font-bold text-slate-800 text-base mb-6 flex items-center gap-2">
           <PieChart size={18} className="text-slate-400" />

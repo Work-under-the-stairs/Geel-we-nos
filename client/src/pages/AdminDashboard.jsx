@@ -6,7 +6,7 @@ import StatCards from "../components/ui/Dashboard/StatCards";
 import DashboardContent from "../components/ui/Dashboard/DashboardContent";
 import UsersTable from "../components/ui/Dashboard/UsersTable";
 import CategoriesTable from "../components/ui/Dashboard/CategoriesTable";
-import { getUserData } from "../utils/auth"; // 👈 استدعاء دالة جلب بيانات اليوزر
+import { getUserData } from "../utils/auth"; 
 import { 
   useDashboardSummary, 
   useCategories, 
@@ -23,24 +23,16 @@ export default function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("الرئيسية");
 
-  // جلب بيانات اليوزر من الـ localStorage (المخزنة عند تسجيل الدخول)
   const userData = getUserData();
 
-  // ==========================================
-  // 1. هوكس الإحصائيات (الرئيسية) والمقالات
-  // ==========================================
   const { data: dashboardData, isLoading: isDashboardLoading, isError: isDashboardError } = useDashboardSummary();
   const { mutate: deleteArticle, isPending: isDeletingArticle } = useDeleteArticle();
 
-  // ==========================================
-  // 2. هوكس الأقسام
-  // ==========================================
   const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories();
   const { mutate: addCategory } = useAddCategory();
   const { mutate: updateCategory } = useUpdateCategory();
   const { mutate: deleteCategory } = useDeleteCategory();
 
-  // خريطة الأيقونات
   const iconMap = {
     "المقالات": FileText,
     "المشاهدات": Eye,
@@ -53,7 +45,6 @@ export default function AdminDashboard() {
     icon: iconMap[stat.title] || BarChart2 
   })) || [];
 
-  // دالة عرض المحتوى
   const renderContent = () => {
     if (isDashboardLoading && activeTab === "الرئيسية") {
       return (
@@ -83,7 +74,6 @@ export default function AdminDashboard() {
         );
       case "إضافة مقال":
         return (
-          // <Navigate to="/add/article" />
           <AddArticle />
         );
       case "التصنيفات":
@@ -128,10 +118,8 @@ export default function AdminDashboard() {
       <div className="flex-1 lg:mr-64 min-w-0 flex flex-col min-h-screen">
         <main className="p-4 lg:p-8 space-y-6 flex-1">
           
-          {/* ================= البار العلوي (الترحيب وزر الإضافة) ================= */}
           <div className="bg-[var(--color-primary)] p-6 rounded-2xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             
-            {/* الجزء الأيمن: زر القائمة المخفي + رسالة الترحيب */}
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setIsSidebarOpen(true)}
@@ -150,10 +138,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* الجزء الأيسر: زر إضافة مقال */}
-            {/* استخدمي <Link to="/add-article"> لو عندك راوت، أو سيبيها <button> لو بتفتحي Modal */}
             <button
-              // onClick={() => navigate("/add/article")}
               onClick={() => setActiveTab("إضافة مقال")}
              className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/90 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-transform hover:-translate-y-0.5 shadow-[0_4px_12px_rgba(252,105,85,0.3)] w-full sm:w-auto justify-center">
               <Plus size={18} />

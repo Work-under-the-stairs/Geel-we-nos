@@ -4,12 +4,10 @@ import { formatDate } from '../../../utils/dateFormatter'
 import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function CategoriesGrid({ articles = {} }) {
   
-  // الاستخراج المباشر والذكي للأخبار من الأوبجكت المبعوث من الباك إند
   const techArticles    = articles['تكنولوجيا ومهارات']?.articles || [];
   const economyArticles = articles['اقتصاد']?.articles || [];
   const healthArticles  = articles['صحة']?.articles || [];
 
-  // ربط الداتا مع الاستايل بالثيم المودرن
   const sectionsData = [
     { title: 'تكنولوجيا ومهارات', color: 'border-secondary', data: techArticles },
     { title: 'اقتصاد والمال', color: 'border-primary', data: economyArticles },
@@ -22,10 +20,8 @@ export default function CategoriesGrid({ articles = {} }) {
         
         {sectionsData.map((sec, idx) => {
           const mainPost = sec.data[0]
-          // جلب المقالين الثاني والثالث للـ List السفلية
           const subPosts = sec.data.slice(1, 3)
 
-          // ✅ استخراج الرابط بشكل آمن (يدعم الأوبجكت الجديد والاسترينج القديم)
           const mainPostImg = mainPost?.images?.[0] || FALLBACK_IMAGE;
           const mainPostImgUrl = typeof mainPostImg === 'object' ? mainPostImg?.url : mainPostImg;
 
@@ -43,13 +39,12 @@ export default function CategoriesGrid({ articles = {} }) {
                 <Link to={`/news/${mainPost._id}`} className="group block flex-shrink-0 cursor-pointer">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-50 shadow-sm mb-3">
                     <img
-                      // ✅ تم التعديل هنا لقراءة الـ URL المتقشر وجاهز
                       src={mainPostImgUrl || FALLBACK_IMAGE}
                       alt={mainPost.title}
                       className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                       onError={(e) => { 
                         e.target.src = FALLBACK_IMAGE; 
-                        e.target.onerror = null; // منع اللوب اللانهائي لو الصورة البديلة مش موجودة
+                        e.target.onerror = null;
                       }} 
                     />
                   </div>

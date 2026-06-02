@@ -74,7 +74,6 @@ const editorExtensions = [
   StarterKit,
   Placeholder.configure({
     placeholder: 'ابدأ بكتابة المقال...',
-    // This ensures the placeholder only shows when the editor is empty
     emptyEditorClass: 'is-editor-empty', 
   }),
   UnderlineExtension,
@@ -106,7 +105,6 @@ export default function ArticleForm({
 }) {
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
 
-  // ── States ───────────────────────────────────────────────────
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [importance, setImportance] = useState(5);
@@ -141,7 +139,6 @@ export default function ArticleForm({
   const [pendingEditorImageData, setPendingEditorImageData] = useState(null);
   const [editorImageCaption, setEditorImageCaption] = useState("");
 
-  // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
   const mediaRef = useRef(null);
@@ -198,12 +195,12 @@ export default function ArticleForm({
 
   const editor = useEditor({
     extensions: editorExtensions,
-    content: '', // Set to empty string
-  editorProps: {
-    attributes: {
-      class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
+    content: '',
+    editorProps: {
+      attributes: {
+        class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
+      },
     },
-  },
     onUpdate: ({ editor }) => {
       if (isContentHydratingRef.current) return;
       const currentHTML = editor.getHTML();
@@ -290,8 +287,6 @@ export default function ArticleForm({
       return;
     }
 
-    // 2. Prepare Images Array with fileId
-    // Mapping both gallery and featured image to ensure they contain fileId
     const formattedGallery = gallery.map((img) => ({ 
       url: img.url, 
       fileId: img.fileId, 
@@ -306,7 +301,6 @@ export default function ArticleForm({
       });
     }
 
-    // 3. Prepare Other Payloads
     const allVideos = videoPreview?.url ? [videoPreview.url] : [];
     const youtubeIdsArray = youtubeLinks.map(item => item.id);
 
@@ -316,7 +310,7 @@ export default function ArticleForm({
       category,
       important_rate: importance,
       isUrgent,
-      images: formattedGallery, // Includes url, fileId, caption
+      images: formattedGallery,
       videos: allVideos,
       youtube_videos: youtubeIdsArray,
       hashtags,
@@ -324,7 +318,6 @@ export default function ArticleForm({
       status: targetStatus,
     };
 
-    // 4. Submit
     onSubmit(payload, targetStatus);
   };
 
@@ -560,8 +553,8 @@ export default function ArticleForm({
   pointer-events: none;
   height: 0;
 
-  font-size: 24px;     /* حجم أكبر */
-  font-weight: 700;    /* خط عريض */
+  font-size: 24px;
+  font-weight: 700;
   line-height: 1.5;
 }
 
