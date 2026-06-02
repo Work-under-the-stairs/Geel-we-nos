@@ -5,8 +5,10 @@ import { Loader2 } from "lucide-react";
 
 import ArticleForm from "../components/ui/Article/ArticleForm";
 import { useUpdateArticle, useAdminArticle } from "../hooks/useAdmin";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 export default function EditArticle() {
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -19,12 +21,12 @@ export default function EditArticle() {
     updateArticleMutation.mutate(
       { id, data: { ...payload, status } },
       {
-        onSuccess: () => {
+        onSuccess: (updatedData) => {
+          queryClient.setQueryData(['news', id], updatedData);
           toast.success("تم تحديث وحفظ المقال بنجاح! 💾", { id: "submit-toast" });
 
-          // التوجيه لصفحة الخبر لو منشور، أو للادمن لو مسودة
           if (status === "published") {
-            navigate(`/news/${id}`); // عدلي مسار /article/ لو مختلف عندك
+            navigate(`/news/${id}`);
           } else {
             navigate("/admin");
           }
@@ -42,7 +44,6 @@ export default function EditArticle() {
     navigate("/admin");
   };
 
-  // حالات التحميل
   if (isArticleLoading) {
     return (
       <div className="min-h-screen bg-[#f5f7fb] flex flex-col items-center justify-center gap-3">

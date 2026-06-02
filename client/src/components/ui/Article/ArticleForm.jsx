@@ -648,6 +648,7 @@ export default function ArticleForm({
               <input placeholder="اسم الشخص" className="p-3 rounded-xl border border-slate-200 text-sm" value={newContributor.name} onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })} />
               <select className="p-3 rounded-xl border border-slate-200 text-sm" value={newContributor.role} onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}>
                 <option value="photographer">مصور (Photographer)</option>
+                <option value="writer">كاتب (Writer)</option>
                 <option value="editor">محرر (Editor)</option>
               </select>
               <button onClick={addContributor} className="bg-slate-800 text-white p-3 rounded-xl text-sm font-bold">+ إضافة</button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Reply, Loader2, PenLine, Camera, Edit3 } from 'lucide-react';
+import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Loader2, Camera, Edit3, PenTool } from 'lucide-react';
 import PopularArticles from '../components/ui/PopularArticles';
 import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
@@ -20,9 +20,8 @@ import {
   useTrending 
 } from '../hooks/useArticles';
 import { FALLBACK_IMAGE } from '../constants/Fall_Back_Image';
-// خريطة الأدوار: مفتاح اللغة → تسمية عربية + أيقونة
 const ROLE_MAP = {
-  writer:       { label: "كاتب",    Icon: PenLine  },
+  writer:       { label: "كاتب",    Icon: PenTool  },
   photographer: { label: "مصور",    Icon: Camera   },
   editor:       { label: "محرر",    Icon: Edit3    },
 };
