@@ -157,10 +157,14 @@ const stories = [
   }
 ];
 
-const chartStats = [
-  { label: "شهداء غزة الإجمالي", value: 70000, targetPercent: 85, color: "#e74c3c" },
-  { label: "المصابين والجرحى الموثقين", value: 170000, targetPercent: 100, color: "#e67e22" },
-  { label: "الأطفال المتضررين بالنزاع بالشام والسودان", value: 12500000, targetPercent: 65, color: "#f1c40f" }
+// ─── SEPARATE GALLERY IMAGES ARRAY - EDIT THIS TO REMOVE OR ADD IMAGES ─────────
+const galleryImages = [
+  { src: "/assets/images/lama.jpeg", caption: "شقيقته الراحلة الطفلة الشهيدة ألمى", storyName: "ألمي عزام" },
+  { src: "/assets/images/adhamatschool.jpeg", caption: "تكريم أدهم ضمن أوائل الطلبة بجمهورية مصر", storyName: "أدهم عزام" },
+  { src: "/assets/images/ghazal.jpeg", caption: "غزل ابنة غزة الواعدة", storyName: "غزل رفعت" },
+  { src: "/assets/images/doaa_1.jpeg", caption: "دعاء ترفع علامة النصر بابتسامة صامدة رغم بتر قدمها", storyName: "دعاء أبو جزر" },
+  { src: "/assets/images/hassan.jpeg", caption: "حسن ينظر من النافذة متأملاً انتهاء سحب الدخان والدمار", storyName: "حسن أحمد" },
+  { src: "/assets/images/ahmed_sudan1.jpeg", caption: "أحمد يمارس مهارات كرة القدم في شوارع اللجوء الآمنة", storyName: "أحمد حامد يحيى" },
 ];
 
 // ─── ROBUST MULTI-TRACK AUDIO ENGINE ────────────────────────────────
@@ -265,59 +269,154 @@ function MultiAudioPlayer({ tracks, accentColor }) {
   );
 }
 
-// ─── INTERACTIVE CHART INFOGRAPHIC ───────────────────────────────────────────
-function InteractiveChart() {
-  const chartWrapperRef = useRef(null);
-
+// ─── ANIMATED CIRCULAR GALLERY WITH WAVE AT THE TOP ─────────────────────────────
+function CircularAnimatedGallery() {
+  const containerRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  
+  const totalImages = galleryImages.length;
+  
   useEffect(() => {
-    const bars = chartWrapperRef.current.querySelectorAll(".chart-bar-fill");
-    const counters = chartWrapperRef.current.querySelectorAll(".counter-val");
-
-    gsap.fromTo(bars, { width: "0%" }, {
-      width: (i, el) => el.getAttribute("data-percentage"),
-      duration: 2, ease: "power3.out",
-      scrollTrigger: { trigger: chartWrapperRef.current, start: "top 85%" }
-    });
-
-    counters.forEach((counter) => {
-      const target = parseInt(counter.getAttribute("data-target"), 10);
-      const obj = { value: 0 };
-      gsap.to(obj, {
-        value: target, duration: 2.5, ease: "power2.out",
-        scrollTrigger: { trigger: chartWrapperRef.current, start: "top 85%" },
-        onUpdate: () => { counter.textContent = Math.floor(obj.value).toLocaleString() + "+"; }
-      });
-    });
-  }, []);
-
+    if (totalImages === 0) return;
+    const interval = setInterval(() => {
+      if (!isAnimating) {
+        setActiveIndex((prev) => (prev + 1) % totalImages);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [totalImages, isAnimating]);
+  
+  useEffect(() => {
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 500);
+    return () => clearTimeout(timer);
+  }, [activeIndex]);
+  
+  const getVisibleImages = () => {
+    const images = [];
+    for (let i = -2; i <= 2; i++) {
+      let idx = (activeIndex + i + totalImages) % totalImages;
+      images.push({ ...galleryImages[idx], originalIndex: idx, offset: i });
+    }
+    return images;
+  };
+  
+  const visibleImages = getVisibleImages();
+  
+  if (totalImages === 0) {
+    return null;
+  }
+  
   return (
-    <section className="interactive-chart-section max-w-4xl mx-auto py-16 px-4 md:px-6" ref={chartWrapperRef}>
-      <div className="chart-header-block text-center mb-12">
-        <h2 className="font-amiri text-3xl md:text-4xl font-bold mb-2">البيانات والمسوح الميدانية</h2>
-        <p className="text-gray-400 text-lg">فاتورة الحروب بالأرقام الإحصائية</p>
-      </div>
-      <div className="chart-grid-layout flex flex-col gap-6">
-        {chartStats.map((stat, idx) => (
-          <div key={idx} className="chart-row-item">
-            <div className="chart-meta-info flex justify-between items-baseline flex-wrap gap-2">
-              <span className="font-medium text-gray-200">{stat.label}</span>
-              <span className="counter-val text-xl font-bold" data-target={stat.value}>0</span>
-            </div>
-            <div className="chart-bar-bg w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="chart-bar-fill h-full rounded-full"
-                data-percentage={`${stat.targetPercent}%`}
-                style={{ backgroundColor: stat.color }}
-              />
-            </div>
+    <section className="circular-gallery-section relative min-h-screen py-12 overflow-hidden" ref={containerRef}>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-transparent pointer-events-none" />
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-8">
+        <div className="text-center mb-3">
+          <h2 className="font-amiri text-3xl pb-6 md:text-5xl font-bold mb-2 bg-gradient-to-r from-white via-amber-300 to-white bg-clip-text text-transparent">
+            معرض الذكريات
+          </h2>
+          <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto" />
+        </div>
+        
+        <div className="relative flex items-center justify-center min-h-[500px] md:min-h-[600px] perspective-1000">
+          <div className="relative w-full flex items-center justify-center">
+            {visibleImages.map((img) => {
+              const offset = img.offset;
+              const absOffset = Math.abs(offset);
+              const isCenter = offset === 0;
+              
+              let translateX = 0;
+              let translateY = 0;
+              let scale = 1;
+              let opacity = 1;
+              let zIndex = 10 - absOffset;
+              let rotation = 0;
+              
+              // Adjust spacing for larger images
+              if (offset === -2) {
+                translateX = -320;
+                translateY = 40;
+                scale = 0.7;
+                opacity = 0.4;
+                rotation = -15;
+              } else if (offset === -1) {
+                translateX = -160;
+                translateY = 20;
+                scale = 0.9;
+                opacity = 0.7;
+                rotation = -8;
+              } else if (offset === 0) {
+                translateX = 0;
+                translateY = 0;
+                scale = 1.3;
+                opacity = 1;
+                rotation = 0;
+              } else if (offset === 1) {
+                translateX = 160;
+                translateY = 20;
+                scale = 0.9;
+                opacity = 0.7;
+                rotation = 8;
+              } else if (offset === 2) {
+                translateX = 320;
+                translateY = 40;
+                scale = 0.7;
+                opacity = 0.4;
+                rotation = 15;
+              }
+              
+              if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                if (offset === -2) translateX = -140;
+                if (offset === -1) translateX = -70;
+                if (offset === 1) translateX = 70;
+                if (offset === 2) translateX = 140;
+                scale = offset === 0 ? 1.1 : 0.7;
+              }
+              
+              return (
+                <div
+                  key={img.originalIndex}
+                  onClick={() => {
+                    if (!isAnimating && offset !== 0) {
+                      setActiveIndex(img.originalIndex);
+                    }
+                  }}
+                  className="absolute cursor-pointer transition-all duration-500 ease-out"
+                  style={{
+                    transform: `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scale})`,
+                    opacity: opacity,
+                    zIndex: zIndex,
+                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                >
+                  <div className={`relative overflow-hidden rounded-2xl shadow-2xl ${
+                    isCenter ? 'ring-4 ring-amber-500/50 shadow-amber-500/20' : ''
+                  }`}>
+                    <img
+                      src={img.src}
+                      alt={img.caption}
+                      className="w-56 h-56 md:w-80 md:h-80 object-cover object-center transition-all duration-300"
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        </div>
       </div>
+      
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+      `}</style>
     </section>
   );
 }
 
-// ─── STICKY SHOWCASE SECTION - IMAGES FIRST ON MOBILE, NO CAPTIONS, DOTS AND AGE AT BOTTOM ────────────
+// ─── STICKY SHOWCASE SECTION ────────────────────────────────
 function StickyShowcaseSection({ story, index }) {
   const sectionRef = useRef(null);
   const textContainerRef = useRef(null);
@@ -355,12 +454,9 @@ function StickyShowcaseSection({ story, index }) {
 
   return (
     <div ref={sectionRef} className="w-full overflow-hidden">
-      {/* Mobile Layout: Image First, Text Below */}
       <div className="block lg:hidden">
-        {/* Image Section - Full width on mobile */}
         <div className="relative h-[60vh] w-full bg-black overflow-hidden">
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            {/* Ambient Blur Backdrop */}
             {story.images[activeImgIdx] && (
               <img
                 src={story.images[activeImgIdx].src}
@@ -369,129 +465,8 @@ function StickyShowcaseSection({ story, index }) {
               />
             )}
 
-            {/* Core Media Render */}
             {hasMultipleImages ? (
               <div className="relative z-10 grid grid-cols-2 grid-rows-2 gap-3 w-[90%] h-[80%] p-2">
-                {story.images.map((img, imgIdx) => (
-                  <div
-                    key={imgIdx}
-                    onClick={() => setActiveImgIdx(imgIdx)}
-                    className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-500 ${
-                      activeImgIdx === imgIdx
-                        ? "opacity-100 scale-[1.02] ring-2 ring-white/40 shadow-2xl z-10"
-                        : "opacity-40 scale-95 grayscale-[20%]"
-                    }`}
-                  >
-                    <img
-                      src={img.src}
-                      alt=""
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full p-4 z-10 relative">
-                <img
-                  src={story.images[0]?.src}
-                  alt=""
-                  className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl"
-                />
-              </div>
-            )}
-
-            {/* Flag & Country Badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full z-20">
-              <span>{story.flag}</span>
-              <span className="text-sm font-medium">{story.country}</span>
-            </div>
-
-            {/* Bottom Controls - Dots and Age only (no caption) */}
-            <div className="absolute bottom-4 left-0 right-0 flex flex-row items-center justify-center gap-4 z-20">
-              {hasMultipleImages && (
-                <div className="gallery-navigation-dots flex gap-2 bg-black/50 px-3 py-1.5 rounded-full">
-                  {story.images.map((_, imgIdx) => (
-                    <button
-                      key={imgIdx}
-                      onClick={() => setActiveImgIdx(imgIdx)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm whitespace-nowrap">
-                {story.age}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Text Section - Below image on mobile */}
-        <div 
-          ref={textContainerRef}
-          className="w-full p-6 overflow-y-auto"
-          style={{ direction: 'rtl' }}
-        >
-          <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 pb-8">
-            <div className="text-xs font-semibold tracking-wider text-white/70 reveal-fade-item">
-              {story.title} — {story.subtitle}
-            </div>
-            <h2 className="font-amiri text-3xl font-bold leading-tight reveal-fade-item">
-              {story.name}
-            </h2>
-            <div className="font-amiri text-lg italic border-r-2 pr-4 text-gray-200 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-2xl opacity-40 ml-1">“</span>
-              {story.quote}
-              <span className="text-2xl opacity-40 mr-1">”</span>
-            </div>
-            <div className="flex flex-col gap-3 reveal-fade-item">
-              {story.body.map((paragraph, pIdx) => (
-                <p key={pIdx} className="text-sm text-gray-300 leading-relaxed text-justify">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 border-r-4 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-xs font-bold uppercase tracking-wider opacity-70">✦ الحلم المستقبلي:</span>
-              <p className="text-base font-medium mt-1">{story.dream}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 reveal-fade-item">
-              {story.tags.map((tag, tIdx) => (
-                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-            <div className="reveal-fade-item mt-2">
-              <MultiAudioPlayer tracks={story.audioTracks} accentColor={story.textColors?.secondary || "#ffffff"} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Layout: Image and Text Side by Side with alternating order */}
-      <div className="hidden lg:grid lg:grid-cols-2 min-h-screen w-full">
-        {/* Image Pane */}
-        <div 
-          className={`relative lg:sticky lg:top-0 h-screen w-full overflow-hidden bg-black ${
-            index % 2 === 0 ? 'order-first' : 'order-last'
-          }`}
-          style={{ direction: 'ltr' }}
-        >
-          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            {story.images[activeImgIdx] && (
-              <img
-                src={story.images[activeImgIdx].src}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-top blur-2xl brightness-50 scale-110 pointer-events-none"
-              />
-            )}
-
-            {hasMultipleImages ? (
-              <div className="relative z-10 grid grid-cols-2 grid-rows-2 gap-4 w-[90%] h-[80%] p-2">
                 {story.images.map((img, imgIdx) => (
                   <div
                     key={imgIdx}
@@ -507,12 +482,87 @@ function StickyShowcaseSection({ story, index }) {
                 ))}
               </div>
             ) : (
+              <div className="flex items-center justify-center w-full h-full p-4 z-10 relative">
+                <img src={story.images[0]?.src} alt="" className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl" />
+              </div>
+            )}
+
+            <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full z-20">
+              <span>{story.flag}</span>
+              <span className="text-sm font-medium">{story.country}</span>
+            </div>
+
+            <div className="absolute bottom-4 left-0 right-0 flex flex-row items-center justify-center gap-4 z-20">
+              {hasMultipleImages && (
+                <div className="gallery-navigation-dots flex gap-2 bg-black/50 px-3 py-1.5 rounded-full">
+                  {story.images.map((_, imgIdx) => (
+                    <button
+                      key={imgIdx}
+                      onClick={() => setActiveImgIdx(imgIdx)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm whitespace-nowrap">
+                {story.age}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div ref={textContainerRef} className="w-full p-6 overflow-y-auto" style={{ direction: 'rtl' }}>
+          <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 pb-8">
+            <div className="text-xs font-semibold tracking-wider text-white/70 reveal-fade-item">
+              {story.title} — {story.subtitle}
+            </div>
+            <h2 className="font-amiri text-3xl font-bold leading-tight reveal-fade-item">{story.name}</h2>
+            <div className="font-amiri text-lg italic border-r-2 pr-4 text-gray-200 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
+              <span className="text-2xl opacity-40 ml-1">“</span>
+              {story.quote}
+              <span className="text-2xl opacity-40 mr-1">”</span>
+            </div>
+            <div className="flex flex-col gap-3 reveal-fade-item">
+              {story.body.map((paragraph, pIdx) => (
+                <p key={pIdx} className="text-sm text-gray-300 leading-relaxed text-justify">{paragraph}</p>
+              ))}
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border-r-4 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
+              <span className="text-xs font-bold uppercase tracking-wider opacity-70">✦ الحلم المستقبلي:</span>
+              <p className="text-base font-medium mt-1">{story.dream}</p>
+            </div>
+            <div className="flex flex-wrap gap-2 reveal-fade-item">
+              {story.tags.map((tag, tIdx) => (
+                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">#{tag}</span>
+              ))}
+            </div>
+            <div className="reveal-fade-item mt-2">
+              <MultiAudioPlayer tracks={story.audioTracks} accentColor={story.textColors?.secondary || "#ffffff"} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="hidden lg:grid lg:grid-cols-2 min-h-screen w-full">
+        <div className={`relative lg:sticky lg:top-0 h-screen w-full overflow-hidden bg-black ${index % 2 === 0 ? 'order-first' : 'order-last'}`} style={{ direction: 'ltr' }}>
+          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+            {story.images[activeImgIdx] && (
+              <img src={story.images[activeImgIdx].src} alt="" className="absolute inset-0 w-full h-full object-cover object-top blur-2xl brightness-50 scale-110 pointer-events-none" />
+            )}
+
+            {hasMultipleImages ? (
+              <div className="relative z-10 grid grid-cols-2 grid-rows-2 gap-4 w-[90%] h-[80%] p-2">
+                {story.images.map((img, imgIdx) => (
+                  <div key={imgIdx} onClick={() => setActiveImgIdx(imgIdx)} className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-500 ${activeImgIdx === imgIdx ? "opacity-100 scale-[1.02] ring-2 ring-white/40 shadow-2xl z-10" : "opacity-40 scale-95 grayscale-[20%]"}`}>
+                    <img src={img.src} alt="" className="w-full h-full object-cover object-top" />
+                  </div>
+                ))}
+              </div>
+            ) : (
               <div className="flex items-center justify-center w-full h-full p-6 z-10 relative">
-                <img
-                  src={story.images[0]?.src}
-                  alt=""
-                  className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl"
-                />
+                <img src={story.images[0]?.src} alt="" className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl" />
               </div>
             )}
 
@@ -521,54 +571,29 @@ function StickyShowcaseSection({ story, index }) {
               <span className="text-sm font-medium">{story.country}</span>
             </div>
 
-            {/* Bottom Controls - Dots and Age only (no caption) */}
             <div className="absolute bottom-6 left-0 right-0 flex flex-row items-center justify-center gap-4 z-20">
               {hasMultipleImages && (
                 <div className="flex gap-2 bg-black/50 px-4 py-2 rounded-full">
                   {story.images.map((_, imgIdx) => (
-                    <button
-                      key={imgIdx}
-                      onClick={() => setActiveImgIdx(imgIdx)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"
-                      }`}
-                    />
+                    <button key={imgIdx} onClick={() => setActiveImgIdx(imgIdx)} className={`w-2.5 h-2.5 rounded-full transition-all ${activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"}`} />
                   ))}
                 </div>
               )}
-
-              <div className="bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm whitespace-nowrap">
-                {story.age}
-              </div>
+              <div className="bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm whitespace-nowrap">{story.age}</div>
             </div>
           </div>
         </div>
 
-        {/* Editorial Content Panel - Desktop */}
-        <div 
-          ref={textContainerRef}
-          className={`flex items-start w-full p-12 overflow-y-auto overflow-x-hidden ${
-            index % 2 === 0 ? 'order-last' : 'order-first'
-          }`}
-          style={{ direction: 'rtl', maxHeight: '100vh', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
+        <div ref={textContainerRef} className={`flex items-start w-full p-12 overflow-y-auto overflow-x-hidden ${index % 2 === 0 ? 'order-last' : 'order-first'}`} style={{ direction: 'rtl', maxHeight: '100vh', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <div className="w-full max-w-xl mx-auto flex flex-col gap-6 pb-8">
-            <div className="text-sm font-semibold tracking-wider text-white/70 reveal-fade-item">
-              {story.title} — {story.subtitle}
-            </div>
-            <h2 className="font-amiri text-5xl lg:text-6xl font-bold leading-tight reveal-fade-item">
-              {story.name}
-            </h2>
+            <div className="text-sm font-semibold tracking-wider text-white/70 reveal-fade-item">{story.title} — {story.subtitle}</div>
+            <h2 className="font-amiri text-5xl lg:text-6xl font-bold leading-tight reveal-fade-item">{story.name}</h2>
             <div className="font-amiri text-xl italic border-r-3 pr-4 text-gray-200 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-2xl opacity-40 ml-1">“</span>
-              {story.quote}
-              <span className="text-2xl opacity-40 mr-1">”</span>
+              <span className="text-2xl opacity-40 ml-1">“</span>{story.quote}<span className="text-2xl opacity-40 mr-1">”</span>
             </div>
             <div className="flex flex-col gap-3 reveal-fade-item">
               {story.body.map((paragraph, pIdx) => (
-                <p key={pIdx} className="text-base text-gray-300 leading-relaxed text-justify">
-                  {paragraph}
-                </p>
+                <p key={pIdx} className="text-base text-gray-300 leading-relaxed text-justify">{paragraph}</p>
               ))}
             </div>
             <div className="bg-white/5 rounded-xl p-5 border-r-4 reveal-fade-item hover:bg-white/10 transition-all duration-300" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
@@ -577,9 +602,7 @@ function StickyShowcaseSection({ story, index }) {
             </div>
             <div className="flex flex-wrap gap-2 reveal-fade-item">
               {story.tags.map((tag, tIdx) => (
-                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                  #{tag}
-                </span>
+                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">#{tag}</span>
               ))}
             </div>
             <div className="reveal-fade-item mt-2">
@@ -592,7 +615,7 @@ function StickyShowcaseSection({ story, index }) {
   );
 }
 
-// ─── HERO SECTION (KEEP ORIGINAL HEADER IMAGE) ───────────────────────────────────────────
+// ─── HERO SECTION ────────────────────────────────────────────
 function HeroSection() {
   const heroRef = useRef(null);
 
@@ -604,15 +627,39 @@ function HeroSection() {
   }, []);
 
   return (
-    <section ref={heroRef} className="premium-fullscreen-hero relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
-      <div className="hero-parallax-bg-layer absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('https://cdn.observer.co.uk/media/original_images/18005.jpeg')", backgroundSize: 'cover' }} />
-      <div className="hero-center-content-box relative z-10 max-w-3xl px-6 md:px-8">
+    <section ref={heroRef} className="premium-fullscreen-hero relative w-full min-h-screen flex items-center justify-center text-center overflow-hidden">
+      <div 
+        className="hero-parallax-bg-layer absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ 
+          backgroundImage: "url('https://cdn.observer.co.uk/media/original_images/18005.jpeg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          backgroundRepeat: 'no-repeat'
+        }} 
+      />
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      
+      <div className="hero-center-content-box relative z-10 max-w-3xl px-6 md:px-8 py-20">
         <div className="hero-animate text-amber-500 text-sm md:text-base font-bold mb-3 tracking-wider">ملف استقصائي عابر للوسائط</div>
         <h1 className="hero-animate font-amiri text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">أطفال الحروب</h1>
         <p className="hero-animate text-gray-300 text-base md:text-lg mt-6 max-w-2xl mx-auto">
           موقع توثيقي يجمع الكلمة الصادقة، الصورة الفوتوغرافية الانسيابية، والتسجيلات الحية لأطفال غزة والسودان في تجربة تفاعلية غامرة.
         </p>
       </div>
+    <div className="absolute left-0 w-full overflow-hidden leading-none z-10 rotate-180 top-[610px] md:top-[580px] lg:top-[620px]">
+  <svg
+    className="block w-full h-[60px] md:h-[100px] lg:h-[120px]"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 120"
+    preserveAspectRatio="none"
+  >
+    <path
+      d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+      fill="#0e1e2c"
+    />
+  </svg>
+</div>
     </section>
   );
 }
@@ -631,7 +678,7 @@ export default function App() {
   return (
     <div className="app-root w-full overflow-x-hidden">
       <HeroSection />
-      <InteractiveChart />
+      <CircularAnimatedGallery />
       {stories.map((story, index) => (
         <StickyShowcaseSection key={story.id} story={story} index={index} />
       ))}
@@ -669,6 +716,11 @@ export default function App() {
         /* Smooth transitions */
         * {
           transition: background-color 0.3s ease, border-color 0.2s ease;
+        }
+        
+        /* Circular gallery section background - natural color */
+        .circular-gallery-section {
+          background: transparent;
         }
       `}</style>
     </div>
