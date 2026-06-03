@@ -18,16 +18,16 @@ const stories = [
     color: "#0f1e2d",
     textColors: { primary: "#ffffff", secondary: "#3498db", bg: "#172a3a" },
     images: [
-      { src: "../../public/assets/images/adham_prewar.jpeg", caption: "أدهم قبل الحرب بابتسامته البريئة" },
-      { src: "../../public/assets/images/adhamwlama1.jpeg", caption: "أدهم والشهيدة ألمى على شاطئ بحر غزة" },
-      { src: "../../public/assets/images/lama.jpeg", caption: "شقيقته الراحلة الطفلة الشهيدة ألمى" },
-      { src: "../../public/assets/images/adhamatschool.jpeg", caption: "تكريم أدهم ضمن أوائل الطلبة بجمهورية مصر" }
+      { src: "./public/assets/images/adham_prewar.jpeg", caption: "أدهم قبل الحرب بابتسامته البريئة" },
+      { src: "./public/assets/images/adhamwlama1.jpeg", caption: "أدهم والشهيدة ألمى على شاطئ بحر غزة" },
+      { src: "./public/assets/images/lama.jpeg", caption: "شقيقته الراحلة الطفلة الشهيدة ألمى" },
+      { src: "./public/assets/images/adhamatschool.jpeg", caption: "تكريم أدهم ضمن أوائل الطلبة بجمهورية مصر" }
     ],
     audioTracks: [
-      { src: "../../public/assets/audio/edysaba2tny.ogg", label: "إيدي سبقتني على الجنة" },
-      { src: "../../public/assets/audio/anarady.ogg", label: "أنا راضٍ بقضاء الله" },
-      { src: "../../public/assets/audio/adhamissining.ogg", label: "أنشودة أدهم لـ غزة العزة" },
-      { src: "../../public/assets/audio/anabat3alemfmaser.ogg", label: "حديثه عن التعليم والمدرسة بمصر" }
+      { src: "./public/assets/audio/edysaba2tny.ogg", label: "إيدي سبقتني على الجنة" },
+      { src: "./public/assets/audio/anarady.ogg", label: "أنا راضٍ بقضاء الله" },
+      { src: "./public/assets/audio/adhamissining.ogg", label: "أنشودة أدهم لـ غزة العزة" },
+      { src: "./public/assets/audio/anabat3alemfmaser.ogg", label: "حديثه عن التعليم والمدرسة بمصر" }
     ],
     quote: "الحمد لله على كل حال، فيدي سبقتني إلى الجنة، وأنا راضٍ بقضاء الله",
     body: [
@@ -52,16 +52,16 @@ const stories = [
     color: "#132313",
     textColors: { primary: "#ffffff", secondary: "#2ecc71", bg: "#1e351e" },
     images: [
-      { src: "../../public/assets/images/ghazal.jpeg", caption: "غزل ابنة غزة الواعدة" },
-      { src: "../../public/assets/images/marcava.jpeg", caption: "قصيدتها المكتوبة بخط يدها عن طائرة ودبابة الميركافا" },
-      { src: "../../public/assets/images/ghazalpaintforgaza.jpeg", caption: "لوحة تعبيرية رسمتها غزل: فلسطين سوف تنتصر بإذن الله" },
-      { src: "../../public/assets/images/favpaint.jpeg", caption: "الرسمة المقربة لقلب غزل التي تعبر عن براءتها وسلب حقوقها" }
+      { src: "./public/assets/images/ghazal.jpeg", caption: "غزل ابنة غزة الواعدة" },
+      { src: "./public/assets/images/marcava.jpeg", caption: "قصيدتها المكتوبة بخط يدها عن طائرة ودبابة الميركافا" },
+      { src: "./public/assets/images/ghazalpaintforgaza.jpeg", caption: "لوحة تعبيرية رسمتها غزل: فلسطين سوف تنتصر بإذن الله" },
+      { src: "./public/assets/images/favpaint.jpeg", caption: "الرسمة المقربة لقلب غزل التي تعبر عن براءتها وسلب حقوقها" }
     ],
     audioTracks: [
-      { src: "../../public/assets/audio/favstudying.ogg", label: "حديثها عن شغف وحب الدراسة" },
-      { src: "../../public/assets/audio/herreading1.ogg", label: "قراءتها للشعر - المقطع الأول" },
-      { src: "../../public/assets/audio/herreading2.ogg", label: "قراءتها للشعر - المقطع الثاني" },
-      { src: "../../public/assets/audio/herreading3.ogg", label: "قراءتها للشعر - المقطع الثالث" }
+      { src: "./public/assets/audio/favstudying.ogg", label: "حديثها عن شغف وحب الدراسة" },
+      { src: "./public/assets/audio/herreading1.ogg", label: "قراءتها للشعر - المقطع الأول" },
+      { src: "./public/assets/audio/herreading2.ogg", label: "قراءتها للشعر - المقطع الثاني" },
+      { src: "./public/assets/audio/herreading3.ogg", label: "قراءتها للشعر - المقطع الثالث" }
     ],
     quote: "تعلمت من المطالعة أن الاستسلام ليس خياراً، والأبطال لا يسقطون",
     body: [
@@ -85,7 +85,7 @@ const stories = [
     color: "#1c1414",
     textColors: { primary: "#ffffff", secondary: "#e74c3c", bg: "#2d1f1f" },
     images: [
-      { src: "../../public/assets/images/doaa_1.jpeg", caption: "دعاء ترفع علامة النصر بابتسامة صامدة رغم بتر قدمها" }
+      { src: "./public/assets/images/doaa_1.jpeg", caption: "دعاء ترفع علامة النصر بابتسامة صامدة رغم بتر قدمها" }
     ],
     audioTracks: [],
     quote: "أريد أن أعود إلى اللعب مع إخوتي بصورة طبيعية",
@@ -109,7 +109,7 @@ const stories = [
     color: "#221911",
     textColors: { primary: "#ffffff", secondary: "#e67e22", bg: "#35271b" },
     images: [
-      { src: "../../public/assets/images/hassan.jpeg", caption: "حسن ينظر من النافذة متأملاً انتهاء سحب الدخان والدمار" }
+      { src: "./public/assets/images/hassan.jpeg", caption: "حسن ينظر من النافذة متأملاً انتهاء سحب الدخان والدمار" }
     ],
     audioTracks: [],
     quote: "آمن ودافئ.. هكذا أتمنى أن يكون مكان الأطفال دائماً وألا يختبروا الفزع",
@@ -137,10 +137,10 @@ const stories = [
     color: "#1d122b",
     textColors: { primary: "#ffffff", secondary: "#9b59b6", bg: "#2d1d42" },
     images: [
-      { src: "../../public/assets/images/ahmed_sudan1.jpeg", caption: "أحمد يمارس مهارات كرة القدم في شوارع اللجوء الآمنة" }
+      { src: "./public/assets/images/ahmed_sudan1.jpeg", caption: "أحمد يمارس مهارات كرة القدم في شوارع اللجوء الآمنة" }
     ],
     audioTracks: [
-      { src: "../../public/assets/audio/dreaming_L9GYIEzS.mp3", label: "تسجيل صوتي لأحمد يعبر فيه عن طموحه" }
+      { src: "./public/assets/audio/dreaming_L9GYIEzS.mp3", label: "تسجيل صوتي لأحمد يعبر فيه عن طموحه" }
     ],
     quote: "عشرات العمارات نُسفت، ولكن كلي أمل أن يعود السودان آمنًا كما كان ونبنيه مجدداً",
     body: [
