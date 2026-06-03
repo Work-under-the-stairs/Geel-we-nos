@@ -1,6 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Loader2, Users, Trash2, Link as LinkIcon } from "lucide-react";
+import { Loader2, Users, Trash2, Link as LinkIcon, FolderOpen } from "lucide-react"; // ✅ أضفنا FolderOpen
+import { useCategories } from "../../../hooks/useArticles";
 
+// ─── Cross-Media Pages Registry ───────────────────────────────────────────────
+// Add a new entry here whenever a new cross-media page is created.
+const CROSS_MEDIA_PAGES = [
+  { id: "atfal-alhoroub", title: "أطفال الحروب" },
+];
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import UnderlineExtension from "@tiptap/extension-underline";
@@ -13,7 +19,6 @@ import { mergeAttributes } from "@tiptap/core";
 
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../../../services/Useimagekit";
-import { useCategories } from "../../../hooks/useArticles";
 import { FALLBACK_IMAGE } from "../../../constants/Fall_Back_Image";
 
 import {
@@ -111,7 +116,8 @@ export default function ArticleForm({
   const [isUrgent, setIsUrgent] = useState(false);
   const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
-
+    // ── States ───────────────────────────────────────────────────
+  const [selectedStory, setSelectedStory] = useState("");
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
   const [featuredProgress, setFeaturedProgress] = useState(0);
@@ -194,37 +200,38 @@ export default function ArticleForm({
   };
 
   const editor = useEditor({
-    extensions: editorExtensions,
-    content: '',
-    editorProps: {
-      attributes: {
-        class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
-      },
+  extensions: editorExtensions,
+  content: '',
+  editorProps: {
+    attributes: {
+      class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
     },
-    onUpdate: ({ editor }) => {
-      if (isContentHydratingRef.current) return;
-      const currentHTML = editor.getHTML();
-      setEditorMediaList((prevList) => {
-        const remainingMedia = [];
-        prevList.forEach((media) => {
-          const cleanUrl = media.url.split("?")[0];
-          if (currentHTML.includes(cleanUrl) || (media.fileId && currentHTML.includes(media.fileId))) {
-            remainingMedia.push(media);
-          } else {
-            deleteMediaFromServer(media.fileId);
-          }
-        });
-        return remainingMedia;
+  },
+  onUpdate: ({ editor }) => {
+    if (!editor || !editor.isEditable) return;
+    if (isContentHydratingRef.current) return;
+    const currentHTML = editor.getHTML();
+    setEditorMediaList((prevList) => {
+      const remainingMedia = [];
+      prevList.forEach((media) => {
+        const cleanUrl = media.url.split("?")[0];
+        if (currentHTML.includes(cleanUrl) || (media.fileId && currentHTML.includes(media.fileId))) {
+          remainingMedia.push(media);
+        } else {
+          deleteMediaFromServer(media.fileId);
+        }
       });
-    },
-  });
+      return remainingMedia;
+    });
+  },
+});
 
   useEffect(() => {
     if (!isEditMode || !initialData || !editor || isInitializedRef.current) return;
-
+    
     isInitializedRef.current = true;
     isContentHydratingRef.current = true;
-
+    setSelectedStory(initialData.crossMediaId || "");
     setTitle(initialData.title || "");
     setCategory(initialData.category?._id || initialData.category || "");
     setImportance(initialData.important_rate || 5);
@@ -315,6 +322,7 @@ export default function ArticleForm({
       youtube_videos: youtubeIdsArray,
       hashtags,
       contributors,
+      crossMediaId: selectedStory || null,
       status: targetStatus,
     };
 
@@ -697,7 +705,24 @@ export default function ArticleForm({
           </div>
 
           <ImportanceSection innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent} />
-
+            <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm mt-6">
+  <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+    <FolderOpen className="text-slate-700 w-5 h-5" />
+    <h2 className="text-lg font-bold text-slate-800">الربط بقصة تفاعلية (Cross Media)</h2>
+  </div>
+  <select 
+    className="w-full p-3 rounded-xl border border-slate-200 text-sm"
+    value={selectedStory}
+    onChange={(e) => setSelectedStory(e.target.value)}
+  >
+    <option value="">بدون قصة مرتبطة</option>
+    {CROSS_MEDIA_PAGES.map((page) => (
+      <option key={page.id} value={page.id}>
+        {page.title}
+      </option>
+    ))}
+  </select>
+</div>
           <ActionButtonsSection innerRef={publishRef} handleSubmitArticle={handleSubmitArticle} handleCancel={handleCancel} />
         </div>
       </div>

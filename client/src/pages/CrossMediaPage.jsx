@@ -1,676 +1,761 @@
-import React, { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 
-gsap.registerPlugin(ScrollTrigger);
+// ─── INLINE STYLES (keyframes + global) ──────────────────────────────────────
+const globalStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;900&display=swap');
 
-// ─── DATASET MAPPED DIRECTLY TO ALL YOUR UPLOADED FILES ──────────────────────
-const stories = [
-  {
-    id: "adham",
-    country: "فلسطين · غزة",
-    flag: "🇵🇸",
-    name: "أدهم عزام",
-    age: "٧ سنوات",
-    title: "روح غزة الأبية",
-    subtitle: "يدي سبقتني إلى الجنة",
-    dream: "العودة إلى غزة موطنه الأصلي وبنائها من جديد",
-    color: "#0f1e2d",
-    textColors: { primary: "#ffffff", secondary: "#3498db", bg: "#172a3a" },
-    images: [
-      { src: "../../public/assets/images/adham_prewar.jpeg", caption: "أدهم قبل الحرب بابتسامته البريئة" },
-      { src: "../../public/assets/images/adhamwlama1.jpeg", caption: "أدهم والشهيدة ألمى على شاطئ بحر غزة" },
-      { src: "../../public/assets/images/lama.jpeg", caption: "شقيقته الراحلة الطفلة الشهيدة ألمى" },
-      { src: "../../public/assets/images/adhamatschool.jpeg", caption: "تكريم أدهم ضمن أوائل الطلبة بجمهورية مصر" }
-    ],
-    audioTracks: [
-      { src: "../../public/assets/audio/edysaba2tny.ogg", label: "إيدي سبقتني على الجنة" },
-      { src: "../../public/assets/audio/anarady.ogg", label: "أنا راضٍ بقضاء الله" },
-      { src: "../../public/assets/audio/adhamissining.ogg", label: "أنشودة أدهم لـ غزة العزة" },
-      { src: "../../public/assets/audio/anabat3alemfmaser.ogg", label: "حديثه عن التعليم والمدرسة بمصر" }
-    ],
-    quote: "الحمد لله على كل حال، فيدي سبقتني إلى الجنة، وأنا راضٍ بقضاء الله",
-    body: [
-      "يحب أدهم عزام، ابن قطاع غزة، القراءة والغناء ولعب كرة القدم، ولديه من الإخوة فادي وألمى، إلا أنه فقد الأخيرة إثر تعرض منزلهم لقصف إسرائيلي، في وقت لم يكن يتجاوز فيه عمرها عشر سنوات.",
-      "يصف أدهم حالته النفسية بعد القصف بقوله: \"نفسيتي كتير كتير تعبت\"، فقد بُترت يد أدهم نتيجة القصف، ويقول عن محنته هذه: \"الحمد لله على كل حال، فيدي سبقتني إلى الجنة، وأنا راضٍ بقضاء الله\"؛ وهو حديث يعكس إيمان أدهم وقوته، وطريقة تربيته وتعامل أسرته مع ظروف الحرب.",
-      "ويضيف أدهم بفخرٍ أنه \"يحب قراءة القرآن، وحفظ سورة التكوير غيبًا\".",
-      "يتميز أدهم كباقي أطفال غزة بحبه للدراسة؛ فهو سعيدٌ باستكمال دراسته في مصر، وتكريمه ضمن أوائل الصف الأول الابتدائي. وأراد أدهم خلال حفل التكريم أن يضيف مقطعًا غنائياً يعبر فيه عن حبه لـ \"غزة العزة\" كما يصفها.",
-      "يعرب أدهم، الذي لم يتعدَّ عمره السنوات السبع، عن رغبته في العودة إلى غزة موطنه الأصلي؛ المكان الذي فقد فيه يده، وهو ما يجعله نموذجًا لأجيال الحروب التي تتحمل ظروفًا يصعب على غيرها تحملها.",
-      "عبر أدهم إلى الحدود المصرية، علمًا بأن عائلته لا تملك مصدرًا للرزق، وتعتمد على المساعدات التي وصفتها أمه بأنها \"شحيحة\"."
-    ],
-    tags: ["إيمان راسخ", "حفظ القرآن", "أوائل الطلبة"]
-  },
-  {
-    id: "ghazal",
-    country: "فلسطين · غزة",
-    flag: "🇵🇸",
-    name: "غزل رفعت",
-    age: "١٢ عامًا",
-    title: "صحافية المستقبل",
-    subtitle: "بلا بيتٍ ولا رفاق.. لم يتبق في هذه الحياة سوى التعلم",
-    dream: "أن تصبح صحفية تنقل ما يعيشه الأطفال في الحروب للعالم أجمع، حتى يسمع صوتهم من يتجاهل صراخهم",
-    color: "#132313",
-    textColors: { primary: "#ffffff", secondary: "#2ecc71", bg: "#1e351e" },
-    images: [
-      { src: "../../public/assets/images/ghazal.jpeg", caption: "غزل ابنة غزة الواعدة" },
-      { src: "../../public/assets/images/marcava.jpeg", caption: "قصيدتها المكتوبة بخط يدها عن طائرة ودبابة الميركافا" },
-      { src: "../../public/assets/images/ghazalpaintforgaza.jpeg", caption: "لوحة تعبيرية رسمتها غزل: فلسطين سوف تنتصر بإذن الله" },
-      { src: "../../public/assets/images/favpaint.jpeg", caption: "الرسمة المقربة لقلب غزل التي تعبر عن براءتها وسلب حقوقها" }
-    ],
-    audioTracks: [
-      { src: "../../public/assets/audio/favstudying.ogg", label: "حديثها عن شغف وحب الدراسة" },
-      { src: "../../public/assets/audio/herreading1.ogg", label: "قراءتها للشعر - المقطع الأول" },
-      { src: "../../public/assets/audio/herreading2.ogg", label: "قراءتها للشعر - المقطع الثاني" },
-      { src: "../../public/assets/audio/herreading3.ogg", label: "قراءتها للشعر - المقطع الثالث" }
-    ],
-    quote: "تعلمت من المطالعة أن الاستسلام ليس خياراً، والأبطال لا يسقطون",
-    body: [
-      "تعلمت غزل رفعت، ابنة قطاع غزة البالغة من العمر 12 عامًا، من مطالعة الكتب أن الاستسلام ليس خيارًا، وأن الأبطال يحاولون دومًا ولا يسقطون؛ لذلك تحولت إلى بطلة داخل أسرتها التي عانت من ويلات الحرب، وحُرمت من أشياء كانت تمثل لها الحياة.",
-      "استعانت غزل بموهبتها في كتابة الشعر لتتخطى ما مرت به من ألم وخذلان؛ إذ إن ما عاشته حوّلها من طفلة إلى امرأة ناضجة لديها الخبرة الكافية في الحياة. كتبت غزل الشعر لتعبر عن واقعها، فحررت قصيدة عن طائرة صغيرة، تمثّل لها مصدراً للإزعاج من ناحية، وتذكّرها من ناحية أخرى بفقد عزيز عليها (كما يظهر في شعرها).",
-      "كما لجأت إلى الرسم لتعبر عن طفولتها، وبراءتها التي سلبتها منها الحرب (كما يتضح في رسوماتها)؛ وظلت غزل تحلم باستكمال دراستها، مرددةً بصوت مفعم بالأمل: \"نفسي ترجع الدراسة\".",
-      "سعت غزل للمحافظة على ما تعلمته بالقراءة يوميًا، ومحاولة اكتساب معلومات جديدة كلما توفرت لديها شبكة الإنترنت؛ إذ حددت حلمها بأن تصبح صحفية تنقل ما يعيشه الأطفال في الحروب للعالم أجمع، حتى يسمع صوتهم من يتجاهل صراخهم.",
-      "ورغم المخاطر المحيطة بمهنة الصحافة، تصر غزل على أن تصبح صحافية، قائلة بصوت واثق. فكل ما تريده غزل ألا تنتظر المساعدات، وأن تعود الحياة يومًا كما كانت."
-    ],
-    tags: ["الشعر والأدب", "توثيق صحفي", "إرادة وعزيمة", "صحافة المستقبل"]
-  },
-  {
-    id: "doaa",
-    country: "فلسطين · غزة",
-    flag: "🇵🇸",
-    name: "دعاء أبو جزر",
-    age: "٦ سنوات",
-    title: "طبيبة المستقبل",
-    subtitle: "ألم كبير في جسد صغير",
-    dream: "أن تصبح طبيبة لتساهم في مداواة آلام الناس وجراح الأطفال",
-    color: "#1c1414",
-    textColors: { primary: "#ffffff", secondary: "#e74c3c", bg: "#2d1f1f" },
-    images: [
-      { src: "../../public/assets/images/doaa_1.jpeg", caption: "دعاء ترفع علامة النصر بابتسامة صامدة رغم بتر قدمها" }
-    ],
-    audioTracks: [],
-    quote: "أريد أن أعود إلى اللعب مع إخوتي بصورة طبيعية",
-    body: [
-      "دفع الأطفال في غزة ثمنًا فادحًا للحرب الإسرائيلية الغاشمة على القطاع (2023-2025)، التي أودت بحياة أكثر من 70 ألف شهيد، فضلًا عن إصابة ما يناهز 170 ألف فلسطيني، من بينهم الطفلة دعاء أبو جزر البالغة من العمر 6 سنوات، التي فقدت ساقها في غارة لطيران الاحتلال، والتي وصفها جدها بأن \"شخصيتها حلوة تحب اللعب\"؛ إذ كانت لا تتوقف عن الركض وممارسة الألعاب حول بيتها قبيل الحرب، وفي الشوارع المحيطة مثل بقية الأطفال.",
-      "في البداية، اعتقدت دعاء أن الطرف الصناعي يمثل فرصة لعودتها إلى اللعب مع إخوتها، غير أنها مع الوقت أدركت صعوبة العودة إلى حياتها قبل الإصابة؛ خصوصًا عندما ترى الأطفال في عمرها يعيشون حياة طبيعية بدون أطراف صناعية، بالإضافة إلى صعوبة فترة التأهيل والعلاج.",
-      "تعاني دعاء من حالة نفسية سيئة منذ أن بُتِرت ساقها، رغم محاولة أفراد العائلة التخفيف عنها؛ ومع ذلك، فهي تحتفظ بابتسامتها وبراءتها عند الحديث عن إصابتها، وعن خوفها من أزيز الطائرات، والأعباء المتعلقة بسفرها لتلقي العلاج، أو حاجتها لتغيير الطرف الصناعي دورياً بسبب نمو جسدها.",
-      "تحلم دعاء بأن تصبح طبيبة لتساهم في مداواة آلام الناس، متمسكةً بحقها في التمتع بطفولتها، واستخدام السبورة للرسم والتلوين، تمهيدًا للعودة إلى الدراسة بعد الحرب. تتلقى دعاء العلاج في مصر برفقة جديها، وحين تخطو خطوات بسيطة للعب مع أقرانها تغمرها السعادة، الأمر الذي يخفف عنها معاناتها لرؤية الأطفال وهم يجرون من حولها، ويمارسون حياتهم بصورة طبيعية."
-    ],
-    tags: ["طبيبة المستقبل", "بتر الأطراف", "علاج تأهيلي", "إرادة بطلة", "حق الطفولة"]
-},
-  {
-    id: "hassan",
-    country: "السودان",
-    flag: "🇸🇩",
-    name: "حسن أحمد",
-    age: "٦ سنوات",
-    title: "حلم الملاذ الآمن",
-    subtitle: "عقله وبراءته.. تفوق المحارب",
-    dream: "أن ينشئ مكاناً مخصصاً للأطفال يعيشون فيه دون خوف أو ترويع",
-    color: "#221911",
-    textColors: { primary: "#ffffff", secondary: "#e67e22", bg: "#35271b" },
-    images: [
-      { src: "../../public/assets/images/hassan.jpeg", caption: "حسن ينظر من النافذة متأملاً انتهاء سحب الدخان والدمار" }
-    ],
-    audioTracks: [],
-    quote: "آمن ودافئ.. هكذا أتمنى أن يكون مكان الأطفال دائماً وألا يختبروا الفزع",
-    body: [
-      "طفولة ضجّت بالحركة والمرح عاشها الطفل السوداني حسن أحمد، ذو الست أعوام، قبل أن تغيّر الحرب حياته بالكامل.",
-      "كان يحب المدرسة كثيرًا، ويقضي أوقاته في اللعب والجري كأي طفل في عمره، كما عُرف بنشاطه وحبه للتعلم، خاصة مادة اللغة الإنجليزية التي كان يستمتع بدراستها دائماً.",
-      "طفولة سرقتها الحرب: اندلعت الحرب في السودان، وذبُلت حياة حسن، الذي فقد شقيقه فيها، ليجد نفسه وحيدا وسط أجواء الخوف والدمار.",
-      "صارت أصوات الانفجارات جزءًا أساسيًا من حياة حسن، إذ كان يستيقظ يوميًا على دوي القصف، ليُصاب بنوبات متكررة من القلق والفزع وهو ما دفع عائلته للفرار إلى مصر.",
-      "ومع مرور الوقت، تعلّق حسن بوالدته بشكل أكبر، وأصبح يخشى الابتعاد عنها أو الخروج بمفرده. فقد الفتى شعوره بالأمان، وبات يخاف من الذهاب إلى المدرسة رغم حبه الشديد لها.",
-      "ولكن شغفه بالتعلّم دفعه لمواصلة دراسة اللغة الإنجليزية، ولكن هذه المرة في المنزل، الذي يقضي فيه معظم وقته وحيدًا حتى أثناء اللعب.",
-      "أمل بريء كطفولته: حلمه كبير، رغم صغر سنه، حيث يتمنى حسن عندما يكبر أن ينشئ مكاناً مخصصاً للأطفال، يستطيعون فيه العيش واللعب دون خوف.",
-      "\"آمن ودافئ\"، هكذا يتمنى حسن، أن يكون ذلك المكان، وأن يجد فيه الأطفال من يحتضنهم ويطمئنهم عندما يشعرون بالخوف، تماما كما كان يرغب لنفسه في الحرب."
-    ],
-    tags: ["السودان", "تجاوز الصدمات", "اللغة الإنجليزية", "فقدان الأمان"]
-  },
-  {
-    id: "ahmed",
-    country: "السودان",
-    flag: "🇸🇩",
-    name: "أحمد حامد يحيى",
-    age: "١٣ عامًا",
-    title: "مهندس إعادة الإعمار",
-    subtitle: "متلازمة القلق.. وحلم البناء",
-    dream: "أن يصير مهندساً معمارياً ليساهم في إعادة إعمار بلاده السودان",
-    color: "#1d122b",
-    textColors: { primary: "#ffffff", secondary: "#9b59b6", bg: "#2d1d42" },
-    images: [
-      { src: "../../public/assets/images/ahmed_sudan1.jpeg", caption: "أحمد يمارس مهارات كرة القدم في شوارع اللجوء الآمنة" }
-    ],
-    audioTracks: [
-      { src: "../../public/assets/audio/dreaming_L9GYIEzS.mp3", label: "تسجيل صوتي لأحمد يعبر فيه عن طموحه" }
-    ],
-    quote: "عشرات العمارات نُسفت، ولكن كلي أمل أن يعود السودان آمنًا كما كان ونبنيه مجدداً",
-    body: [
-      "أحمد حامد يحيى، البالغ من العمر ثلاثة عشر عامًا، لا تختلف قصته كثيرًا عن حسن. كلاهما كانت حياته طبيعية حتى حلّت الحرب.",
-      "يفتقد أحمد مدرسته وأصدقاءه، وتمرين كرة القدم، الذي كان مولعاً به. ويروي تفاصيل تلك الأيام الصعبة قائلًا: \"عاشت عائلتي في عزلة تامة داخل المنزل خوفاً من القصف\".",
-      "مراراً حاول أحمد التظاهر بالقوة وعدم الخوف، إلا أن أصوات الضرب والانفجارات القريبة، تركت أثراً نفسياً كبيراً بداخله، وجعلته يخشى الخروج إلى الشارع، حسب تعبيره.",
-      "\"حتى بعد لجوئي إلى مصر، لا تزال الكوابيس تلاحقني، أستيقظ على أصوات الانفجارات، وأسترجع اللحظات القاسية\".",
-      "يحاول أحمد أن يبدأ حياةً جديدةً، فهو يقضي يومه بين الدراسة وحلّ الواجبات واللعب مع أصدقائه، وكرة القدم التي يصفها بأنها \"مصدر سعادته الأكبر\".",
-      "يخفف عنه وطأة الفراق، تواصله الدائم مع أعمامه وخالاته، الذي طال انقطاعه عنهم، بسبب الحرب، ليتمكن من محادثتهم فور وصوله إلى مصر.",
-      "بناء الوطن: يحلم أحمد باليوم الذي يصير فيه مهندسًا ليساهم في إعادة إعمار ما دمرته الحرب في وطنه السودان.",
-      "ويختم حديثه قائلًا: \"عشرات العمارات والمنشآت نُسفت خلال الحرب، ولكن كلّي أمل أن يعود السودان آمنًا كما كان\"."
-    ],
-    tags: ["إعادة الأعمار", "عزيمة الشباب", "كرة القدم", "بناء الوطن"]
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #0a0000; overflow-x: hidden; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0000; }
+  ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 2px; }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
+    50%  { opacity: 0.35; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
   }
-];
-
-const chartStats = [
-  { label: "شهداء غزة الإجمالي", value: 70000, targetPercent: 85, color: "#e74c3c" },
-  { label: "المصابين والجرحى الموثقين", value: 170000, targetPercent: 100, color: "#e67e22" },
-  { label: "الأطفال المتضررين بالنزاع بالشام والسودان", value: 12500000, targetPercent: 65, color: "#f1c40f" }
-];
-
-// ─── ROBUST MULTI-TRACK AUDIO ENGINE ────────────────────────────────
-function MultiAudioPlayer({ tracks, accentColor }) {
-  const [activeTrack, setActiveTrack] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef(null);
-
-  if (!tracks || tracks.length === 0) {
-    return null;
+  @keyframes pulseRed {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+    50%       { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
   }
+  @keyframes scanLine {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.04); }
+  }
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes borderFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes glitch {
+    0%  { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+    5%  { clip-path: inset(80% 0 0 0);  transform: translate(2px, 0); }
+    10% { clip-path: inset(40% 0 40% 0); transform: translate(0, 0); }
+    100%{ clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .shimmer-text {
+    background: linear-gradient(90deg, #dc2626 0%, #fff 40%, #fca5a5 60%, #dc2626 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+  .card-hover-border {
+    position: relative;
+  }
+  .card-hover-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #dc2626, #7f1d1d, #dc2626, #ef4444);
+    background-size: 300% 300%;
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: 0;
+    animation: borderFlow 3s ease infinite;
+  }
+  .card-hover-border:hover::before { opacity: 1; }
+  .card-inner {
+    position: relative;
+    z-index: 1;
+    background: #0f0000;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+`;
 
+// ─── SVG BACKGROUND ──────────────────────────────────────────────────────────
+const HeroBackground = () => (
+  <svg
+    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+    xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="xMidYMid slice"
+  >
+    <defs>
+      <radialGradient id="rg1" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#7f1d1d" stopOpacity="0.5" />
+        <stop offset="100%" stopColor="#0a0000" stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="rg2" cx="80%" cy="70%" r="40%">
+        <stop offset="0%" stopColor="#dc2626" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#0a0000" stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="rg3" cx="20%" cy="80%" r="35%">
+        <stop offset="0%" stopColor="#991b1b" stopOpacity="0.2" />
+        <stop offset="100%" stopColor="#0a0000" stopOpacity="0" />
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="blur" />
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(220,38,38,0.06)" strokeWidth="0.5"/>
+      </pattern>
+    </defs>
+
+    {/* Base dark red */}
+    <rect width="100%" height="100%" fill="#0a0000" />
+    {/* Grid */}
+    <rect width="100%" height="100%" fill="url(#grid)" />
+    {/* Glow blobs */}
+    <rect width="100%" height="100%" fill="url(#rg1)" />
+    <rect width="100%" height="100%" fill="url(#rg2)" />
+    <rect width="100%" height="100%" fill="url(#rg3)" />
+
+    {/* Diagonal accent lines */}
+    {[...Array(8)].map((_, i) => (
+      <line
+        key={i}
+        x1={`${-10 + i * 15}%`} y1="0%"
+        x2={`${10 + i * 15}%`}  y2="100%"
+        stroke="rgba(220,38,38,0.04)" strokeWidth="1"
+      />
+    ))}
+
+    {/* Concentric rings */}
+    {[180, 260, 340, 420].map((r, i) => (
+      <circle
+        key={i} cx="50%" cy="38%"
+        r={r} fill="none"
+        stroke="rgba(220,38,38,0.07)"
+        strokeWidth="1"
+        strokeDasharray={`${4 + i * 3} ${20 + i * 5}`}
+      />
+    ))}
+
+    {/* Corner decorative geometry */}
+    <polygon points="0,0 120,0 0,120" fill="rgba(220,38,38,0.07)" />
+    <polygon points="100%,0 calc(100% - 120px),0 100%,120" fill="rgba(220,38,38,0.05)" />
+
+    {/* Scan line animation */}
+    <rect
+      x="0" y="0" width="100%" height="2"
+      fill="rgba(220,38,38,0.12)"
+      style={{ animation: "scanLine 6s linear infinite" }}
+    />
+
+    {/* Small glowing dots */}
+    {[
+      [15,25], [85,15], [92,60], [8,75], [50,90], [35,50], [70,35], [25,65]
+    ].map(([cx, cy], i) => (
+      <circle
+        key={i} cx={`${cx}%`} cy={`${cy}%`} r={i % 2 === 0 ? 2 : 1.5}
+        fill="#dc2626"
+        style={{ animation: `breathe ${2 + i * 0.4}s ease-in-out ${i * 0.3}s infinite`, opacity: 0.5 }}
+        filter="url(#glow)"
+      />
+    ))}
+  </svg>
+);
+
+// ─── FLOATING PARTICLES ───────────────────────────────────────────────────────
+const Particles = () => (
+  <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+    {[...Array(18)].map((_, i) => {
+      const size  = 2 + Math.random() * 4;
+      const left  = Math.random() * 100;
+      const delay = Math.random() * 12;
+      const dur   = 10 + Math.random() * 14;
+      return (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            bottom: "-10px",
+            left:  `${left}%`,
+            width:  size,
+            height: size,
+            borderRadius: "50%",
+            background: i % 3 === 0 ? "#dc2626" : i % 3 === 1 ? "#991b1b" : "#fca5a5",
+            animation: `floatUp ${dur}s ${delay}s linear infinite`,
+          }}
+        />
+      );
+    })}
+  </div>
+);
+
+// ─── ANIMATED COUNTER ─────────────────────────────────────────────────────────
+const AnimatedCounter = ({ target, suffix = "", duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+  const ref  = useRef(null);
+  const seen = useRef(false);
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (playing) {
-      audio.load();
-      audio.play().catch(() => setPlaying(false));
-    } else {
-      audio.load();
-    }
-  }, [activeTrack]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateProgress = () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !seen.current) {
+        seen.current = true;
+        const step = target / (duration / 16);
+        let current = 0;
+        const timer = setInterval(() => {
+          current = Math.min(current + step, target);
+          setCount(Math.floor(current));
+          if (current >= target) clearInterval(timer);
+        }, 16);
       }
-    };
+    });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [target, duration]);
+  return <span ref={ref}>{count.toLocaleString("ar-EG")}{suffix}</span>;
+};
 
-    const handleEnded = () => {
-      setPlaying(false);
-      setProgress(0);
-    };
-
-    audio.addEventListener("timeupdate", updateProgress);
-    audio.addEventListener("ended", handleEnded);
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateProgress);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, []);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play()
-        .then(() => setPlaying(true))
-        .catch((err) => {
-          console.error("Audio Playback Error:", err);
-          setPlaying(false);
-        });
-    }
-  };
-
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+const StoryModal = ({ isOpen, onClose, story }) => {
+  if (!story) return null;
+  const RED = "#dc2626";
   return (
-    <div className="multi-audio-box w-full bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-      <div className="audio-tabs-list flex flex-wrap gap-2 mb-3">
-        {tracks.map((track, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActiveTrack(idx)}
-            className={`audio-tab-item px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
-              activeTrack === idx
-                ? "bg-white/20 text-white font-medium ring-1 ring-white/30"
-                : "bg-black/30 text-gray-300 hover:bg-white/10"
-            }`}
-          >
-            🔊 {track.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="custom-audio-player flex items-center gap-3 w-full">
-        <button
-          onClick={togglePlay}
-          className="audio-play-btn w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105"
-          style={{ backgroundColor: accentColor || "#ffffff", color: "#000" }}
+    <AnimatePresence>
+      {isOpen && (
+        <div dir="rtl" style={{ fontFamily: "'Amiri', Georgia, serif" }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-8"
         >
-          {playing ? "⏸" : "▶"}
-        </button>
-        <div className="audio-timeline-track flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-          <div
-            className="audio-timeline-fill h-full rounded-full transition-all duration-200"
-            style={{ width: `${progress}%`, backgroundColor: accentColor || "#ffffff" }}
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0"
+            style={{ background: "rgba(5,0,0,0.96)", backdropFilter: "blur(16px)" }}
+          />
+
+          {/* Card */}
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0, y: 70 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.85, opacity: 0, y: 70 }}
+            transition={{ type: "spring", damping: 22, stiffness: 200 }}
+            className="relative w-full max-h-[92vh] overflow-hidden flex flex-col md:flex-row"
+            style={{
+              maxWidth: 920,
+              borderRadius: 24,
+              background: "#0f0000",
+              border: `1px solid ${RED}40`,
+              boxShadow: `0 0 60px ${RED}20, 0 30px 80px rgba(0,0,0,0.7)`,
+            }}
+          >
+            {/* Top accent line */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 3,
+              background: `linear-gradient(90deg, transparent, ${RED}, transparent)`,
+              zIndex: 10,
+            }} />
+
+            {/* Close */}
+            <motion.button
+              whileHover={{ scale: 1.15, rotate: 90 }}
+              onClick={onClose}
+              className="absolute top-4 left-4 z-50 flex items-center justify-center w-9 h-9 rounded-full"
+              style={{ background: "rgba(220,38,38,0.15)", color: "#fca5a5", border: "1px solid rgba(220,38,38,0.3)", transition: "all 0.2s" }}
+            >✕</motion.button>
+
+            {/* Image panel */}
+            <div className="relative w-full md:w-5/12 flex-shrink-0" style={{ minHeight: 280 }}>
+              {/* SVG-based placeholder background for image area */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: `linear-gradient(135deg, #1a0000, #3b0000, #1a0000)`,
+              }}>
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style={{ position: "absolute", inset: 0 }}>
+                  <defs>
+                    <pattern id="imgGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(220,38,38,0.1)" strokeWidth="0.5"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#imgGrid)" />
+                  <circle cx="50%" cy="40%" r="80" fill="rgba(220,38,38,0.08)" />
+                  <circle cx="50%" cy="40%" r="55" fill="rgba(220,38,38,0.06)" />
+                </svg>
+              </div>
+              <img
+                src={story.image}
+                alt={story.name}
+                className="w-full h-full object-cover"
+                style={{ filter: "grayscale(60%) sepia(20%)", transition: "filter 0.6s", position: "relative", zIndex: 1 }}
+                onMouseEnter={e => (e.currentTarget.style.filter = "grayscale(0%) sepia(10%)")}
+                onMouseLeave={e => (e.currentTarget.style.filter = "grayscale(60%) sepia(20%)")}
+                onError={e => { e.currentTarget.style.display = "none"; }}
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0" style={{ zIndex: 2,
+                background: `linear-gradient(to top, #0f0000 0%, transparent 55%), linear-gradient(to left, #0f0000 0%, transparent 60%)`,
+              }} />
+              {/* Red vignette */}
+              <div className="absolute inset-0" style={{ zIndex: 2,
+                background: `radial-gradient(ellipse at center, transparent 40%, rgba(10,0,0,0.6) 100%)`,
+              }} />
+              {/* Labels */}
+              <div className="absolute bottom-0 right-0 p-6" style={{ zIndex: 3 }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span style={{ color: RED, fontSize: 11, fontWeight: 700, letterSpacing: 3 }}>
+                    📍 {story.location}
+                  </span>
+                </div>
+                <h2 style={{ color: "#fff", fontSize: 38, fontWeight: 900, lineHeight: 1.1, textShadow: `0 0 30px ${RED}60` }}>
+                  {story.name}
+                </h2>
+                <motion.div
+                  animate={{ boxShadow: [`0 0 0 0 ${RED}40`, `0 0 12px 4px ${RED}20`, `0 0 0 0 ${RED}40`] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="mt-2 inline-block px-3 py-1 rounded-full text-xs font-bold"
+                  style={{ background: `${RED}22`, color: RED, border: `1px solid ${RED}55` }}
+                >
+                  حلمه: {story.dream}
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Content panel */}
+            <div className="w-full md:w-7/12 flex flex-col overflow-y-auto"
+              style={{ maxHeight: "92vh", scrollbarWidth: "thin", scrollbarColor: `${RED}44 transparent` }}
+            >
+              <div className="p-7 md:p-10 flex flex-col gap-6">
+                {/* Title */}
+                <div className="flex gap-3 items-start">
+                  <span style={{ color: RED, fontSize: 32, marginTop: -4, lineHeight: 1 }}>"</span>
+                  <h3 style={{ color: "#f5f5f5", fontSize: 20, fontWeight: 700, lineHeight: 1.7 }}>
+                    {story.title}
+                  </h3>
+                </div>
+                {/* Divider */}
+                <div style={{ height: 1, background: `linear-gradient(90deg, ${RED}60, transparent)` }} />
+
+                {/* Paragraphs */}
+                <div className="flex flex-col gap-5">
+                  {story.paragraphs.map((p, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.08 + i * 0.07 }}
+                      style={{ color: "#c4b5b5", fontSize: 15, lineHeight: 2.1, borderRight: i === 0 ? `2px solid ${RED}` : "none", paddingRight: i === 0 ? 12 : 0 }}
+                    >
+                      {p}
+                    </motion.p>
+                  ))}
+                </div>
+
+                {/* Stats */}
+                <div className="mt-2 pt-6 grid grid-cols-2 gap-3"
+                  style={{ borderTop: "1px solid rgba(220,38,38,0.12)" }}
+                >
+                  {[
+                    { val: story.stats.value, lbl: story.stats.label },
+                    { val: story.location,    lbl: "الموقع" },
+                  ].map((s, i) => (
+                    <motion.div
+                      key={i}
+                      whileHover={{ scale: 1.03 }}
+                      className="rounded-2xl p-4"
+                      style={{ background: `rgba(220,38,38,0.06)`, border: `1px solid ${RED}20` }}
+                    >
+                      <p style={{ color: i === 0 ? RED : "#fff", fontSize: 24, fontWeight: 900 }}>{s.val}</p>
+                      <p style={{ color: "#664444", fontSize: 11, marginTop: 3 }}>{s.lbl}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// ─── CARD ─────────────────────────────────────────────────────────────────────
+const StoryCard = ({ story, onClick, index }) => {
+  const RED = "#dc2626";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 * index, type: "spring", damping: 20 }}
+      whileHover={{ y: -10, scale: 1.015 }}
+      onClick={() => onClick(story)}
+      className="card-hover-border rounded-3xl cursor-pointer"
+      style={{ borderRadius: 24 }}
+    >
+      <div className="card-inner" style={{ border: "1px solid rgba(220,38,38,0.1)", borderRadius: 24 }}>
+        {/* Image */}
+        <div className="relative overflow-hidden" style={{ height: 230 }}>
+          {/* SVG Background — used as artistic fill / fallback */}
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
+            style={{ position: "absolute", inset: 0 }}
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <defs>
+              <radialGradient id={`cardBg${index}`} cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stopColor="#3b0000" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#0a0000" stopOpacity="1" />
+              </radialGradient>
+              <pattern id={`dots${index}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="1" fill="rgba(220,38,38,0.15)" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill={`url(#cardBg${index})`} />
+            <rect width="100%" height="100%" fill={`url(#dots${index})`} />
+            <circle cx="50%" cy="50%" r="60" fill="rgba(220,38,38,0.07)" />
+          </svg>
+
+          <img
+            src={story.image}
+            alt={story.name}
+            className="w-full h-full object-cover"
+            style={{ filter: "grayscale(60%) sepia(15%)", transition: "transform 0.6s, filter 0.6s", position: "relative", zIndex: 1 }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.07)"; e.currentTarget.style.filter = "grayscale(0%) sepia(0%)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)";   e.currentTarget.style.filter = "grayscale(60%) sepia(15%)"; }}
+            onError={e => { e.currentTarget.style.display = "none"; }}
+          />
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0" style={{ zIndex: 2,
+            background: "linear-gradient(to top, #0f0000 0%, transparent 60%)",
+          }} />
+
+          {/* Location badge */}
+          <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold" style={{ zIndex: 3,
+            background: `${RED}22`, color: RED, border: `1px solid ${RED}55`, backdropFilter: "blur(6px)",
+          }}>
+            {story.location}
+          </div>
+
+          {/* Animated corner */}
+          <motion.div
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: index * 0.3 }}
+            style={{
+              position: "absolute", bottom: 0, left: 0, zIndex: 3,
+              width: 40, height: 40,
+              borderBottom: `2px solid ${RED}`,
+              borderLeft:   `2px solid ${RED}`,
+            }}
           />
         </div>
-      </div>
-      <audio ref={audioRef} src={tracks[activeTrack]?.src} preload="metadata" />
-    </div>
-  );
-}
 
-// ─── INTERACTIVE CHART INFOGRAPHIC ───────────────────────────────────────────
-function InteractiveChart() {
-  const chartWrapperRef = useRef(null);
-
-  useEffect(() => {
-    const bars = chartWrapperRef.current.querySelectorAll(".chart-bar-fill");
-    const counters = chartWrapperRef.current.querySelectorAll(".counter-val");
-
-    gsap.fromTo(bars, { width: "0%" }, {
-      width: (i, el) => el.getAttribute("data-percentage"),
-      duration: 2, ease: "power3.out",
-      scrollTrigger: { trigger: chartWrapperRef.current, start: "top 85%" }
-    });
-
-    counters.forEach((counter) => {
-      const target = parseInt(counter.getAttribute("data-target"), 10);
-      const obj = { value: 0 };
-      gsap.to(obj, {
-        value: target, duration: 2.5, ease: "power2.out",
-        scrollTrigger: { trigger: chartWrapperRef.current, start: "top 85%" },
-        onUpdate: () => { counter.textContent = Math.floor(obj.value).toLocaleString() + "+"; }
-      });
-    });
-  }, []);
-
-  return (
-    <section className="interactive-chart-section max-w-4xl mx-auto py-16 px-4 md:px-6" ref={chartWrapperRef}>
-      <div className="chart-header-block text-center mb-12">
-        <h2 className="font-amiri text-3xl md:text-4xl font-bold mb-2">البيانات والمسوح الميدانية</h2>
-        <p className="text-gray-400 text-lg">فاتورة الحروب بالأرقام الإحصائية</p>
-      </div>
-      <div className="chart-grid-layout flex flex-col gap-6">
-        {chartStats.map((stat, idx) => (
-          <div key={idx} className="chart-row-item">
-            <div className="chart-meta-info flex justify-between items-baseline flex-wrap gap-2">
-              <span className="font-medium text-gray-200">{stat.label}</span>
-              <span className="counter-val text-xl font-bold" data-target={stat.value}>0</span>
-            </div>
-            <div className="chart-bar-bg w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="chart-bar-fill h-full rounded-full"
-                data-percentage={`${stat.targetPercent}%`}
-                style={{ backgroundColor: stat.color }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── STICKY SHOWCASE SECTION - IMAGES FIRST ON MOBILE, NO CAPTIONS, DOTS AND AGE AT BOTTOM ────────────
-function StickyShowcaseSection({ story, index }) {
-  const sectionRef = useRef(null);
-  const textContainerRef = useRef(null);
-  const [activeImgIdx, setActiveImgIdx] = useState(0);
-
-  useEffect(() => {
-    if (story.images.length > 1) {
-      const interval = setInterval(() => {
-        setActiveImgIdx((prev) => (prev + 1) % story.images.length);
-      }, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [story.images.length]);
-
-  useEffect(() => {
-    const textElements = textContainerRef.current?.querySelectorAll(".reveal-fade-item");
-    if (textElements && textElements.length) {
-      gsap.fromTo(textElements, 
-        { opacity: 0, y: 30 }, 
-        { opacity: 1, y: 0, stagger: 0.1, duration: 0.8, ease: "power2.out",
-          scrollTrigger: { trigger: textContainerRef.current, start: "top 80%", toggleActions: "play none none reverse" }
-        }
-      );
-    }
-
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top 50%", end: "bottom 50%",
-      onEnter: () => gsap.to("body", { backgroundColor: story.color, color: "#fff", duration: 0.6 }),
-      onEnterBack: () => gsap.to("body", { backgroundColor: story.color, color: "#fff", duration: 0.6 }),
-    });
-  }, [story]);
-
-  const hasMultipleImages = story.images.length > 1;
-
-  return (
-    <div ref={sectionRef} className="w-full overflow-hidden">
-      {/* Mobile Layout: Image First, Text Below */}
-      <div className="block lg:hidden">
-        {/* Image Section - Full width on mobile */}
-        <div className="relative h-[60vh] w-full bg-black overflow-hidden">
-          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            {/* Ambient Blur Backdrop */}
-            {story.images[activeImgIdx] && (
-              <img
-                src={story.images[activeImgIdx].src}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-top blur-2xl brightness-50 scale-110 pointer-events-none"
-              />
-            )}
-
-            {/* Core Media Render */}
-            {hasMultipleImages ? (
-              <div className="relative z-10 grid grid-cols-2 grid-rows-2 gap-3 w-[90%] h-[80%] p-2">
-                {story.images.map((img, imgIdx) => (
-                  <div
-                    key={imgIdx}
-                    onClick={() => setActiveImgIdx(imgIdx)}
-                    className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-500 ${
-                      activeImgIdx === imgIdx
-                        ? "opacity-100 scale-[1.02] ring-2 ring-white/40 shadow-2xl z-10"
-                        : "opacity-40 scale-95 grayscale-[20%]"
-                    }`}
-                  >
-                    <img
-                      src={img.src}
-                      alt=""
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full p-4 z-10 relative">
-                <img
-                  src={story.images[0]?.src}
-                  alt=""
-                  className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl"
-                />
-              </div>
-            )}
-
-            {/* Flag & Country Badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full z-20">
-              <span>{story.flag}</span>
-              <span className="text-sm font-medium">{story.country}</span>
-            </div>
-
-            {/* Bottom Controls - Dots and Age only (no caption) */}
-            <div className="absolute bottom-4 left-0 right-0 flex flex-row items-center justify-center gap-4 z-20">
-              {hasMultipleImages && (
-                <div className="gallery-navigation-dots flex gap-2 bg-black/50 px-3 py-1.5 rounded-full">
-                  {story.images.map((_, imgIdx) => (
-                    <button
-                      key={imgIdx}
-                      onClick={() => setActiveImgIdx(imgIdx)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm whitespace-nowrap">
-                {story.age}
-              </div>
-            </div>
+        {/* Text */}
+        <div className="p-5 flex flex-col gap-2" dir="rtl">
+          <h2 style={{ color: "#f5e8e8", fontSize: 22, fontWeight: 800, lineHeight: 1.3 }}>{story.name}</h2>
+          <p style={{ color: "#7a5555", fontSize: 13, lineHeight: 1.75 }} className="line-clamp-2">{story.title}</p>
+          <div className="flex items-center gap-2 mt-auto pt-3"
+            style={{ borderTop: "1px solid rgba(220,38,38,0.1)" }}
+          >
+            <span style={{ color: "#4a2222", fontSize: 12 }}>{story.age}</span>
+            <motion.span
+              whileHover={{ x: -4 }}
+              style={{ color: RED, fontSize: 11, marginRight: "auto", fontWeight: 700, cursor: "pointer" }}
+            >
+              حلمه: {story.dream} ←
+            </motion.span>
           </div>
         </div>
+      </div>
+    </motion.div>
+  );
+};
 
-        {/* Text Section - Below image on mobile */}
-        <div 
-          ref={textContainerRef}
-          className="w-full p-6 overflow-y-auto"
-          style={{ direction: 'rtl' }}
-        >
-          <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 pb-8">
-            <div className="text-xs font-semibold tracking-wider text-white/70 reveal-fade-item">
-              {story.title} — {story.subtitle}
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const stories = [
+  {
+    id: 1, name: "دعاء", location: "غزة",
+    title: "دعاء طبيبة المستقبل.. ألم كبير في جسد صغير",
+    image: "../../assets/images/doaa_1.jpeg",
+    color: "#dc2626", dream: "طبيبة", age: "6 سنوات",
+    paragraphs: [
+      "دفع الأطفال في غزة ثمنًا فادحًا للحرب الإسرائيلية الغاشمة على القطاع (2023-2025)، التي أودت بحياة أكثر من 70 ألف شهيد، فضلًا عن إصابة ما يناهز 170 ألف فلسطيني، من بينهم الطفلة دعاء أبو جزر البالغة من العمر 6 سنوات، التي فقدت ساقها في غارة لطيران الاحتلال.",
+      "في البداية، اعتقدت دعاء أن الطرف الصناعي يمثل فرصة لعودتها إلى اللعب مع إخوتها، غير أنها مع الوقت أدركت صعوبة العودة إلى حياتها قبل الإصابة.",
+      "تعاني دعاء من حالة نفسية سيئة منذ أن بُتِرت ساقها، رغم محاولة أفراد العائلة التخفيف عنها؛ ومع ذلك، فهي تحتفظ بابتسامتها وبراءتها.",
+      "تحلم دعاء بأن تصبح طبيبة لتساهم في مداواة آلام الناس، متمسكةً بحقها في التمتع بطفولتها.",
+    ],
+    stats: { value: "6 سنوات", label: "عمر الطفلة", year: "2024" },
+  },
+  {
+    id: 2, name: "غزل", location: "غزة",
+    title: "غزل ابنة غزة: صحافية المستقبل",
+    image: "../../assets/images/ghazal.jpeg",
+    color: "#dc2626", dream: "صحافية", age: "12 عاماً",
+    paragraphs: [
+      "تعلمت غزل رفعت، ابنة قطاع غزة البالغة من العمر 12 عامًا، من مطالعة الكتب أن الاستسلام ليس خيارًا، وأن الأبطال يحاولون دومًا ولا يسقطون.",
+      "استعانت غزل بموهبتها في كتابة الشعر لتتخطى ما مرت به من ألم وخذلان.",
+      "كما لجأت إلى الرسم لتعبر عن طفولتها، وبراءتها التي سلبتها منها الحرب.",
+      "حددت حلمها بأن تصبح صحفية تنقل ما يعيشه الأطفال في الحروب للعالم أجمع.",
+    ],
+    stats: { value: "12 عاماً", label: "عمر غزل", year: "2024" },
+  },
+  {
+    id: 3, name: "أدهم", location: "غزة",
+    title: "بصوته البريء يقول أدهم: يدي سبقتني إلى الجنة",
+    image: "../../assets/images/adham_prewar.jpeg",
+    color: "#dc2626", dream: "حافظ قرآن", age: "7 سنوات",
+    paragraphs: [
+      "يحب أدهم عزام، ابن قطاع غزة، القراءة والغناء ولعب كرة القدم، إلا أنه فقد أخته إثر تعرض منزلهم لقصف إسرائيلي.",
+      "يصف أدهم حالته النفسية بعد القصف بقوله: «نفسيتي كتير كتير تعبت»، فقد بُترت يده نتيجة القصف.",
+      "ويضيف أدهم بفخرٍ أنه «يحب قراءة القرآن، وحفظ سورة التكوير غيبًا».",
+      "يعرب أدهم عن رغبته في العودة إلى غزة موطنه الأصلي؛ المكان الذي فقد فيه يده.",
+    ],
+    stats: { value: "7 سنوات", label: "عمر أدهم", year: "2024" },
+  },
+  {
+    id: 4, name: "حسن", location: "السودان",
+    title: "عقله وبراءته.. تفوق المحارب",
+    image: "../../assets/images/hassan.jpeg",
+    color: "#dc2626", dream: "بناء ملجأ للأطفال", age: "6 سنوات",
+    paragraphs: [
+      "طفولة ضجّت بالحركة والمرح عاشها الطفل السوداني حسن أحمد، ذو الست أعوام، قبل أن تغيّر الحرب حياته بالكامل.",
+      "اندلعت الحرب في السودان، وذبُلت حياة حسن، الذي فقد شقيقه فيها.",
+      "ومع مرور الوقت، تعلّق حسن بوالدته بشكل أكبر، وأصبح يخشى الابتعاد عنها.",
+      "حلمه كبير رغم صغر سنه: ينشئ مكاناً مخصصاً للأطفال يعيشون فيه دون خوف.",
+    ],
+    stats: { value: "6 سنوات", label: "عمر حسن", year: "2024" },
+  },
+  {
+    id: 5, name: "أحمد", location: "السودان",
+    title: "متلازمة القلق.. أمل في إعادة الإعمار",
+    image: "../../assets/images/ahmed_sudan1.jpeg",
+    color: "#dc2626", dream: "مهندس", age: "13 عاماً",
+    paragraphs: [
+      "أحمد حامد يحيى، البالغ من العمر ثلاثة عشر عامًا، يفتقد مدرسته وأصدقاءه.",
+      "مراراً حاول أحمد التظاهر بالقوة وعدم الخوف، إلا أن أصوات الانفجارات القريبة تركت أثراً نفسياً كبيراً.",
+      "«حتى بعد لجوئي إلى مصر، لا تزال الكوابيس تلاحقني، أستيقظ على أصوات الانفجارات».",
+      "يحلم أحمد باليوم الذي يصير فيه مهندسًا ليساهم في إعادة إعمار وطنه.",
+    ],
+    stats: { value: "13 عاماً", label: "عمر أحمد", year: "2024" },
+  },
+];
+
+// ─── PAGE ─────────────────────────────────────────────────────────────────────
+export default function CrossMediaPage() {
+  const [selectedStory, setSelectedStory] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const RED = "#dc2626";
+
+  const filtered = filter === "all" ? stories : stories.filter(s => s.location === filter);
+
+  return (
+    <>
+      <style>{globalStyles}</style>
+      <Particles />
+
+      <div className="min-h-screen" dir="rtl"
+        style={{ background: "#0a0000", fontFamily: "'Cairo', 'Amiri', serif", position: "relative", zIndex: 1 }}
+      >
+
+        {/* ── HERO HEADER ── */}
+        <header className="relative overflow-hidden" style={{ paddingBottom: 80, paddingTop: 100 }}>
+          <HeroBackground />
+
+          {/* Top thin red bar */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, height: 2,
+            background: `linear-gradient(90deg, transparent 0%, ${RED} 30%, ${RED} 70%, transparent 100%)`,
+          }} />
+
+          <div className="relative z-10 text-center px-6">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {/* Label */}
+              <motion.p
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                style={{
+                  color: RED, fontSize: 11, letterSpacing: 6, marginBottom: 16,
+                  fontFamily: "'Cairo', sans-serif", fontWeight: 700,
+                  textTransform: "uppercase",
+                }}
+              >
+                تقرير صحفي · وسائط متعددة
+              </motion.p>
+
+              {/* Main title */}
+              <h1 className="shimmer-text" style={{
+                fontSize: "clamp(2.8rem, 8vw, 5.5rem)",
+                fontWeight: 900,
+                lineHeight: 1.1,
+                fontFamily: "'Amiri', serif",
+                marginBottom: 12,
+              }}>
+                أطفال الحروب
+              </h1>
+
+              <h2 style={{
+                color: "#5a3333",
+                fontSize: "clamp(1rem, 3vw, 1.6rem)",
+                fontWeight: 400,
+                fontFamily: "'Amiri', serif",
+                marginBottom: 20,
+              }}>
+                أجيال من العزيمة والإرادة
+              </h2>
+
+              {/* Animated divider */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1, delay: 0.4 }}
+                style={{
+                  width: 120, height: 2, margin: "0 auto 20px",
+                  background: `linear-gradient(90deg, transparent, ${RED}, transparent)`,
+                }}
+              />
+
+              <p style={{ color: "#4a2020", fontSize: 14 }}>
+                قصص بصرية وصوتية من غزة والسودان
+              </p>
+            </motion.div>
+
+            {/* Orbiting decorative ring */}
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", pointerEvents: "none", zIndex: -1 }}>
+              {[0, 120, 240].map((deg, i) => (
+                <div key={i} style={{
+                  position: "absolute", top: "50%", left: "50%",
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: RED, opacity: 0.3,
+                  marginTop: -3, marginLeft: -3,
+                  animation: `orbit ${8 + i * 2}s ${i * 1.5}s linear infinite`,
+                  transformOrigin: "center center",
+                  transform: `rotate(${deg}deg) translateX(${120 + i * 40}px)`,
+                }} />
+              ))}
             </div>
-            <h2 className="font-amiri text-3xl font-bold leading-tight reveal-fade-item">
-              {story.name}
-            </h2>
-            <div className="font-amiri text-lg italic border-r-2 pr-4 text-gray-200 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-2xl opacity-40 ml-1">“</span>
-              {story.quote}
-              <span className="text-2xl opacity-40 mr-1">”</span>
-            </div>
-            <div className="flex flex-col gap-3 reveal-fade-item">
-              {story.body.map((paragraph, pIdx) => (
-                <p key={pIdx} className="text-sm text-gray-300 leading-relaxed text-justify">
-                  {paragraph}
+          </div>
+        </header>
+
+        {/* ── STATS BAR ── */}
+        <div style={{
+          borderTop: `1px solid ${RED}20`,
+          borderBottom: `1px solid ${RED}20`,
+          background: `linear-gradient(90deg, #0a0000, rgba(220,38,38,0.04), #0a0000)`,
+          padding: "32px 16px",
+        }}>
+          <div className="flex justify-center gap-12 flex-wrap">
+            {[
+              { val: 70000, suffix: "+", lbl: "شهيد في غزة" },
+              { val: 5,     suffix: "",  lbl: "قصص موثقة" },
+              { val: 2,     suffix: "",  lbl: "دولة" },
+            ].map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 * i }}
+                className="text-center"
+                style={{ minWidth: 80 }}
+              >
+                <p style={{ color: RED, fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 900, fontVariantNumeric: "tabular-nums" }}>
+                  <AnimatedCounter target={s.val} suffix={s.suffix} />
                 </p>
-              ))}
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 border-r-4 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-xs font-bold uppercase tracking-wider opacity-70">✦ الحلم المستقبلي:</span>
-              <p className="text-base font-medium mt-1">{story.dream}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 reveal-fade-item">
-              {story.tags.map((tag, tIdx) => (
-                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-            <div className="reveal-fade-item mt-2">
-              <MultiAudioPlayer tracks={story.audioTracks} accentColor={story.textColors?.secondary || "#ffffff"} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Layout: Image and Text Side by Side with alternating order */}
-      <div className="hidden lg:grid lg:grid-cols-2 min-h-screen w-full">
-        {/* Image Pane */}
-        <div 
-          className={`relative lg:sticky lg:top-0 h-screen w-full overflow-hidden bg-black ${
-            index % 2 === 0 ? 'order-first' : 'order-last'
-          }`}
-          style={{ direction: 'ltr' }}
-        >
-          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            {story.images[activeImgIdx] && (
-              <img
-                src={story.images[activeImgIdx].src}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-top blur-2xl brightness-50 scale-110 pointer-events-none"
-              />
-            )}
-
-            {hasMultipleImages ? (
-              <div className="relative z-10 grid grid-cols-2 grid-rows-2 gap-4 w-[90%] h-[80%] p-2">
-                {story.images.map((img, imgIdx) => (
-                  <div
-                    key={imgIdx}
-                    onClick={() => setActiveImgIdx(imgIdx)}
-                    className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-500 ${
-                      activeImgIdx === imgIdx
-                        ? "opacity-100 scale-[1.02] ring-2 ring-white/40 shadow-2xl z-10"
-                        : "opacity-40 scale-95 grayscale-[20%]"
-                    }`}
-                  >
-                    <img src={img.src} alt="" className="w-full h-full object-cover object-top" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full p-6 z-10 relative">
-                <img
-                  src={story.images[0]?.src}
-                  alt=""
-                  className="w-auto h-full max-h-[85%] object-contain rounded-xl shadow-2xl"
-                />
-              </div>
-            )}
-
-            <div className="absolute top-6 right-6 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full z-20">
-              <span>{story.flag}</span>
-              <span className="text-sm font-medium">{story.country}</span>
-            </div>
-
-            {/* Bottom Controls - Dots and Age only (no caption) */}
-            <div className="absolute bottom-6 left-0 right-0 flex flex-row items-center justify-center gap-4 z-20">
-              {hasMultipleImages && (
-                <div className="flex gap-2 bg-black/50 px-4 py-2 rounded-full">
-                  {story.images.map((_, imgIdx) => (
-                    <button
-                      key={imgIdx}
-                      onClick={() => setActiveImgIdx(imgIdx)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        activeImgIdx === imgIdx ? "bg-white scale-125" : "bg-white/50"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm whitespace-nowrap">
-                {story.age}
-              </div>
-            </div>
+                <p style={{ color: "#5a2222", fontSize: 12, marginTop: 4 }}>{s.lbl}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
 
-        {/* Editorial Content Panel - Desktop */}
-        <div 
-          ref={textContainerRef}
-          className={`flex items-start w-full p-12 overflow-y-auto overflow-x-hidden ${
-            index % 2 === 0 ? 'order-last' : 'order-first'
-          }`}
-          style={{ direction: 'rtl', maxHeight: '100vh', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <div className="w-full max-w-xl mx-auto flex flex-col gap-6 pb-8">
-            <div className="text-sm font-semibold tracking-wider text-white/70 reveal-fade-item">
-              {story.title} — {story.subtitle}
-            </div>
-            <h2 className="font-amiri text-5xl lg:text-6xl font-bold leading-tight reveal-fade-item">
-              {story.name}
-            </h2>
-            <div className="font-amiri text-xl italic border-r-3 pr-4 text-gray-200 reveal-fade-item" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-2xl opacity-40 ml-1">“</span>
-              {story.quote}
-              <span className="text-2xl opacity-40 mr-1">”</span>
-            </div>
-            <div className="flex flex-col gap-3 reveal-fade-item">
-              {story.body.map((paragraph, pIdx) => (
-                <p key={pIdx} className="text-base text-gray-300 leading-relaxed text-justify">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-            <div className="bg-white/5 rounded-xl p-5 border-r-4 reveal-fade-item hover:bg-white/10 transition-all duration-300" style={{ borderRightColor: story.textColors?.secondary || "#fff" }}>
-              <span className="text-xs font-bold uppercase tracking-wider opacity-70">✦ الحلم المستقبلي:</span>
-              <p className="text-lg font-medium mt-1">{story.dream}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 reveal-fade-item">
-              {story.tags.map((tag, tIdx) => (
-                <span key={tIdx} className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-            <div className="reveal-fade-item mt-2">
-              <MultiAudioPlayer tracks={story.audioTracks} accentColor={story.textColors?.secondary || "#ffffff"} />
-            </div>
-          </div>
+        {/* ── FILTER ── */}
+        <div className="flex justify-center gap-3 py-8 px-4 flex-wrap">
+          {[
+            { key: "all", lbl: "الكل" },
+            { key: "غزة", lbl: "غزة 🇵🇸" },
+            { key: "السودان", lbl: "السودان 🇸🇩" },
+          ].map(f => (
+            <motion.button
+              key={f.key}
+              whileHover={{ scale: 1.07 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setFilter(f.key)}
+              style={{
+                padding: "8px 22px",
+                borderRadius: 99,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.25s",
+                background: filter === f.key ? RED : "rgba(220,38,38,0.06)",
+                color:      filter === f.key ? "#fff" : "#7a3333",
+                border: `1px solid ${filter === f.key ? RED : "rgba(220,38,38,0.15)"}`,
+                boxShadow: filter === f.key ? `0 0 20px ${RED}40` : "none",
+                fontFamily: "'Cairo', sans-serif",
+              }}
+            >
+              {f.lbl}
+            </motion.button>
+          ))}
         </div>
+
+        {/* ── GRID ── */}
+        <main className="px-6 pb-24 max-w-6xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filtered.map((story, i) => (
+                <StoryCard key={story.id} story={story} onClick={setSelectedStory} index={i} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+        {/* ── FOOTER ── */}
+        <footer style={{
+          textAlign: "center",
+          padding: "40px 16px",
+          borderTop: `1px solid ${RED}15`,
+          background: `linear-gradient(to top, rgba(220,38,38,0.03), transparent)`,
+        }}>
+          <motion.div
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            <div style={{
+              width: 32, height: 2, margin: "0 auto 16px",
+              background: `linear-gradient(90deg, transparent, ${RED}, transparent)`,
+            }} />
+            <p style={{ color: "#4a2020", fontSize: 13, letterSpacing: 1 }}>
+              وثّقت هذه القصص لتبقى · أطفال الحروب ليسوا أرقامًا
+            </p>
+          </motion.div>
+        </footer>
+
+        {/* ── MODAL ── */}
+        <StoryModal
+          isOpen={!!selectedStory}
+          onClose={() => setSelectedStory(null)}
+          story={selectedStory}
+        />
       </div>
-    </div>
-  );
-}
-
-// ─── HERO SECTION (KEEP ORIGINAL HEADER IMAGE) ───────────────────────────────────────────
-function HeroSection() {
-  const heroRef = useRef(null);
-
-  useEffect(() => {
-    gsap.fromTo(heroRef.current.querySelectorAll('.hero-animate'),
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, stagger: 0.2, duration: 1, ease: "power3.out" }
-    );
-  }, []);
-
-  return (
-    <section ref={heroRef} className="premium-fullscreen-hero relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
-      <div className="hero-parallax-bg-layer absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('https://cdn.observer.co.uk/media/original_images/18005.jpeg')", backgroundSize: 'cover' }} />
-      <div className="hero-center-content-box relative z-10 max-w-3xl px-6 md:px-8">
-        <div className="hero-animate text-amber-500 text-sm md:text-base font-bold mb-3 tracking-wider">ملف استقصائي عابر للوسائط</div>
-        <h1 className="hero-animate font-amiri text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">أطفال الحروب</h1>
-        <p className="hero-animate text-gray-300 text-base md:text-lg mt-6 max-w-2xl mx-auto">
-          موقع توثيقي يجمع الكلمة الصادقة، الصورة الفوتوغرافية الانسيابية، والتسجيلات الحية لأطفال غزة والسودان في تجربة تفاعلية غامرة.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-// ─── MASTER ENTRY APPLICATION VIEW ───────────────────────────────────────────
-export default function App() {
-  useEffect(() => {
-    document.body.style.margin = "0";
-    document.body.style.padding = "0";
-    document.body.style.backgroundColor = stories[0]?.color || "#0f1e2d";
-    document.body.style.color = "#ffffff";
-    document.body.style.fontFamily = "system-ui, -apple-system, sans-serif";
-    document.body.style.overflowX = "hidden";
-  }, []);
-
-  return (
-    <div className="app-root w-full overflow-x-hidden">
-      <HeroSection />
-      <InteractiveChart />
-      {stories.map((story, index) => (
-        <StickyShowcaseSection key={story.id} story={story} index={index} />
-      ))}
-
-      <style>{`
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .single-showcase-img {
-          opacity: 1 !important;
-        }
-        .hero-animate {
-          will-change: transform, opacity;
-        }
-        .reveal-fade-item {
-          will-change: transform, opacity;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
-        }
-        ::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 3px;
-        }
-        
-        /* Smooth transitions */
-        * {
-          transition: background-color 0.3s ease, border-color 0.2s ease;
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
