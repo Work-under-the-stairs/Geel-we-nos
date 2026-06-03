@@ -278,7 +278,7 @@ export default function ArticleDetail() {
                 <h3 className="text-2xl font-black mb-3">هل تريد معرفة المزيد؟</h3>
                 <p className="text-red-100 mb-6 font-medium opacity-90">هذا الخبر مرتبط بقصة تفاعلية بصرية، اضغط هنا للمشاهدة.</p>
                 <button 
-                  onClick={() => navigate(`/cross-media?storyId=${article.crossMediaId}`)}
+                  onClick={() => navigate("/cross-media")}
                   className="bg-white text-red-600 px-10 py-4 rounded-full font-black text-lg hover:bg-slate-50 transition-all shadow-md"
                 >
                   اضغط هنا لمعرفة المزيد
