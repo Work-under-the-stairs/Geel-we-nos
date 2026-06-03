@@ -47,7 +47,6 @@ export async function uploadToImageKit(file, folder = "/articles", onProgress) {
         try {
           const response = JSON.parse(xhr.responseText);
           if (xhr.status >= 200 && xhr.status < 300) {
-            // هنا التعديل: إرجاع الرابط ومعرف الملف للاستخدام في الحذف لاحقاً
             resolve({
               url: response.url,
               fileId: response.fileId

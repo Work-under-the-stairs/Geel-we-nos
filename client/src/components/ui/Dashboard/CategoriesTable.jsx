@@ -309,7 +309,6 @@ const [search, setSearch] = useState('');
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-      {/* --- الهيدر العلوي --- */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
         <h3 className="font-bold text-slate-800 flex items-center gap-2">
           <Folder size={18} className="text-slate-400" />
@@ -317,7 +316,6 @@ const [search, setSearch] = useState('');
         </h3>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* مربع البحث */}
           <div className="relative w-full sm:w-64">
             <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -329,7 +327,6 @@ const [search, setSearch] = useState('');
             />
           </div>
           
-          {/* زر إضافة قسم جديد */}
           <button 
             onClick={handleOpenAdd}
             className="bg-[var(--color-secondary)] hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-md shadow-orange-600/10 shrink-0"
@@ -340,7 +337,6 @@ const [search, setSearch] = useState('');
         </div>
       </div>
 
-      {/* --- جدول الأقسام --- */}
       {isLoading ? (
         <div className="py-12 flex justify-center items-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -363,7 +359,6 @@ const [search, setSearch] = useState('');
                 </tr>
               ) : (
                 filteredCategories.map((cat) => {
-                  // استخراج الأيقونة الديناميكية، لو مش موجودة نحط Folder كافتراضي
                   const IconComponent = ICONS_DICTIONARY[cat.icon_name] || Folder;
 
                   return (
@@ -404,11 +399,9 @@ const [search, setSearch] = useState('');
         </div>
       )}
 
-      {/* --- نافذة الإضافة والتعديل (Modal) --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            {/* رأس النافذة */}
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
               <h3 className="font-bold text-slate-800 text-lg">
                 {editMode ? 'تعديل القسم' : 'إضافة قسم جديد'}
@@ -421,9 +414,7 @@ const [search, setSearch] = useState('');
               </button>
             </div>
 
-            {/* محتوى النموذج */}
             <form onSubmit={handleSubmit} className="p-5 space-y-5">
-              {/* اسم القسم */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">اسم القسم</label>
                 <input
@@ -436,7 +427,6 @@ const [search, setSearch] = useState('');
                 />
               </div>
 
-              {/* اختيار الأيقونة */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">اختر أيقونة مناسبة</label>
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto custom-scrollbar">
@@ -465,7 +455,6 @@ const [search, setSearch] = useState('');
                 </div>
               </div>
 
-              {/* أزرار الحفظ والإلغاء */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"

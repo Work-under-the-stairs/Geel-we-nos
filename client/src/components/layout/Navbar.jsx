@@ -25,7 +25,6 @@ export default function Navbar() {
   return (
     <header className="w-full select-none pt-[90px] md:pt-[120px]" dir="rtl">
       
-      {/* ======= ROW 1 ======= */}
       <div className="fixed top-0 left-0 z-50 w-full bg-main-bg border-b border-gray-200 shadow-sm h-[90px] md:h-[120px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex flex-row-reverse items-center justify-between h-full relative">
 
@@ -69,7 +68,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ======= ROW 2 (التبويبات) ======= */}
       <div className="border-b border-gray-200 bg-white overflow-x-auto scrollbar-none relative z-30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
           <ul className="flex items-center lg:justify-between gap-6 min-w-max sm:min-w-0">
@@ -85,7 +83,6 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* ======= السايد بار (Sidebar) ======= */}
       {menuOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setMenuOpen(false)} />}
       <div className={`fixed top-0 right-0 h-full w-[280px] bg-white shadow-2xl z-50 transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">

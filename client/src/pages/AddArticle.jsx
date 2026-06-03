@@ -15,18 +15,17 @@ export default function AddArticle() {
       { ...payload, status },
       {
         onSuccess: (response) => {
-          // ⚠️ ملحوظة: تأكدي من مسار الـ ID في الرد بتاع الـ Backend الخاص بيكي
-          // غالباً بيكون response.data._id أو response.data.article._id
-          const newArticleId = response?.data?._id || response?.data?.article?._id || response?._id;
+          
+
+          const newArticleId = response?.data?._id;
 
           toast.success(
             status === "published" ? "تم نشر المقال بنجاح! 🚀" : "تم حفظ المقال كمسودة بنجاح 💾",
             { id: "submit-toast" }
           );
 
-          // لو اتنشر ومعانا الـ ID، نوديه لصفحة الخبر مباشرة.. غير كده نرجعه للـ Admin
           if (status === "published" && newArticleId) {
-            navigate(`/news/${newArticleId}`); // عدلي مسار /article/ لو مختلف عندك
+            navigate(`/news/${newArticleId}`);
           } else {
             navigate("/admin");
           }

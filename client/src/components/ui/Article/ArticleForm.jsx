@@ -23,10 +23,8 @@ import {
   MediaSection,
   ImportanceSection,
   ActionButtonsSection,
-} from "./Overlay"; // تأكدي من مسار الاستيراد حسب هيكلة مشروعك
+} from "./Overlay"; 
 
-
-// 🌟 امتداد مخصص للصور يدعم الكابشن
 const ImageWithCaption = Image.extend({
   addAttributes() {
     return {
@@ -76,7 +74,6 @@ const editorExtensions = [
   StarterKit,
   Placeholder.configure({
     placeholder: 'ابدأ بكتابة المقال...',
-    // This ensures the placeholder only shows when the editor is empty
     emptyEditorClass: 'is-editor-empty', 
   }),
   UnderlineExtension,
@@ -108,17 +105,16 @@ export default function ArticleForm({
 }) {
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
 
-  // ── States ───────────────────────────────────────────────────
-  const [selectedStory, setSelectedStory] = useState(""); 
-// افترضي أنك تجلبين القصص من hook
-const { data: stories, isLoading: isStoriesLoading } = useStories();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [importance, setImportance] = useState(5);
   const [isUrgent, setIsUrgent] = useState(false);
   const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
-
+    // ── States ───────────────────────────────────────────────────
+  const [selectedStory, setSelectedStory] = useState(""); 
+// افترضي أنك تجلبين القصص من hook
+const { data: stories, isLoading: isStoriesLoading } = useStories();
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
   const [featuredProgress, setFeaturedProgress] = useState(0);
@@ -146,7 +142,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
   const [pendingEditorImageData, setPendingEditorImageData] = useState(null);
   const [editorImageCaption, setEditorImageCaption] = useState("");
 
-  // ── Refs ─────────────────────────────────────────────────────
   const basicInfoRef = useRef(null);
   const contentRef = useRef(null);
   const mediaRef = useRef(null);
@@ -175,7 +170,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
     }
   };
 
-  // ── دوال يوتيوب ───────────────────────────────────────────
   const extractYouTubeId = (url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -202,15 +196,14 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
     setYoutubeLinks(prev => prev.filter(link => link.id !== idToRemove));
   };
 
-  // ── إعداد Tiptap ──────────────────────────────────────────────
   const editor = useEditor({
     extensions: editorExtensions,
-    content: '', // Set to empty string
-  editorProps: {
-    attributes: {
-      class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
+    content: '',
+    editorProps: {
+      attributes: {
+        class: "min-h-[350px] md:min-h-[500px] outline-none p-4 md:p-6 text-slate-700 leading-8 text-[15px]",
+      },
     },
-  },
     onUpdate: ({ editor }) => {
       if (isContentHydratingRef.current) return;
       const currentHTML = editor.getHTML();
@@ -229,7 +222,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
     },
   });
 
-  // ── تهيئة البيانات (Hydration) للتعديل ───────────────────────
   useEffect(() => {
     if (!isEditMode || !initialData || !editor || isInitializedRef.current) return;
     
@@ -266,7 +258,7 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
     if (initialData.videos?.length > 0) {
       setVideoPreview({ 
         url: initialData.videos[0], 
-        fileId: initialData.videoFileId || "legacy_video" // لو الـ ID مش موجود
+        fileId: initialData.videoFileId || "legacy_video"
       });
     }
 
@@ -278,9 +270,8 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
       isContentHydratingRef.current = false;
     }, 100);
   }, [initialData, editor, isEditMode]);
-  // ── الإرسال (Submit) ──────────────────────────────────────────
+
   const handleSubmitArticle = (targetStatus) => {
-    // 1. Validation
     if (!title.trim()) {
       toast.error("برجاء إدخال عنوان المقال أولاً");
       scrollToSection(basicInfoRef);
@@ -299,8 +290,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
       return;
     }
 
-    // 2. Prepare Images Array with fileId
-    // Mapping both gallery and featured image to ensure they contain fileId
     const formattedGallery = gallery.map((img) => ({ 
       url: img.url, 
       fileId: img.fileId, 
@@ -315,7 +304,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
       });
     }
 
-    // 3. Prepare Other Payloads
     const allVideos = videoPreview?.url ? [videoPreview.url] : [];
     const youtubeIdsArray = youtubeLinks.map(item => item.id);
 
@@ -325,7 +313,7 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
       category,
       important_rate: importance,
       isUrgent,
-      images: formattedGallery, // Includes url, fileId, caption
+      images: formattedGallery,
       videos: allVideos,
       youtube_videos: youtubeIdsArray,
       hashtags,
@@ -334,11 +322,9 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
       status: targetStatus,
     };
 
-    // 4. Submit
     onSubmit(payload, targetStatus);
   };
 
-  // ── الإلغاء والتنظيف ──────────────────────────────────────────
   const executeCancelAndCleanup = async () => {
     const deletePromises = [];
     if (featuredImage?.fileId) deletePromises.push(deleteMediaFromServer(featuredImage.fileId));
@@ -375,7 +361,6 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
     );
   };
 
-  // ── دوال الميديا المباشرة والمحرر ──────────────────────────────
   const handleFeaturedImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -572,8 +557,8 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
   pointer-events: none;
   height: 0;
 
-  font-size: 24px;     /* حجم أكبر */
-  font-weight: 700;    /* خط عريض */
+  font-size: 24px;
+  font-weight: 700;
   line-height: 1.5;
 }
 
@@ -660,6 +645,7 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
               <input placeholder="اسم الشخص" className="p-3 rounded-xl border border-slate-200 text-sm" value={newContributor.name} onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })} />
               <select className="p-3 rounded-xl border border-slate-200 text-sm" value={newContributor.role} onChange={(e) => setNewContributor({ ...newContributor, role: e.target.value })}>
                 <option value="photographer">مصور (Photographer)</option>
+                <option value="writer">كاتب (Writer)</option>
                 <option value="editor">محرر (Editor)</option>
               </select>
               <button onClick={addContributor} className="bg-slate-800 text-white p-3 rounded-xl text-sm font-bold">+ إضافة</button>
@@ -690,7 +676,7 @@ const { data: stories, isLoading: isStoriesLoading } = useStories();
           <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm mt-6">
             <div className="flex items-center gap-2 mb-2 border-b border-slate-100 pb-3">
               <svg className="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-              <h2 className="text-lg font-bold text-slate-800">فيديوهات يوتيوب المرفقة (اختياري)</h2>
+              <h2 className="text-lg font-bold text-slate-800">فيديوهات يوتيوب المرفقة</h2>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="flex-1 relative">

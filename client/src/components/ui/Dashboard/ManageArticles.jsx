@@ -7,7 +7,6 @@ import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function ManageArticles({ categories = [], onDeleteArticle, isDeletingArticle }) {
   const navigate = useNavigate();
   
-  // ================= State للفلترة والبحث =================
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     page: 1,
@@ -18,7 +17,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
     sort: '-createdAt' 
   });
 
-  // ================= Debounce للبحث =================
   useEffect(() => {
     const timeout = setTimeout(() => {
       setFilters(prev => ({ ...prev, search: searchInput, page: 1 }));
@@ -26,16 +24,11 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  // ================= جلب الداتا من السيرفر =================
   const { data: articlesData, isLoading, isFetching } = useAdminArticles(filters);
   
   const articles = articlesData?.data || [];
   const totalPages = articlesData?.totalPages || 1;
 
-  // صورة افتراضية آمنة للجدول
-  const fallbackPlaceholder = FALLBACK_IMAGE;
-
-  // ================= دوال التغيير =================
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setFilters(prev => ({ ...prev, page: newPage }));
@@ -68,10 +61,8 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
   return (
     <div className="space-y-6">
       
-      {/* ================= 1. شريط البحث والفلاتر ================= */}
       <div className="flex flex-col xl:flex-row gap-4 items-center justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
         
-        {/* البحث */}
         <div className="relative w-full xl:w-96">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
@@ -83,7 +74,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
           />
         </div>
         
-        {/* الفلاتر والأزرار */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           
           <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 flex-1 sm:flex-none">
@@ -119,9 +109,7 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
         </div>
       </div>
 
-      {/* ================= 2. الجدول ================= */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden relative min-h-[400px]">
-        {/* مؤشر التحميل */}
         {(isLoading || isFetching) && (
           <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex items-center justify-center">
             <Loader2 className="animate-spin text-[var(--color-primary)]" size={40} />
@@ -143,23 +131,20 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
             <tbody className="divide-y divide-slate-100">
               {articles.length > 0 ? articles.map((art) => {
                 
-                // ✅ تأمين رابط الصورة (سواء الكائن الجديد أو النص القديم) قبل رندرة العنصر
                 const artImg = art.images?.[0] || FALLBACK_IMAGE;
                 const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 
                 return (
                   <tr key={art._id} className="hover:bg-slate-50/80 transition-colors group">
                     
-                    {/* عمود الصورة والعنوان */}
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <img 
-                          // ✅ استخدام الرابط الآمن والمستخلص بشكل صحيح
                           src={artImgUrl || FALLBACK_IMAGE} 
                           alt={art.title} 
                           className="w-14 h-14 rounded-xl object-cover border border-slate-100 shrink-0" 
                           onError={(e) => {
-                            e.target.onerror = null; // تفادي تكرار الخطأ اللانهائي
+                            e.target.onerror = null;
                             e.target.src = FALLBACK_IMAGE;
                           }}
                         />
@@ -181,26 +166,22 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                       </div>
                     </td>
 
-                    {/* عمود التصنيف */}
                     <td className="p-4 text-sm font-semibold text-slate-600">
                       <span className="bg-slate-100 px-2.5 py-1 rounded-lg">
                         {art.category?.name || art.category || 'غير محدد'}
                       </span>
                     </td>
 
-                    {/* عمود الكاتب */}
                     <td className="p-4 text-sm font-medium text-slate-600">
                       {art.writer?.name || 'الإدارة'}
                     </td>
 
-                    {/* عمود المشاهدات */}
                     <td className="p-4 text-center">
                       <span className="inline-flex items-center justify-center bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg text-sm font-mono font-bold text-slate-700">
                         {art.views || 0}
                       </span>
                     </td>
 
-                    {/* عمود الحالة */}
                     <td className="p-4 text-center">
                       <span className={`inline-flex px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${
                         art.status === 'draft' 
@@ -211,7 +192,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
                       </span>
                     </td>
 
-                    {/* عمود العمليات */}
                     <td className="p-4 text-left">
                       <div className="flex items-center justify-end gap-1.5">
                         <button 
@@ -253,7 +233,6 @@ export default function ManageArticles({ categories = [], onDeleteArticle, isDel
           </table>
         </div>
 
-        {/* ================= 3. الترقيم (Pagination) ================= */}
         {totalPages > 1 && (
           <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
             <span className="text-sm font-medium text-slate-500">

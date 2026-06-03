@@ -15,17 +15,11 @@ export default function Home() {
   const { data: groupedData, isLoading: loadGrouped } = useGroupedByCategory(4);
   const { data: urgentData, isLoading: loadUrgent } = useUrgent(5);
 
-  // ✅ التعديل هنا: الداتا جاية متقشرة وجاهزة من الهوك، فبناخدها علطول مع حماية بسيطة
   const featured = featuredData || [];
   const trending = trendingData || [];
   const latest = latestData || [];
   const groupedCategories = groupedData || {};
   const urgent = urgentData || [];
-
-  // console.log("Featured:", featured);
-  // console.log("Trending:", trending);
-  // console.log("Latest:", latest);
-  // console.log("Grouped by Category:", groupedCategories);
 
   if (loadFeatured || loadTrending || loadLatest || loadGrouped || loadUrgent) {
     return <Loading />;
@@ -50,7 +44,6 @@ export default function Home() {
 
       <div className="bg-primary text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 ">
-          {/* تأمين إضافي بعلامة الاستفهام عشان لو القسم لسه فاضي في الداتا بيز ميعملش كراش */}
           <MultimediaHub multimediaArticles={groupedCategories?.["بودكاست"] || []} />
         </div>
       </div>

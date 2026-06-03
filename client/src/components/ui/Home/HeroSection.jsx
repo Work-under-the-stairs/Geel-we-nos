@@ -5,9 +5,7 @@ import { formatDate } from '../../../utils/dateFormatter'
 import { stripHtml } from '../../../utils/textUtils';
 import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 
-// ======= SUB-COMPONENT: Sidebar Vertical Sliding Carousel =======
 function SidebarCarousel({ sidebarArticles }) {
-  // Duplicate array to achieve a seamless, infinite vertical loop
   const doubledArticles = [...sidebarArticles, ...sidebarArticles];
   
   const [translateY, setTranslateY] = useState(0);
@@ -18,34 +16,30 @@ function SidebarCarousel({ sidebarArticles }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTransitioning(true);
-      // Slide up by exactly one card height
       setTranslateY((prev) => prev - cardHeightWithMargin);
     }, 4000);
 
     return () => clearInterval(interval);
   }, [cardHeightWithMargin]);
 
-  // Reset positioning silently when reaching the end of the original list
   const handleTransitionEnd = () => {
     const maxScroll = sidebarArticles.length * cardHeightWithMargin;
     
     if (Math.abs(translateY) >= maxScroll) {
-      setIsTransitioning(false); // Temporarily disable transition for instant reset
-      setTranslateY(0); // Jump back to the start
+      setIsTransitioning(false);
+      setTranslateY(0);
     }
   };
 
   return (
     <div className="flex flex-col gap-4 h-full">
       
-      {/* ======= Sidebar Title ======= */}
       <div className="flex items-center justify-between px-1 flex-shrink-0">
         <h3 className="text-[15px] font-black text-primary border-r-4 border-secondary pr-2 ">
           أحدث المستجدات
         </h3>
       </div>
 
-      {/* ======= Vertical Sliding Carousel Container ======= */}
       <div className="overflow-hidden relative h-[420px] w-full pt-5">
         <div 
           className={`flex flex-col ${isTransitioning ? 'transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1)' : ''}`}
@@ -62,7 +56,6 @@ function SidebarCarousel({ sidebarArticles }) {
                 to={`/news/${art._id}`}
                 className="h-[120px] mb-4 flex items-center gap-4 bg-transparent border-b border-slate-100 pb-4 last:border-0 last:mb-0 group cursor-pointer flex-shrink-0"
               >
-                {/* Enlarged Image Container */}
                 <div className="w-34 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50 shadow-sm">
                   <img
                     src={artImgUrl || FALLBACK_IMAGE}
@@ -75,7 +68,6 @@ function SidebarCarousel({ sidebarArticles }) {
                   />
                 </div>
 
-                {/* Enhanced Content area with comfortable line heights */}
                 <div className="flex flex-col gap-1 flex-1 min-w-0 py-0.5">
                   <span className="text-secondary font-black text-[11px] uppercase tracking-wider">
                     {art.category?.name || 'عام'}

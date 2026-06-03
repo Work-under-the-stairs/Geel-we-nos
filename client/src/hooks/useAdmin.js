@@ -1,9 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { adminService } from '../services/adminService'
 
-// ============================================================
-// QUERY KEYS
-// ============================================================
+
 export const ADMIN_KEYS = {
   dashboard:       ['admin', 'dashboard'],
   articlesBase:    ['admin', 'articles'], 
@@ -14,7 +12,6 @@ export const ADMIN_KEYS = {
   users:           (filters) => ['admin', 'users', filters],
 }
 
-// ============ لوحة التحكم (الرئيسية) ============
 export const useDashboardSummary = () =>
   useQuery({
     queryKey: ADMIN_KEYS.dashboard,
@@ -22,14 +19,6 @@ export const useDashboardSummary = () =>
     staleTime: 1000 * 60 * 5, 
   })
 
-// ============ إدارة المقالات (Queries & Mutations) ============
-// export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '' }) =>
-//   useQuery({
-//     queryKey: ADMIN_KEYS.articles(filters),
-//     queryFn:  () => adminService.getArticles(filters.page, filters.limit, filters.search, filters.status).then(res => res.data),
-//     placeholderData: keepPreviousData,
-//     staleTime: 1000 * 60 * 2,
-//   })
 
 export const useAdminArticle = (id) =>
   useQuery({
@@ -73,7 +62,6 @@ export const useDeleteArticle = () => {
   })
 }
 
-// ============ إدارة المستخدمين ============
 export const useAdminUsers = (filters = { page: 1, limit: 10, search: '', role: '' }) => {
   return useQuery({
     queryKey: ADMIN_KEYS.users(filters),
@@ -83,11 +71,9 @@ export const useAdminUsers = (filters = { page: 1, limit: 10, search: '', role: 
   });
 };
 
-// 👇 الهوك الجديد لتحديث المستخدم
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    // بياخد id و data في Object واحد عشان ده نظام React Query V5
     mutationFn: ({ id, data }) => adminService.updateUser(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.usersBase });
@@ -95,7 +81,6 @@ export const useUpdateUser = () => {
   });
 };
 
-// ============ إدارة الأقسام ============
 export const useCategories = () => {
   return useQuery({
     queryKey: ['admin', 'categories'],
@@ -142,14 +127,12 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: (id) => adminService.deleteUser(id),
     onSuccess: () => {
-      // بنعمل تحديث لجدول المستخدمين وللوحة التحكم عشان العداد يقل
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.usersBase });
       queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.dashboard });
     },
   });
 };
 
-// ضفناهم في الـ filters الافتراضية
 export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', status: '', category: '', sort: '-createdAt' }) =>
   useQuery({
     queryKey: ADMIN_KEYS.articles(filters),
@@ -160,7 +143,7 @@ export const useAdminArticles = (filters = { page: 1, limit: 10, search: '', sta
       filters.status, 
       filters.category, 
       filters.sort
-    ).then(res => res.data), // بنرجع الـ response كامل عشان نحتاج منه totalPages
+    ).then(res => res.data),
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 2,
   })

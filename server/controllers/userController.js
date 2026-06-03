@@ -1,9 +1,7 @@
 const User = require("../models/User");
 const News = require("../models/News");
 
-// ==========================================
-// 1. جلب كل المستخدمين (للأدمن)
-// ==========================================
+
 exports.getUsers = async (req, res) => {
   try {
     const { page = 1, limit = 20, search = "", role = "" } = req.query;
@@ -39,9 +37,6 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// ==========================================
-// 2. تسجيل مستخدم جديد من Firebase
-// ==========================================
 exports.registerDb = async (req, res) => {
   try {
     const { firebaseUid, username, email, name, avatar } = req.body;
@@ -68,9 +63,6 @@ exports.registerDb = async (req, res) => {
   }
 };
 
-// ==========================================
-// 3. إضافة مستخدم يدوياً (للأدمن)
-// ==========================================
 exports.addUser = async (req, res) => {
   try {
     const { username, password, email, name, avatar, role } = req.body;
@@ -83,12 +75,8 @@ exports.addUser = async (req, res) => {
   }
 };
 
-// ==========================================
-// 4. جلب مستخدم عن طريق Firebase UID
-// ==========================================
 exports.getUserByFirebaseUid = async (req, res) => {
   try {
-    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
     if (req.user.role !== "admin" && req.user.firebaseUid !== req.params.uid) {
       return res.status(403).json({ message: "غير مصرح لك بعرض بيانات هذا المستخدم." });
     }
@@ -105,12 +93,9 @@ exports.getUserByFirebaseUid = async (req, res) => {
   }
 };
 
-// ==========================================
-// 5. جلب مستخدم عن طريق MongoDB ID
-// ==========================================
+
 exports.getUserById = async (req, res) => {
   try {
-    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
     if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
       return res.status(403).json({ message: "غير مصرح لك بعرض بيانات هذا المستخدم." });
     }
@@ -123,12 +108,8 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// ==========================================
-// 6. تحديث بيانات المستخدم
-// ==========================================
 exports.updateUser = async (req, res) => {
   try {
-    // 🛡️ حماية 1: مسموح للأدمن أو لصاحب الحساب نفسه فقط
     if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
       return res.status(403).json({ message: "غير مصرح لك بتعديل بيانات هذا المستخدم." });
     }
@@ -138,7 +119,6 @@ exports.updateUser = async (req, res) => {
     
     allowed.forEach((f) => { 
       if (req.body[f] !== undefined) {
-        // 🛡️ حماية 2: لو اللي بيعدل مش أدمن وبيحاول يعدل الرتبة، نتجاهله
         if (f === "role" && req.user.role !== "admin") {
           return; 
         }
@@ -158,12 +138,8 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// ==========================================
-// 7. تحديث كلمة المرور
-// ==========================================
 exports.updatePassword = async (req, res) => {
   try {
-    // 🛡️ حماية: مسموح للأدمن أو لصاحب الحساب نفسه فقط
     if (req.user.role !== "admin" && req.user._id.toString() !== req.params.id) {
       return res.status(403).json({ message: "غير مصرح لك بتعديل كلمة مرور هذا المستخدم." });
     }
@@ -183,31 +159,25 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// ==========================================
-// 8. حذف مستخدم (للأدمن)
-// ==========================================
-const admin = require("firebase-admin"); // تأكدي من استيراد الـ admin SDK
+
+const admin = require("firebase-admin"); 
 
 exports.deleteUser = async (req, res) => {
   try {
-    // 1. البحث عن المستخدم في قاعدة البيانات أولاً
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
 
-    // 2. حذف المستخدم من Firebase Authentication
     if (user.firebaseUid) {
       try {
         await admin.auth().deleteUser(user.firebaseUid);
         console.log(`✅ تم حذف المستخدم ${user.firebaseUid} من Firebase`);
       } catch (firebaseErr) {
-        // إذا كان المستخدم غير موجود في Firebase، لا نوقف العملية، نكمل حذف من المونجو
         console.warn("⚠️ تحذير: المستخدم غير موجود في Firebase:", firebaseErr.message);
       }
     }
 
-    // 3. حذف المستخدم من MongoDB
     await User.findByIdAndDelete(req.params.id);
 
     res.json({ message: "تم حذف المستخدم من النظام بالكامل بنجاح" });
@@ -216,16 +186,12 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// ==========================================
-// 9. ملخص لوحة التحكم (للأدمن)
-// ==========================================
 exports.getDashboardSummary = async (req, res) => {
   try {
     const [totalNews, totalUsers, recentNews, topViewedNews] = await Promise.all([
       News.countDocuments(),
       User.countDocuments(),
       
-      // جلب أحدث 5 أخبار مع اسم القسم والحالة (status)
       News.find()
         .sort("-createdAt")
         .limit(5)
@@ -233,19 +199,16 @@ exports.getDashboardSummary = async (req, res) => {
         .populate("writer", "name")
         .select("title images category views createdAt status writer"),
         
-      // جلب أكثر 5 أخبار مشاهدة
       News.find()
         .sort("-views")
         .limit(5)
         .select("title images views ")
     ]);
 
-    // حساب المقالات اللي اتضافت النهاردة
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayNews = await News.countDocuments({ createdAt: { $gte: today } });
 
-    // حساب إجمالي المشاهدات لكل الأخبار
     const totalViewsResult = await News.aggregate([
       { $group: { _id: null, totalViews: { $sum: "$views" } } }
     ]);
@@ -270,7 +233,6 @@ exports.getDashboardSummary = async (req, res) => {
       { $sort: { count: -1 } } 
     ]);
 
-    // تظبيط الألوان والنسبة المئوية للفرونت اند
     const colors = ["bg-[#FF6347]", "bg-[#2E8B57]", "bg-[#4682B4]", "bg-[#DAA520]", "bg-[#BA55D3]", "bg-[#A9A9A9]"];
     const categoryDistribution = categoryStats.map((item, index) => ({
       name: item._id || "غير مصنف",

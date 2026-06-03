@@ -5,7 +5,6 @@ import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function ArticleGridCard({ article }) {
   if (!article) return null;
 
-  // ✅ استخراج ذكي وآمن لرابط الصورة
   const artImg = article.images?.[0] || FALLBACK_IMAGE;
   const artImgUrl = typeof artImg === 'object' ? artImg?.url : artImg;
 

@@ -1,10 +1,10 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
-import { auth } from "../firebase"; // استيراد إعدادات فايربيس التي أنشأناها
+import { auth } from "../firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
-import { Mail, Lock, UserPlus, Loader2, User, AtSign } from "lucide-react"; // أيقونات التصميم الجديد
+import { Mail, Lock, UserPlus, Loader2, User, AtSign } from "lucide-react";
 import api from "../services/api";
 
 export default function Register() {
@@ -22,7 +22,6 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    // --- 1. التحقق في الفرونت إند (Frontend Validation) ---
     if (formData.password.length < 6) {
       setError("كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.");
       return toast.error("كلمة المرور قصيرة جداً.");
@@ -36,27 +35,24 @@ export default function Register() {
     let firebaseUser = null;
 
     try {
-      // 2. إنشاء الحساب في Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
-        formData.email.toLowerCase().trim(), // توحيد الإيميل
+        formData.email.toLowerCase().trim(), 
         formData.password
       );
       firebaseUser = userCredential.user;
 
-      // 3. محاولة الحفظ في MongoDB
       try {
         await api.post("/users/register-db", {
           firebaseUid: firebaseUser.uid,
           name: formData.name,
           username: formData.username.toLowerCase().trim(),
-          email: formData.email.toLowerCase().trim(), // توحيد الإيميل
+          email: formData.email.toLowerCase().trim(),
         });
         
         toast.success("تم إنشاء الحساب بنجاح! 🎉");
         navigate("/login");
       } catch (dbError) {
-        // --- 4. حماية عملية الحذف (Safe Rollback) ---
         console.error("MongoDB Save Failed, Rolling back Firebase user...");
         try {
           if (firebaseUser) {
@@ -65,7 +61,7 @@ export default function Register() {
         } catch (rollbackError) {
           console.error("Critical: Failed to delete Firebase user after DB failure", rollbackError);
         }
-        throw dbError; // إعادة رمي الخطأ للـ catch الكبيرة عشان المستخدم يشوف رسالة الخطأ
+        throw dbError;
       }
 
     } catch (err) {
@@ -77,7 +73,7 @@ export default function Register() {
       } else if (err.code === "auth/email-already-in-use") {
         setError("البريد الإلكتروني مستخدم بالفعل.");
         toast.error("البريد الإلكتروني مستخدم بالفعل.");
-      } else if (err.code === "auth/invalid-email") { // إضافة إيرور الإيميل غير الصالح
+      } else if (err.code === "auth/invalid-email") {
         setError("صيغة البريد الإلكتروني غير صحيحة.");
         toast.error("صيغة البريد الإلكتروني غير صحيحة.");
       } else {
@@ -92,21 +88,17 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 py-10 font-['Cairo']" dir="rtl">
       
-      {/* ======= الخلفية الإبداعية (متطابقة مع اللوجين) ======= */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       
       <div className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-[var(--color-primary)] opacity-[0.15] blur-[120px] rounded-full pointer-events-none animate-pulse duration-1000"></div>
       <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-[var(--color-secondary)] opacity-[0.15] blur-[100px] rounded-full pointer-events-none animate-pulse duration-1000 delay-500"></div>
 
-      {/* ======= كارت إنشاء الحساب ======= */}
       <div className="relative z-10 w-full max-w-md">
         <form
           onSubmit={handleSubmit}
           className="bg-white backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white flex flex-col gap-6"
         >
-          {/* الهيدر واللوجو */}
           <div className="text-center space-y-2 mb-1 flex flex-col items-center">
-            {/* اللوجو بدون أي بوردر أو شادو حسب طلبك */}
             <div className="w-40 h-20 mb-2 flex items-center justify-center">
               <img 
                 src="/images/logo.jpeg" 
@@ -119,7 +111,6 @@ export default function Register() {
             <p className="text-sm text-slate-500 font-medium">انضم إلى منصة <span className="text-[var(--color-primary)] font-bold">جيل ونص</span> التحريرية</p>
           </div>
 
-          {/* رسالة الخطأ */}
           {error && (
             <div className="bg-red-50/80 backdrop-blur-sm text-red-600 p-4 rounded-2xl text-xs font-bold border border-red-100 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse shrink-0" />
@@ -128,7 +119,6 @@ export default function Register() {
           )}
 
           <div className="space-y-4">
-            {/* حقل الاسم الكامل */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-700 mr-2">الاسم الكامل</label>
               <div className="relative group">
@@ -145,7 +135,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* حقل اسم المستخدم */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-700 mr-2">اسم المستخدم (English)</label>
               <div className="relative group">
@@ -163,7 +152,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* حقل الإيميل */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-700 mr-2">البريد الإلكتروني</label>
               <div className="relative group">
@@ -181,7 +169,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* حقل الباسورد */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-700 mr-2">كلمة المرور</label>
               <div className="relative group">
@@ -200,13 +187,11 @@ export default function Register() {
             </div>
           </div>
 
-          {/* زر إنشاء الحساب */}
           <button
             type="submit"
             disabled={loading}
             className="group relative w-full flex justify-center items-center gap-2 bg-[var(--color-primary)] text-white py-4 rounded-2xl font-bold text-sm hover:bg-[var(--color-primary)]/90 hover:shadow-lg hover:shadow-[var(--color-primary)]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none mt-2 overflow-hidden"
           >
-            {/* تأثير إضاءة خفيف يمر على الزر */}
             <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
             
             {loading ? (
@@ -222,7 +207,6 @@ export default function Register() {
             )}
           </button>
 
-          {/* رابط تسجيل الدخول */}
           <p className="text-xs text-center text-slate-500 font-medium mt-1">
             لديك حساب بالفعل؟{" "}
             <Link to="/login" className="text-[var(--color-primary)] font-bold hover:text-[var(--color-secondary)] transition-colors inline-flex items-center gap-1 underline decoration-2 underline-offset-4">

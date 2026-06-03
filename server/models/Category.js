@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: [true, "Category icon name is required"],
       trim: true,
-      default: "Newspaper", // أيقونة افتراضية في حال مالم يتم تحديد واحدة
+      default: "Newspaper",
     },
   },
   {

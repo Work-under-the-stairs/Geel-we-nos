@@ -32,14 +32,13 @@ body {
     direction: rtl;
 }
 
-/* إخفاء السكرول بار مع الحفاظ على التمرير */
 @layer utilities {
   .scrollbar-none::-webkit-scrollbar {
-    display: none; /* لمتصفحات Chrome, Safari, Opera */
+    display: none;
   }
   .scrollbar-none {
-    -ms-overflow-style: none;  /* لمتصفح IE و Edge القديم */
-    scrollbar-width: none;  /* لمتصفح Firefox */
+    -ms-overflow-style: none; 
+    scrollbar-width: none;
   }
 }
 
@@ -52,13 +51,12 @@ body {
   }
 }
 
-/* في ملف index.css أو أي ملف تنسيق عام */
 .article-content img {
-  max-width: 100%;       /* الصور لا تخرج عن حدود العرض */
-  height: auto;          /* الحفاظ على أبعاد الصورة */
-  border-radius: 16px;   /* إضافة زوايا دائرية للصور */
-  margin: 20px 0;        /* مسافات حول الصور */
-  display: block;        /* جعل الصورة بلوك لمنع تداخل النصوص */
+  max-width: 100%;       
+  height: auto;         
+  border-radius: 16px;   
+  margin: 20px 0;
+  display: block;
 }
 
 .article-content p {
@@ -69,10 +67,8 @@ img:not([src]),
 img[src=""],
 img[src="undefined"],
 img[src="null"] {
-  /* أيقونة الصورة البديلة */
   content: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E");
   
-  /* التنسيقات الإجبارية (!important) عشان نلغي تأثير كلاسات Tailwind زي object-cover */
   background-color: #f1f5f9 !important;
   padding: 1.5rem !important;
   object-fit: contain !important; 

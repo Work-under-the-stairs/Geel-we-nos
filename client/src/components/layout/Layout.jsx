@@ -16,7 +16,7 @@ const Layout = () => {
             <Footer />
         </div>
     ) : (
-        <Loading height='h-screen'/> // يفضل ترك الشاشة كاملة للـ Loading
+        <Loading height='h-screen'/>
     )
 }
 

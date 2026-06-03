@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"; // استيراد موديل المصادقة بدلاً من الإحصائيات
+import { getAuth } from "firebase/auth";
 
-// إعدادات تطبيقك التي حصلتِ عليها
 const firebaseConfig = {
   apiKey: "AIzaSyBcJlpFyN49qzzbKn28gbUR0H_TKE7P1Zk",
   authDomain: "geelwnos.firebaseapp.com",
@@ -12,8 +11,6 @@ const firebaseConfig = {
   measurementId: "G-KS5607478F"
 };
 
-// تهيئة وتشغيل Firebase
 const app = initializeApp(firebaseConfig);
 
-// تصدير متغير التوثيق (auth) حتى نتمكن من استدعائه في صفحات الـ Login والـ Register
 export const auth = getAuth(app);
