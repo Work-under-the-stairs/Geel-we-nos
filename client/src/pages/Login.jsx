@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword, browserLocalPersistence, setPersistence } from "firebase/auth";
+import { signInWithEmailAndPassword, browserLocalPersistence, setPersistence,signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Mail, Lock, LogIn, Loader2 } from "lucide-react";
@@ -20,34 +20,39 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. Set persistence to local (keeps user logged in even after closing the browser tab/window)
+      // 1. إعداد الـ Persistence
       await setPersistence(auth, browserLocalPersistence);
 
-      // 2. Authenticate with Firebase
+      // 2. تسجيل الدخول
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      // 3. Get the initial ID Token
-      const idToken = await user.getIdToken();
 
-      // 4. Fetch user data from MongoDB (Interceptor will automatically attach the token now, but we pass it just in case)
+      // 3. التحقق مما إذا كان البريد مفعل
+      if (!user.emailVerified) {
+        toast.error("يرجى تفعيل بريدك الإلكتروني أولاً قبل تسجيل الدخول.");
+        setError("لم يتم تفعيل البريد الإلكتروني. يرجى مراجعة صندوق الوارد الخاص بك.");
+        
+        // تسجيل خروج المستخدم فوراً لأنه غير مفعل
+        await signOut(auth);
+        setLoading(false);
+        return; // إيقاف تنفيذ الكود
+      }
+      
+      // 4. استكمال عملية جلب البيانات إذا كان البريد مفعلاً
+      const idToken = await user.getIdToken();
       const response = await api.get(`/users/me/${user.uid}`, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
       
       if (response.data) {
         const userData = response.data;
-        
-        // 5. Store user info (and initial token as fallback) in localStorage
         localStorage.setItem("user", JSON.stringify(userData));
-        // localStorage.setItem("token", idToken); 
-        
         toast.success(`مرحباً بك مجدداً يا ${userData.name} 👋`);
-
         setTimeout(() => {
           window.location.replace("/");
         }, 500);
       }
+      
     } catch (err) {
       console.error(err);
       if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
