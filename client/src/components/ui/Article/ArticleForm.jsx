@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Loader2, Users, Trash2, Link as LinkIcon } from "lucide-react";
-
+import { Loader2, Users, Trash2, Link as LinkIcon, FolderOpen } from "lucide-react"; // ✅ أضفنا FolderOpen
+ import { useCategories, useStories } from "../../../hooks/useArticles"; // ✅ مسار واحد صحيح فقط // تأكدي من مسار الاستيراد
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import UnderlineExtension from "@tiptap/extension-underline";
@@ -13,7 +13,7 @@ import { mergeAttributes } from "@tiptap/core";
 
 import toast from "react-hot-toast";
 import { uploadToImageKit, IK_FOLDERS } from "../../../services/Useimagekit";
-import { useCategories } from "../../../hooks/useArticles";
+//import { useCategories } from "../../../hooks/useArticles";
 import { FALLBACK_IMAGE } from "../../../constants/Fall_Back_Image";
 
 import {
@@ -24,6 +24,7 @@ import {
   ImportanceSection,
   ActionButtonsSection,
 } from "./Overlay"; // تأكدي من مسار الاستيراد حسب هيكلة مشروعك
+
 
 // 🌟 امتداد مخصص للصور يدعم الكابشن
 const ImageWithCaption = Image.extend({
@@ -108,6 +109,9 @@ export default function ArticleForm({
   const { data: categories, isLoading: isCatsLoading, isError: isCatsError } = useCategories();
 
   // ── States ───────────────────────────────────────────────────
+  const [selectedStory, setSelectedStory] = useState(""); 
+// افترضي أنك تجلبين القصص من hook
+const { data: stories, isLoading: isStoriesLoading } = useStories();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [importance, setImportance] = useState(5);
@@ -228,10 +232,10 @@ export default function ArticleForm({
   // ── تهيئة البيانات (Hydration) للتعديل ───────────────────────
   useEffect(() => {
     if (!isEditMode || !initialData || !editor || isInitializedRef.current) return;
-
+    
     isInitializedRef.current = true;
     isContentHydratingRef.current = true;
-
+    setSelectedStory(initialData.crossMediaId || "");
     setTitle(initialData.title || "");
     setCategory(initialData.category?._id || initialData.category || "");
     setImportance(initialData.important_rate || 5);
@@ -326,6 +330,7 @@ export default function ArticleForm({
       youtube_videos: youtubeIdsArray,
       hashtags,
       contributors,
+      crossMediaId: selectedStory || null,
       status: targetStatus,
     };
 
@@ -710,7 +715,24 @@ export default function ArticleForm({
           </div>
 
           <ImportanceSection innerRef={importanceRef} importance={importance} setImportance={setImportance} isUrgent={isUrgent} setIsUrgent={setIsUrgent} />
-
+            <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm mt-6">
+  <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+    <FolderOpen className="text-slate-700 w-5 h-5" />
+    <h2 className="text-lg font-bold text-slate-800">الربط بقصة تفاعلية (Cross Media)</h2>
+  </div>
+  <select 
+    className="w-full p-3 rounded-xl border border-slate-200 text-sm"
+    value={selectedStory}
+    onChange={(e) => setSelectedStory(e.target.value)}
+  >
+    <option value="">بدون قصة مرتبطة</option>
+    {stories?.map((story) => (
+      <option key={story._id} value={story._id}>
+        {story.title}
+      </option>
+    ))}
+  </select>
+</div>
           <ActionButtonsSection innerRef={publishRef} handleSubmitArticle={handleSubmitArticle} handleCancel={handleCancel} />
         </div>
       </div>
