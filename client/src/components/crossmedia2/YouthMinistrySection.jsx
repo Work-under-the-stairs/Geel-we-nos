@@ -122,7 +122,7 @@ const YouthMinistrySection = () => {
 
     {/* </div> */}
       <section className="sticky top-0 h-screen w-full bg-[#111817] z-10 flex flex-col justify-center overflow-hidden pb-20">
-          <div className="absolute top-30 left-[-10%] w-[20vw] h-[20vw] bg-emerald-900/40 rounded-full blur-[120px] pointer-events-none"></div>
+          <div className="absolute top-60 left-[-10%] w-[20vw] h-[20vw] bg-emerald-900/40 rounded-full blur-[120px] pointer-events-none"></div>
         {/* <div className="absolute bottom-20 right-[-10%] w-[30vw] h-[30vw] bg-lime-900/10 rounded-full blur-[100px] pointer-events-none"></div> */}
 
         <div className="max-w-6xl mx-auto px-6 w-full relative z-10">
