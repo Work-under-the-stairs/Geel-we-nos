@@ -647,7 +647,7 @@ function HeroSection() {
           موقع توثيقي يجمع الكلمة الصادقة، الصورة الفوتوغرافية الانسيابية، والتسجيلات الحية لأطفال غزة والسودان في تجربة تفاعلية غامرة.
         </p>
       </div>
-    <div className="absolute left-0 w-full overflow-hidden leading-none z-10 rotate-180 top-[560px] md:top-[580px] lg:top-[620px]">
+    <div className="absolute left-0 w-full overflow-hidden leading-none z-10 rotate-180 top-[600px] md:top-[580px] lg:top-[620px]">
   <svg
     className="block w-full h-[150px] md:h-[100px] lg:h-[120px]"
     xmlns="http://www.w3.org/2000/svg"
