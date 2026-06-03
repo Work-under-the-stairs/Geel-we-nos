@@ -6,6 +6,8 @@ import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
 import { Mail, Lock, UserPlus, Loader2, User, AtSign } from "lucide-react";
 import api from "../services/api";
+import { sendEmailVerification } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
+    // 1. التحقق من صحة البيانات المدخلة
     if (formData.password.length < 6) {
       setError("كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.");
       return toast.error("كلمة المرور قصيرة جداً.");
@@ -35,6 +38,7 @@ export default function Register() {
     let firebaseUser = null;
 
     try {
+      // 2. إنشاء المستخدم في Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email.toLowerCase().trim(), 
@@ -42,6 +46,11 @@ export default function Register() {
       );
       firebaseUser = userCredential.user;
 
+      // 3. إرسال بريد التحقق
+      await sendEmailVerification(firebaseUser);
+      toast.success("تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب قبل تسجيل الدخول.");
+
+      // 4. حفظ البيانات في MongoDB
       try {
         await api.post("/users/register-db", {
           firebaseUid: firebaseUser.uid,
@@ -50,41 +59,39 @@ export default function Register() {
           email: formData.email.toLowerCase().trim(),
         });
         
-        toast.success("تم إنشاء الحساب بنجاح! 🎉");
+        // 5. تسجيل الخروج فوراً لمنع الدخول قبل تفعيل البريد
+        await signOut(auth);
+        
+        // 6. التوجيه لصفحة تسجيل الدخول
         navigate("/login");
       } catch (dbError) {
+        // في حال فشل الحفظ في MongoDB، نقوم بحذف المستخدم من Firebase (Rollback)
         console.error("MongoDB Save Failed, Rolling back Firebase user...");
-        try {
-          if (firebaseUser) {
-            await firebaseUser.delete(); 
-          }
-        } catch (rollbackError) {
-          console.error("Critical: Failed to delete Firebase user after DB failure", rollbackError);
-        }
+        if (firebaseUser) await firebaseUser.delete();
         throw dbError;
       }
 
     } catch (err) {
       console.error(err);
       
+      // معالجة الأخطاء
       if (err.response?.data?.message) {
         setError(err.response.data.message);
         toast.error(err.response.data.message);
       } else if (err.code === "auth/email-already-in-use") {
         setError("البريد الإلكتروني مستخدم بالفعل.");
         toast.error("البريد الإلكتروني مستخدم بالفعل.");
-      } else if (err.code === "auth/invalid-email") {
-        setError("صيغة البريد الإلكتروني غير صحيحة.");
-        toast.error("صيغة البريد الإلكتروني غير صحيحة.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError("خطأ في الاتصال بالسيرفر، يرجى التأكد من الإنترنت.");
+        toast.error("خطأ في الاتصال بالشبكة.");
       } else {
-        setError("حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة لاحقاً.");
+        setError("حدث خطأ أثناء إنشاء الحساب.");
         toast.error("حدث خطأ أثناء إنشاء الحساب.");
       }
     } finally {
       setLoading(false);
     }
   };
-  
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 py-10 font-['Cairo']" dir="rtl">
       
