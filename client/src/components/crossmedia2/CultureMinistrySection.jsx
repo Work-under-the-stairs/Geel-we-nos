@@ -58,170 +58,174 @@ const CultureMinistrySection = () => {
   ];
 
   return (
-    <div className="relative z-20 w-full font-sans bg-[#1e1e24] text-slate-200 overflow-hidden" dir="rtl">
-      <PlayfulBackground />
+    <div className="relative z-40 w-full font-sans text-slate-200" dir="rtl">
+      
+      <div className="relative z-20 w-full bg-[#1e1e24] overflow-hidden pb-16">
+        <PlayfulBackground />
 
-      <div className="absolute left-0 right-0 top-[-6vw] w-full z-30 pointer-events-none drop-shadow-sm translate-y-[2px]">
-        <svg viewBox="0 0 1440 120" className="w-full h-auto fill-current text-[#1e1e24] block" preserveAspectRatio="none">
-          <path d="M0,120 C320,0 1120,0 1440,120 L1440,120 L0,120 Z"></path>
-        </svg>
-      </div>
-
-      <section className="relative flex flex-col justify-center py-24 px-6 max-w-6xl mx-auto z-10 mt-10">
-        <FadeUpScroll>
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <span className="text-pink-400 font-bold text-sm md:text-base tracking-widest uppercase bg-[#2b2b36] px-6 py-2 rounded-full border border-pink-500/20">
-              وزارة الثقافة والمركز القومي
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight text-center">
-            رئيس المركز القومي لثقافة الطفل: <br/>
-            <span className="text-pink-400 mt-3 block">
-              نسعى للتحول الرقمي لمواكبة الجيل الجديد
-            </span>
-          </h2>
-        </FadeUpScroll>
-
-        <FadeUpScroll delay={0.2}>
-          <p className="text-lg md:text-xl font-light leading-relaxed text-slate-300 mb-20 text-center max-w-4xl mx-auto">
-            يقول محمد حافظ ناصف، رئيس "المركز القومي لثقافة الطفل" التابع لوزارة الثقافة: "إن المركز يحرص على تقديم خدماته بشكل يتناسب مع تطورات العصر وثقافة الأجيال الجديدة، إذ لم يعد يقدم المحتوى بالشكل التقليدي، بل يسعى إلى التحول الرقمي".
-          </p>
-        </FadeUpScroll>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {digitalPlatforms.map((platform, idx) => (
-            <FadeUpScroll delay={idx * 0.2} key={idx}>
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className={`p-8 rounded-[2rem] border transition-all duration-300 ${platform.theme} flex flex-col items-center text-center`}
-              >
-                <div className="w-16 h-16 rounded-full bg-[#1e1e24] flex items-center justify-center mb-6 shadow-sm">
-                  <platform.icon size={28} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-3">{platform.title}</h3>
-                <p className="text-base text-slate-300 font-light leading-relaxed">{platform.desc}</p>
-              </motion.div>
-            </FadeUpScroll>
-          ))}
+        <div className="absolute left-0 right-0 top-[-18vw] md:top-[-16vw] w-full z-30 pointer-events-none drop-shadow-2xl translate-y-[2px]">
+          <svg viewBox="0 0 1440 320" className="w-full h-auto fill-current text-[#1e1e24] block" preserveAspectRatio="none">
+            <path fillOpacity="0.4" d="M0,160L48,170.7C96,181,192,203,288,186.7C384,171,480,117,576,96C672,75,768,85,864,112C960,139,1056,181,1152,181.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            <path d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,218.7C672,213,768,139,864,128C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
         </div>
-      </section>
 
-      <section className="relative w-full py-32 mt-16 group overflow-hidden bg-[#18181b]">
-        <img 
-          src="/assets/crossmedia2/zewi-hemam.jpg" 
-          alt="فريق ذوي الهمم" 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-50 mix-blend-luminosity"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1e1e24] via-[#1e1e24]/80 to-transparent"></div>
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="w-full lg:w-3/5">
-            <FadeUpScroll>
-              <div className="inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-5 py-2 rounded-full mb-8">
-                <Heart className="w-5 h-5 text-amber-400" />
-                <span className="text-amber-400 font-bold tracking-wide">طاقات منتجة</span>
-              </div>
-              <h3 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
-                الاهتمام <span className="text-amber-400">بذوي الهمم</span>
-              </h3>
-            </FadeUpScroll>
-
-            <FadeUpScroll delay={0.2}>
-              <p className="text-xl font-light leading-relaxed text-slate-200 mb-8">
-                ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
-              </p>
-            </FadeUpScroll>
-
-            <FadeUpScroll delay={0.3}>
-              <div className="bg-[#2b2b36]/80 backdrop-blur-sm border-r-4 border-amber-400 p-6 rounded-l-2xl mb-8 shadow-sm">
-                <p className="text-lg md:text-xl font-medium leading-relaxed text-white">
-                  هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
-                </p>
-              </div>
-            </FadeUpScroll>
-
-            <FadeUpScroll delay={0.4}>
-              <p className="text-lg text-slate-300 font-light leading-relaxed">
-                وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
-              </p>
-            </FadeUpScroll>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative flex flex-col justify-center py-32 px-6 max-w-6xl mx-auto z-10">
-        
-        <FadeUpScroll>
-          <div className="text-center mb-20">
-            <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              مبادرتانِ بالتعاون مع وزارتي <br className="md:hidden" /> الشباب والتعليم
-            </h3>
-            <div className="w-24 h-1 bg-pink-400 mx-auto rounded-full"></div>
-          </div>
-        </FadeUpScroll>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
-          
-          <FadeUpScroll delay={0.2}>
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="relative h-full min-h-[400px] rounded-[2.5rem] overflow-hidden group border border-[#3f3f46]"
-            >
-              <img 
-                src="/assets/crossmedia2/eyalna.jpg" 
-                alt="مبادرة عيالنا" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1e1e24] via-[#1e1e24]/60 to-transparent"></div>
-              
-              <div className="relative z-10 flex flex-col justify-end h-full p-10">
-                <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-6 border border-white/20">
-                  <Star className="w-8 h-8 text-white fill-white" />
-                </div>
-                <h4 className="text-4xl font-bold text-white mb-4">مبادرة "عيالنا"</h4>
-                <p className="text-slate-200 leading-relaxed font-light text-xl">
-                  تُقدم بالتعاون مع وزارة الشباب والرياضة، لتنظيم رحلات الأطفال في المحافظات المختلفة لتعزيز الانتماء.
-                </p>
-              </div>
-            </motion.div>
+        <section className="relative flex flex-col justify-center py-24 px-6 max-w-6xl mx-auto z-10 mt-10">
+          <FadeUpScroll>
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <span className="text-pink-400 font-bold text-sm md:text-base tracking-widest uppercase bg-[#2b2b36] px-6 py-2 rounded-full border border-pink-500/20">
+                وزارة الثقافة والمركز القومي
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight text-center">
+              رئيس المركز القومي لثقافة الطفل: <br/>
+              <span className="text-pink-400 mt-3 block">
+                نسعى للتحول الرقمي لمواكبة الجيل الجديد
+              </span>
+            </h2>
           </FadeUpScroll>
 
-          <FadeUpScroll delay={0.4}>
-            <div className="h-full bg-[#2b2b36] border border-[#3f3f46] rounded-[2.5rem] p-10 flex flex-col justify-center">
-              <div className="flex items-center gap-4 mb-10">
-                <div className="p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20">
-                  <Star className="w-8 h-8 text-purple-400 fill-purple-400/20" />
-                </div>
-                <div>
-                  <h4 className="text-2xl md:text-3xl font-bold text-white mb-1">مبادرة "اكتشاف الموهوبين"</h4>
-                  <span className="text-purple-400 text-sm">بالتعاون مع وزارة التربية والتعليم</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                {talentStages.map((stage, idx) => (
-                  <motion.div 
-                    whileHover={{ scale: 1.03 }}
-                    key={idx} 
-                    className={`${stage.bg} ${stage.border} border p-4 rounded-2xl flex flex-col items-center text-center`}
-                  >
-                    <stage.icon className={`w-8 h-8 ${stage.color} mb-3`} strokeWidth={1.5} />
-                    <span className={`text-xs font-bold ${stage.color} mb-1`}>المرحلة {idx + 1}</span>
-                    <h5 className="text-white font-medium text-sm">{stage.title}</h5>
-                  </motion.div>
-                ))}
-              </div>
+          <FadeUpScroll delay={0.2}>
+            <p className="text-lg md:text-xl font-light leading-relaxed text-slate-300 mb-20 text-center max-w-4xl mx-auto">
+              يقول محمد حافظ ناصف، رئيس "المركز القومي لثقافة الطفل" التابع لوزارة الثقافة: "إن المركز يحرص على تقديم خدماته بشكل يتناسب مع تطورات العصر وثقافة الأجيال الجديدة، إذ لم يعد يقدم المحتوى بالشكل التقليدي، بل يسعى إلى التحول الرقمي".
+            </p>
+          </FadeUpScroll>
 
-              <p className="text-slate-300 leading-relaxed font-light text-base bg-[#1e1e24] p-5 rounded-2xl border border-[#3f3f46]">
-                تنفذ المبادرة مسابقات عدة للاستعانة بالموهوبين في الفرق الفنية والأدبية، والمشاركة في العروض والمهرجانات لعرض مشاريعهم.
-              </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {digitalPlatforms.map((platform, idx) => (
+              <FadeUpScroll delay={idx * 0.2} key={idx}>
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className={`p-8 rounded-[2rem] border transition-all duration-300 ${platform.theme} flex flex-col items-center text-center`}
+                >
+                  <div className="w-16 h-16 rounded-full bg-[#1e1e24] flex items-center justify-center mb-6 shadow-sm">
+                    <platform.icon size={28} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">{platform.title}</h3>
+                  <p className="text-base text-slate-300 font-light leading-relaxed">{platform.desc}</p>
+                </motion.div>
+              </FadeUpScroll>
+            ))}
+          </div>
+        </section>
+
+        <section className="relative w-full py-32 mt-16 group overflow-hidden bg-[#18181b]">
+          <img 
+            src="/assets/crossmedia2/zewi-hemam.jpg" 
+            alt="فريق ذوي الهمم" 
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 mix-blend-luminosity"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent"></div>
+
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
+            <div className="w-full lg:w-3/5">
+              <FadeUpScroll>
+                <div className="inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-5 py-2 rounded-full mb-8">
+                  <Heart className="w-5 h-5 text-amber-400" />
+                  <span className="text-amber-400 font-bold tracking-wide">طاقات منتجة</span>
+                </div>
+                <h3 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                  الاهتمام <span className="text-amber-400">بذوي الهمم</span>
+                </h3>
+              </FadeUpScroll>
+
+              <FadeUpScroll delay={0.2}>
+                <p className="text-xl font-light leading-relaxed text-slate-200 mb-8">
+                  ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
+                </p>
+              </FadeUpScroll>
+
+              <FadeUpScroll delay={0.3}>
+                <div className="bg-[#2b2b36]/80 backdrop-blur-sm border-r-4 border-amber-400 p-6 rounded-l-2xl mb-8 shadow-sm">
+                  <p className="text-lg md:text-xl font-medium leading-relaxed text-white">
+                    هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
+                  </p>
+                </div>
+              </FadeUpScroll>
+
+              <FadeUpScroll delay={0.4}>
+                <p className="text-lg text-slate-300 font-light leading-relaxed">
+                  وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
+                </p>
+              </FadeUpScroll>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative flex flex-col justify-center py-32 px-6 max-w-6xl mx-auto z-10">
+          
+          <FadeUpScroll>
+            <div className="text-center mb-20">
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                مبادرتانِ بالتعاون مع وزارتي <br className="md:hidden" /> الشباب والتعليم
+              </h3>
+              <div className="w-24 h-1 bg-pink-400 mx-auto rounded-full"></div>
             </div>
           </FadeUpScroll>
 
-        </div>
-      </section>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+            
+            <FadeUpScroll delay={0.2}>
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="relative h-full min-h-[400px] rounded-[2.5rem] overflow-hidden group border border-[#3f3f46]"
+              >
+                <img 
+                  src="/assets/crossmedia2/eyalna.jpg" 
+                  alt="مبادرة عيالنا" 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1e1e24] via-[#1e1e24]/60 to-transparent"></div>
+                
+                <div className="relative z-10 flex flex-col justify-end h-full p-10">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-6 border border-white/20">
+                    <Star className="w-8 h-8 text-white fill-white" />
+                  </div>
+                  <h4 className="text-4xl font-bold text-white mb-4">مبادرة "عيالنا"</h4>
+                  <p className="text-slate-200 leading-relaxed font-light text-xl">
+                    تُقدم بالتعاون مع وزارة الشباب والرياضة، لتنظيم رحلات الأطفال في المحافظات المختلفة لتعزيز الانتماء.
+                  </p>
+                </div>
+              </motion.div>
+            </FadeUpScroll>
 
-      <section className="relative w-full py-32 mt-10 bg-[#18181b] overflow-hidden">
+            <FadeUpScroll delay={0.4}>
+              <div className="h-full bg-[#2b2b36] border border-[#3f3f46] rounded-[2.5rem] p-10 flex flex-col justify-center">
+                <div className="flex items-center gap-4 mb-10">
+                  <div className="p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20">
+                    <Star className="w-8 h-8 text-purple-400 fill-purple-400/20" />
+                  </div>
+                  <div>
+                    <h4 className="text-2xl md:text-3xl font-bold text-white mb-1">مبادرة "اكتشاف الموهوبين"</h4>
+                    <span className="text-purple-400 text-sm">بالتعاون مع وزارة التربية والتعليم</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {talentStages.map((stage, idx) => (
+                    <motion.div 
+                      whileHover={{ scale: 1.03 }}
+                      key={idx} 
+                      className={`${stage.bg} ${stage.border} border p-4 rounded-2xl flex flex-col items-center text-center`}
+                    >
+                      <stage.icon className={`w-8 h-8 ${stage.color} mb-3`} strokeWidth={1.5} />
+                      <span className={`text-xs font-bold ${stage.color} mb-1`}>المرحلة {idx + 1}</span>
+                      <h5 className="text-white font-medium text-sm">{stage.title}</h5>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <p className="text-slate-300 leading-relaxed font-light text-base bg-[#1e1e24] p-5 rounded-2xl border border-[#3f3f46]">
+                  تنفذ المبادرة مسابقات عدة للاستعانة بالموهوبين في الفرق الفنية والأدبية، والمشاركة في العروض والمهرجانات لعرض مشاريعهم.
+                </p>
+              </div>
+            </FadeUpScroll>
+
+          </div>
+        </section>
+      </div>
+
+      <section className="sticky top-0 h-screen w-full bg-[#18181b] z-10 flex flex-col justify-center overflow-hidden border-t border-[#3f3f46]">
         <div className="absolute left-0 right-0 top-0 w-full h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"></div>
         
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">

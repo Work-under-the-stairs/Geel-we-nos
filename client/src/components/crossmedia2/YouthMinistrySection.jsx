@@ -16,14 +16,16 @@ const FadeUpScroll = ({ children, delay = 0 }) => {
 
 const YouthMinistrySection = () => {
   return (
-    <div className="relative w-full bg-gray-900" dir="rtl">
+    <>
+    {/* <div className="relative w-full bg-gray-900" dir="rtl"> */}
       
+      {/* ================= 1. القسم الأول: ثابت (الأسرة والخلفية) ================= */}
       <section className="sticky top-0 h-screen w-full overflow-hidden z-0">
         <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-[position:left_center] md:bg-center opacity-40"
+          className="absolute inset-0 w-full h-full bg-cover bg-[position:left_center] md:bg-center opacity-80"
           style={{ backgroundImage: "url('/assets/crossmedia2/family.png')" }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-l from-gray-900 via-gray-900/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-l from-gray-900/80 via-gray-900/60 to-transparent"></div>
 
         <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center">
           <div className="w-full lg:w-1/2">
@@ -59,8 +61,10 @@ const YouthMinistrySection = () => {
         </div>
       </section>
 
-      <div className="sticky top-0 z-10 w-full ">
+      {/* ================= 2. القسم الثاني: متحرك بحرية (الكروت) ================= */}
+      <div className="relative z-10 w-full">
         
+        {/* التعرجات العلوية */}
         <div className="absolute left-0 right-0 top-[-18vw] md:top-[-16vw] w-full z-20 pointer-events-none drop-shadow-2xl translate-y-[2px]">
           <svg viewBox="0 0 1440 320" className="w-full h-auto fill-current text-[#111817] block" preserveAspectRatio="none">
             <path fillOpacity="0.4" d="M0,160L48,170.7C96,181,192,203,288,186.7C384,171,480,117,576,96C672,75,768,85,864,112C960,139,1056,181,1152,181.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -68,12 +72,10 @@ const YouthMinistrySection = () => {
           </svg>
         </div>
 
-        <div className="bg-[#111817] relative z-30 pt-10 md:pt-20 pb-32 overflow-hidden">
-          
+        <div className="bg-[#111817] relative z-20 pt-10 md:pt-20 pb-20 overflow-hidden">
           <div className="absolute top-40 left-[-10%] w-[40vw] h-[40vw] bg-emerald-900/20 rounded-full blur-[120px] pointer-events-none"></div>
-          <div className="absolute bottom-20 right-[-10%] w-[30vw] h-[30vw] bg-lime-900/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-          <div className="max-w-5xl mx-auto px-6 mb-32 relative z-10">
+          <div className="max-w-5xl mx-auto px-6 relative z-10">
             <FadeUpScroll>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-8">
                 الوزارة والأسرة المصرية
@@ -112,48 +114,55 @@ const YouthMinistrySection = () => {
               </FadeUpScroll>
             </div>
           </div>
-
-          <div className=" max-w-6xl mx-auto px-6 mt-32 md:mt-40 relative z-10">
-            <FadeUpScroll>
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 border-r-4 border-emerald-500 pr-4">
-                معايير قياس النجاح
-              </h3>
-              <p className="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-16 md:mb-24 max-w-3xl">
-                وتملك وزارة الشباب والرياضة وسائل محددة لقياس مدى نجاح مبادرات وبرامج الأسرة، غير أن بعض المبادرات لا يمكن قياس نجاحها إلا بملاحظة السلوك المجتمعي.
-              </p>
-            </FadeUpScroll>
-
-            <FadeUpScroll delay={0.2}>
-              <div className="relative flex flex-row items-end bg-gradient-to-r from-[#151c18] to-[#111814] px-4 md:px-8 pt-8 md:pt-12 pb-0 rounded-2xl md:rounded-3xl border border-emerald-900/40 shadow-2xl mt-12 md:mt-24">
-                
-                <div className="relative flex-1 pb-4 md:pb-8 pl-2 md:pl-10">
-                  <svg className="absolute -top-4 md:-top-10 -right-2 md:-right-4 w-8 h-8 md:w-20 md:h-20 text-emerald-500/10 transform rotate-180" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                  </svg>
-                  <blockquote className="relative z-10 text-sm md:text-3xl text-white font-medium leading-relaxed md:leading-relaxed italic">
-                    "إن المسؤولية موزعة بين الوزارات المعنية لتقييم أثر المبادرات على سلوك الأسرة والنشء داخل المجتمع."
-                  </blockquote>
-                  <p className="mt-4 md:mt-8 text-emerald-400 font-bold text-xs md:text-xl">
-                    — مصطفى عز العرب
-                    <span className="block text-[10px] md:text-base text-gray-400 font-light mt-1 md:mt-2">معاون الوزير لشؤون التنمية الثقافية والمجتمعية</span>
-                  </p>
-                </div>
-
-                <div className="w-50 md:w-[350px] lg:w-[400px] shrink-0 self-end -left-10 -mr-20 -mt-5 md:-mt-300 relative z-20 flex justify-center ">
-                  <img 
-                    src="/assets/crossmedia2/ezz-elarab.png" 
-                    alt="مصطفى عز العرب" 
-                    className="w-full h-auto max-h-[160px] md:max-h-[400px] object-contain object-bottom drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] md:drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)] filter contrast-125"
-                  />
-                </div>
-
-              </div>
-            </FadeUpScroll>
-          </div>
-
         </div>
       </div>
-    </div>
+
+      {/* ================= 3. القسم الأخير: ثابت (صورة عز العرب) ================= */}
+      {/* هنا السر! القسم ده بياخد h-screen وبيبقى sticky فبيثبت على الشاشة ويسمح للقسم اللي بعده يغطيه */}
+
+    {/* </div> */}
+      <section className="sticky top-0 h-screen w-full bg-[#111817] z-10 flex flex-col justify-center overflow-hidden pb-20">
+        <div className="absolute bottom-20 right-[-10%] w-[30vw] h-[30vw] bg-lime-900/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="max-w-6xl mx-auto px-6 w-full relative z-10">
+          <FadeUpScroll>
+            <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 border-r-4 border-emerald-500 pr-4">
+              معايير قياس النجاح
+            </h3>
+            <p className="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-16 md:mb-24 max-w-3xl">
+              وتملك وزارة الشباب والرياضة وسائل محددة لقياس مدى نجاح مبادرات وبرامج الأسرة، غير أن بعض المبادرات لا يمكن قياس نجاحها إلا بملاحظة السلوك المجتمعي.
+            </p>
+          </FadeUpScroll>
+
+          <FadeUpScroll delay={0.2}>
+            <div className="relative flex flex-row items-end bg-gradient-to-r from-[#151c18] to-[#111814] px-4 md:px-8 pt-8 md:pt-12 pb-0 rounded-2xl md:rounded-3xl border border-emerald-900/40 shadow-2xl mt-12 md:mt-24">
+              
+              <div className="relative flex-1 pb-4 md:pb-8 pl-2 md:pl-10">
+                <svg className="absolute -top-4 md:-top-10 -right-2 md:-right-4 w-8 h-8 md:w-20 md:h-20 text-emerald-500/10 transform rotate-180" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+                <blockquote className="relative z-10 text-sm md:text-3xl text-white font-medium leading-relaxed md:leading-relaxed italic">
+                  "إن المسؤولية موزعة بين الوزارات المعنية لتقييم أثر المبادرات على سلوك الأسرة والنشء داخل المجتمع."
+                </blockquote>
+                <p className="mt-4 md:mt-8 text-emerald-400 font-bold text-xs md:text-xl">
+                  — مصطفى عز العرب
+                  <span className="block text-[10px] md:text-base text-gray-400 font-light mt-1 md:mt-2">معاون الوزير لشؤون التنمية الثقافية والمجتمعية</span>
+                </p>
+              </div>
+
+              <div className="w-50 md:w-[350px] lg:w-[400px] shrink-0 self-end -left-10 -mr-20 -mt-5 md:-mt-300 relative z-20 flex justify-center ">
+                <img 
+                  src="/assets/crossmedia2/ezz-elarab.png" 
+                  alt="مصطفى عز العرب" 
+                  className="w-full h-auto max-h-[160px] md:max-h-[400px] object-contain object-bottom drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] md:drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)] filter contrast-125"
+                />
+              </div>
+
+            </div>
+          </FadeUpScroll>
+        </div>
+      </section>
+      </>
   );
 };
 
