@@ -161,14 +161,3 @@ export const useAddReply = (articleId, commentId) => {
     },
   })
 }
-// ... (تأكدي من إضافة export قبل الكلمة)
-export const useStories = () => {
-  return useQuery({
-    queryKey: ['stories'],
-    queryFn: async () => {
-      // تأكدي من مسار الـ API الصحيح لقصصك
-      const { data } = await axios.get('/api/stories'); 
-      return data;
-    },
-  });
-};

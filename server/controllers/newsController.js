@@ -263,7 +263,10 @@ exports.createNews = async (req, res, next) => {
       content: req.body.content,
       writer: req.user._id,
       category: req.body.category,
-      crossMediaId: req.body.crossMediaId ? Number(req.body.crossMediaId) : null,
+      crossMediaId: (() => {
+  const parsed = Number(req.body.crossMediaId);
+  return req.body.crossMediaId && !isNaN(parsed) ? parsed : null;
+})(),
       important_rate: req.body.important_rate,
       isUrgent: req.body.isUrgent || false,
       images: imageUrls,

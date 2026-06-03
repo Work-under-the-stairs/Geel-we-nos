@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
 
 // ─── INLINE STYLES (keyframes + global) ──────────────────────────────────────
 const globalStyles = `
@@ -552,33 +551,9 @@ const stories = [
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function CrossMediaPage() {
-<<<<<<< HEAD
-  const [searchParams] = useSearchParams();
-  const storyId = searchParams.get('storyId');
-=======
-const [searchParams] = useSearchParams();
-const storyIdFromUrl = searchParams.get("storyId");
-
-useEffect(() => {
-  if (storyIdFromUrl) {
-    const story = stories.find(s => s.id == storyIdFromUrl);
-    if (story) {
-      setSelectedStory(story);
-    }
-  }
-}, [storyIdFromUrl]);
   const [selectedStory, setSelectedStory] = useState(null);
->>>>>>> 98245ff957521db7409c892e47ee91d5aae8f395
   const [filter, setFilter] = useState("all");
   const RED = "#dc2626";
-
-  useEffect(() => {
-    const id = searchParams.get("storyId");
-    if (id) {
-      const s = stories.find(x => x.id == id);
-      if (s) setSelectedStory(s);
-    }
-  }, [searchParams]);
 
   const filtered = filter === "all" ? stories : stories.filter(s => s.location === filter);
 

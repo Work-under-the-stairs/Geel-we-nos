@@ -54,8 +54,9 @@ const newsSchema = new mongoose.Schema(
       ref: "Category",
       required: [true, "Category is required"],
     },
+     
     crossMediaId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number, default: null,
       ref: 'Story',
       required: false, // ليس إجبارياً، فقط للمقالات التي لها قصص
     },
