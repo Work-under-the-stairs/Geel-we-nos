@@ -14,6 +14,7 @@ import AddArticle from './pages/AddArticle'
 import { isAuthenticated,isAdmin } from './utils/auth';
 import EditArticle from './pages/EditArticle'
 import ScrollToTop from './ScrollToTop'
+import CrossMediaArticle2 from './pages/CrossMediaArticle2'
 
 const App = () => {
   
@@ -38,7 +39,11 @@ const App = () => {
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />
         <Route path="/edit/article/:id" element={isAdmin() ? <EditArticle/> : <Navigate to="/" replace />} />
+        
         <Route path="/cross-media" element={<CrossMediaPage/>} />
+
+        <Route path="/cross-media-initiatives" element={<CrossMediaArticle2/>} />
+
         <Route path="/cross-media-gaza" element={<CrossMediaPageGaza/>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
