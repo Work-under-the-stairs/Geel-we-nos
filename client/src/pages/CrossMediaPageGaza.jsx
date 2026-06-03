@@ -615,57 +615,79 @@ function StickyShowcaseSection({ story, index }) {
   );
 }
 
-// ─── HERO SECTION ────────────────────────────────────────────
 function HeroSection() {
   const heroRef = useRef(null);
 
   useEffect(() => {
-    gsap.fromTo(heroRef.current.querySelectorAll('.hero-animate'),
+    gsap.fromTo(
+      heroRef.current.querySelectorAll(".hero-animate"),
       { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, stagger: 0.2, duration: 1, ease: "power3.out" }
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.2,
+        duration: 1,
+        ease: "power3.out",
+      }
     );
   }, []);
 
   return (
-    <section ref={heroRef} className="premium-fullscreen-hero relative w-full min-h-screen flex items-center justify-center text-center overflow-hidden">
-      <div 
-        className="hero-parallax-bg-layer absolute inset-0 bg-cover bg-center opacity-10"
-        style={{ 
-          backgroundImage: "url('https://cdn.observer.co.uk/media/original_images/18005.jpeg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          backgroundRepeat: 'no-repeat'
-        }} 
+    <section
+      ref={heroRef}
+      className="relative w-full min-h-screen flex items-center justify-center text-center overflow-visible"
+    >
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{
+          backgroundImage:
+            "url('https://cdn.observer.co.uk/media/original_images/18005.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          backgroundRepeat: "no-repeat",
+        }}
       />
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-      
-      <div className="hero-center-content-box relative z-10 max-w-3xl px-6 md:px-8 py-20">
-        <div className="hero-animate text-amber-500 text-sm md:text-base font-bold mb-3 tracking-wider">ملف استقصائي عابر للوسائط</div>
-        <h1 className="hero-animate font-amiri text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">أطفال الحروب</h1>
+
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Content */}
+      <div className="relative z-20 max-w-3xl px-6 md:px-8 py-20">
+        <div className="hero-animate text-amber-500 text-sm md:text-base font-bold mb-3 tracking-wider">
+          ملف استقصائي عابر للوسائط
+        </div>
+
+        <h1 className="hero-animate font-amiri text-5xl sm:text-7xl md:text-8xl font-bold">
+          أطفال الحروب
+        </h1>
+
         <p className="hero-animate text-gray-300 text-base md:text-lg mt-6 max-w-2xl mx-auto">
-          موقع توثيقي يجمع الكلمة الصادقة، الصورة الفوتوغرافية الانسيابية، والتسجيلات الحية لأطفال غزة والسودان في تجربة تفاعلية غامرة.
+          موقع توثيقي يجمع الكلمة الصادقة، الصورة الفوتوغرافية الانسيابية،
+          والتسجيلات الحية لأطفال غزة والسودان في تجربة تفاعلية غامرة.
         </p>
       </div>
-    <div className="absolute left-0 w-full overflow-hidden leading-none z-10 rotate-180 top-[620px] md:top-[580px] lg:top-[620px]">
-  <svg
-    className="block w-full h-[150px] md:h-[100px] lg:h-[120px]"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 1200 120"
-    preserveAspectRatio="none"
-  >
-    <path
-      d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
-      fill="#0e1e2c"
-    />
-  </svg>
-</div>
+
+      {/* Wave Separator */}
+      <div className="absolute bottom-[-1px] left-0 w-full leading-none z-30">
+        <svg
+          className="block w-full h-[90px] md:h-[130px] lg:h-[170px]"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M321.39,56.44C58.3,10.25,0,0,0,0V120H1200V0c0,0-93.34,58.09-256.88,58.09-110.78,0-203.88-39.79-321.73-39.79C487.2,18.3,432.49,75.24,321.39,56.44Z"
+            fill="#0e1e2c"
+          />
+        </svg>
+      </div>
     </section>
   );
 }
 
 // ─── MASTER ENTRY APPLICATION VIEW ───────────────────────────────────────────
-export default function App() {
+export default function CrossMediaPageGaza() {
   useEffect(() => {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
