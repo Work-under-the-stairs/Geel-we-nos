@@ -45,7 +45,11 @@ const YouthMinistrySection = () => {
               className="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-6"
             >
               تختص وزارة الشباب والرياضة برسم السياسات والخطط اللازمة لرعاية النشء والشباب، كما أنها معنية بالقضايا المجتمعية المرتبطة بالأسرة المصرية؛ باعتبار أن 
-              <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الآباء والأمهات هم ركيزة المجتمع</span>، والمسؤولون عن تنشئة جيل يمثل حاضر البلاد ومستقبلها.
+              <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الآباء والأمهات هم ركيزة المجتمع</span>
+              ، والمسؤولون عن تنشئة جيل يمثل حاضر البلاد ومستقبلها، 
+              حسب ما يرى 
+             <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1"> مصطفى عز العرب</span>
+              ، معاون الوزير لشؤون التنمية الثقافية والمجتمعية.
             </motion.p>
 
             <motion.p 

@@ -38,13 +38,13 @@ const CultureMinistrySection = () => {
     },
     {
       title: 'منصة "عيالنا"',
-      desc: 'منصة خبرية مهتمة بكل شؤون الطفل الثقافية والفنية.',
+      desc: 'منصة خبرية مهتمة بكل شؤون الطفل الثقافية والفنية والأدبية والاجتماعية.',
       icon: Globe,
       theme: 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20'
     },
     {
       title: 'قناة "نجوم صغيرة"',
-      desc: 'تضم 1700 فيديو لتنمية القيم وتعديل السلوك الإيجابي.',
+      desc: 'تضم 1700 فيديو للمساعدة على تنمية القيم الإيجابية، وهدم الأفكار السلبية، وتعديل السلوك.',
       icon: PlayCircle,
       theme: 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
     }
@@ -115,7 +115,7 @@ const CultureMinistrySection = () => {
             alt="فريق ذوي الهمم" 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 mix-blend-luminosity"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-l from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent"></div>
 
           <div className="max-w-6xl mx-auto px-6 relative z-10">
             <div className="w-full lg:w-3/5">
