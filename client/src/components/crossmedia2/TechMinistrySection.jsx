@@ -193,43 +193,62 @@ const TechMinistrySection = () => {
                 
                 <div className="flex w-full max-w-3xl mx-auto h-[300px] md:h-[400px] relative font-sans">
                   <div className="absolute -right-12 md:-right-16 top-0 bottom-0 flex items-center">
-                    <span className="transform -rotate-90 text-slate-400 font-bold text-xs md:text-lg whitespace-nowrap">عدد الأطفال (طالب)</span>
+                    <span className="-m-4 transform -rotate-90 text-slate-400 font-bold text-xs md:text-lg whitespace-nowrap">عدد الأطفال (طالب)</span>
                   </div>
 
-                  <div className="flex flex-col justify-between items-end pr-4 text-slate-400 font-medium text-[10px] md:text-base h-[calc(100%-2rem)] md:h-[calc(100%-3rem)] w-16 md:w-24 z-10">
-                    {yLabels.map((label, index) => (
-                      <span key={index} className="translate-y-1/2">{label}</span>
-                    ))}
-                  </div>
-
-                  <div className="relative flex-1 border-r-2 border-b-2 border-slate-600 flex justify-center gap-12 md:gap-32 items-end pb-0 px-4 md:px-10 h-[calc(100%-2rem)] md:h-[calc(100%-3rem)]">
+                  <div className="relative flex-1 h-[calc(100%-2rem)] md:h-[calc(100%-3rem)] flex">
                     
-                    <div className="absolute inset-0 flex flex-col justify-between z-0">
-                      {yLabels.map((_, index) => (
-                        <div key={index} className="w-full border-t border-slate-700/50 border-dashed"></div>
+                    <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-10 flex flex-col justify-between pr-4 text-slate-400 font-medium text-[10px] md:text-base pointer-events-none">
+                      {yLabels.map((label, index) => (
+                        <div 
+                          key={index} 
+                          className="h-0 flex items-center justify-end"
+                          style={{
+                            position: 'absolute',
+                            top: `${(index / (yLabels.length - 1)) * 100}%`,
+                            left: '1rem'
+                          }}
+                        >
+                          <span>{label}</span>
+                        </div>
                       ))}
                     </div>
 
-                    <div className="relative z-10 flex flex-col justify-end items-center w-16 md:w-32 h-full cursor-pointer">
-                      <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="text-blue-400 font-bold mb-2 text-sm md:text-2xl text-center">
-                        195,000 <span className="block text-[10px] md:text-base text-slate-400 font-normal">طالب</span>
-                      </motion.div>
-                      <motion.div initial={{ height: 0 }} whileInView={{ height: '78%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="w-full bg-gradient-to-t from-blue-900 to-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)] rounded-t-md relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all">
-                        <motion.div animate={{ y: ["100%", "-100%"] }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }} className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 to-transparent" />
-                      </motion.div>
-                      <span className="text-slate-200 mt-2 md:mt-4 font-bold text-xs md:text-xl absolute -bottom-8 md:-bottom-12 whitespace-nowrap">براعم مصر</span>
-                    </div>
+                    <div className="relative flex-1 mr-16 md:mr-24 border-r-2 border-b-2 border-slate-600 flex justify-center gap-12 md:gap-32 items-end pb-0 px-4 md:px-10 h-full">
+                      
+                      <div className="absolute inset-0 flex flex-col justify-between z-0 pointer-events-none">
+                        {yLabels.map((_, index) => (
+                          <div 
+                            key={index} 
+                            className="absolute w-full border-t border-slate-700/50 border-dashed"
+                            style={{
+                              top: `${(index / (yLabels.length - 1)) * 100}%`
+                            }}
+                          ></div>
+                        ))}
+                      </div>
 
-                    <div className="relative z-10 flex flex-col justify-end items-center w-16 md:w-32 h-full cursor-pointer">
-                      <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} className="text-emerald-400 font-bold mb-2 text-sm md:text-2xl text-center">
-                        112,000 <span className="block text-[10px] md:text-base text-slate-400 font-normal">طالب</span>
-                      </motion.div>
-                      <motion.div initial={{ height: 0 }} whileInView={{ height: '44.8%' }} transition={{ duration: 1.2, delay: 0.2, ease: 'easeOut' }} className="w-full bg-gradient-to-t from-emerald-900 to-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] rounded-t-md relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all">
-                        <motion.div animate={{ y: ["100%", "-100%"] }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 1 }} className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 to-transparent" />
-                      </motion.div>
-                      <span className="text-slate-200 mt-2 md:mt-4 font-bold text-xs md:text-xl absolute -bottom-8 md:-bottom-12 whitespace-nowrap">أشبال مصر</span>
-                    </div>
+                      <div className="relative z-10 flex flex-col justify-end items-center w-16 md:w-32 h-full cursor-pointer">
+                        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="text-blue-400 font-bold mb-2 text-sm md:text-2xl text-center">
+                          195,000 <span className="block text-[10px] md:text-base text-slate-400 font-normal">طالب</span>
+                        </motion.div>
+                        <motion.div initial={{ height: 0 }} whileInView={{ height: '78%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="w-full bg-gradient-to-t from-blue-900 to-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)] rounded-t-md relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all">
+                          <motion.div animate={{ y: ["100%", "-100%"] }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }} className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 to-transparent" />
+                        </motion.div>
+                        <span className="text-slate-200 mt-2 md:mt-4 font-bold text-xs md:text-xl absolute -bottom-8 md:-bottom-12 whitespace-nowrap">براعم مصر</span>
+                      </div>
 
+                      <div className="relative z-10 flex flex-col justify-end items-center w-16 md:w-32 h-full cursor-pointer">
+                        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} className="text-emerald-400 font-bold mb-2 text-sm md:text-2xl text-center">
+                          112,000 <span className="block text-[10px] md:text-base text-slate-400 font-normal">طالب</span>
+                        </motion.div>
+                        <motion.div initial={{ height: 0 }} whileInView={{ height: '44.8%' }} transition={{ duration: 1.2, delay: 0.2, ease: 'easeOut' }} className="w-full bg-gradient-to-t from-emerald-900 to-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] rounded-t-md relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all">
+                          <motion.div animate={{ y: ["100%", "-100%"] }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear", delay: 1 }} className="absolute inset-0 bg-gradient-to-t from-transparent via-white/30 to-transparent" />
+                        </motion.div>
+                        <span className="text-slate-200 mt-2 md:mt-4 font-bold text-xs md:text-xl absolute -bottom-8 md:-bottom-12 whitespace-nowrap">أشبال مصر</span>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
               </div>
