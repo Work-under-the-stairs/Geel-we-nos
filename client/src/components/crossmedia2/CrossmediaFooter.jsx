@@ -16,19 +16,19 @@ const FadeUpScroll = ({ children, delay = 0 }) => {
 };
 
 const CrossmediaFooter = () => {
-  const executionNames = ["عمر طارق", "ملك محمود", "ميسرة سعيد"];
-  
-  const designers = [
-    { name: "رحيق ايمن", url: "https://www.linkedin.com/in/raheeq-ayman-8b12a3281/" },
-    { name: "ايمان اشرف", url: "https://www.linkedin.com/in/eman-ashraf-fullstack/" },
-    { name: "تسنيم علاء", url: "https://www.linkedin.com/in/tasneem-alaa" }
-  ];
+    const executionNames = ["عمر طارق", "ملك محمود", "ميسرة سعيد"];
+    
+    const designers = [
+        { name: "تسنيم علاء", url: "https://www.linkedin.com/in/tasneem-alaa" },
+        { name: "ايمان اشرف", url: "https://www.linkedin.com/in/eman-ashraf-fullstack/" },
+        { name: "رحيق ايمن", url: "https://www.linkedin.com/in/raheeq-ayman-8b12a3281/" },
+    ];
 
-  const badgeBaseStyle = "px-4 py-1.5 rounded-full border text-sm font-medium transition-all duration-300";
-  
-  const executionBadgeStyle = `${badgeBaseStyle} bg-amber-500/10 border-amber-500/20 text-amber-400`;
-  
-  const designBadgeStyle = `${badgeBaseStyle} bg-pink-500/10 border-pink-500/20 text-pink-400 cursor-pointer hover:bg-pink-500/20 hover:border-pink-500/40 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/10`;
+    const badgeBaseStyle = "px-4 py-1.5 rounded-full border text-sm font-medium transition-all duration-300";
+    
+    const executionBadgeStyle = `${badgeBaseStyle} bg-amber-500/10 border-amber-500/20 text-amber-400`;
+    
+    const designBadgeStyle = `${badgeBaseStyle} bg-pink-500/10 border-pink-500/20 text-pink-400 cursor-pointer hover:bg-pink-500/20 hover:border-pink-500/40 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/10`;
 
   return (
     <footer className="relative w-full bg-[#18181b] font-sans text-slate-300 z-40 border-t border-white/5" dir="rtl">

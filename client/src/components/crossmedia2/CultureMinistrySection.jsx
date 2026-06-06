@@ -259,29 +259,37 @@ const CultureMinistrySection = () => {
               </div>
             </div>
           </FadeUpScroll>
-
-          <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 px-4 overflow-visible">
+          <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-4 px-4 overflow-visible">
             {galleryImages.map((img, idx) => {
               const collageStyles = [
-                { rotate: '-4deg', y: '0px',   hoverGlow: 'shadow-pink-500/30' }, // Image 1
-                { rotate: '3deg',  y: '30px',  hoverGlow: 'shadow-purple-500/30' }, // Image 2
-                { rotate: '-2deg', y: '-20px', hoverGlow: 'shadow-pink-500/30' }, // Image 3
-                { rotate: '5deg',  y: '20px',  hoverGlow: 'shadow-purple-500/30' }, // Image 4
+                { rotate: '-4deg', y: 0,   hoverGlow: 'shadow-pink-500/30' },
+                { rotate: '3deg',  y: 30,  hoverGlow: 'shadow-purple-500/30' },
+                { rotate: '-2deg', y: -20, hoverGlow: 'shadow-pink-500/30' },
+                { rotate: '5deg',  y: 20,  hoverGlow: 'shadow-purple-500/30' },
               ];
               const style = collageStyles[idx % collageStyles.length];
+              const baseRotate = parseFloat(style.rotate);
 
               return (
                 <FadeUpScroll delay={idx * 0.15} key={idx}>
                   <motion.div 
-                    style={{ rotate: style.rotate, y: style.y }}
+                    initial={{ rotate: baseRotate, y: style.y }}
+                    animate={{
+                      y: [style.y, style.y - 15, style.y],
+                      rotate: [baseRotate, baseRotate + 1, baseRotate - 1, baseRotate]
+                    }}
+                    transition={{
+                      y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 },
+                      rotate: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: idx * 0.1 }
+                    }}
                     whileHover={{ 
                       rotate: '0deg', 
-                      scale: 1.08, 
-                      y: '-15px',
+                      scale: 1.05, 
+                      y: style.y - 25,
                       zIndex: 10,
-                      transition: { duration: 0.4, ease: "easeOut" }
+                      transition: { duration: 0.3, ease: "easeOut" }
                     }}
-                    className={`relative aspect-[8/6] sm:aspect-[8/6] rounded-3xl overflow-hidden group border border-[#3f3f46] bg-[#2b2b36] shadow-xl transition-shadow duration-300 hover:shadow-2xl ${style.hoverGlow}`}
+                    className={`relative aspect-[5/4] md:aspect-[8/6] rounded-3xl overflow-hidden group border border-[#3f3f46] bg-[#2b2b36] shadow-xl transition-shadow duration-300 hover:shadow-2xl ${style.hoverGlow}`}
                   >
                     <img 
                       src={img.src} 
