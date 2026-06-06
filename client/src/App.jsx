@@ -15,7 +15,7 @@ import { isAuthenticated,isAdmin } from './utils/auth';
 import EditArticle from './pages/EditArticle'
 import ScrollToTop from './ScrollToTop'
 import CrossMediaArticle2 from './pages/CrossMediaArticle2'
-
+import SearchPage from './pages/SearchPage'
 const App = () => {
   
   return (
@@ -35,6 +35,7 @@ const App = () => {
           <Route index element={<Home/>}/>
           <Route path="/:category" element={<Category/>} />
           <Route path="/news/:id" element={<ArticleDetail/>}/>
+          <Route path="/search" element={<SearchPage/>} />  {/* ← add this */}
         </Route>
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />

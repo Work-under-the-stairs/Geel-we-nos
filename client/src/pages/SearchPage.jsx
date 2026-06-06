@@ -11,19 +11,21 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get(`/news/search?q=${query}`);
-        setResults(res.data);
-      } catch (err) {
-        console.error("خطأ في جلب نتائج البحث", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (query) fetchResults();
-  }, [query]);
+  const fetchResults = async () => {
+    setLoading(true);
+    try {
+      console.log("Fetching for query:", query); // add this
+      const res = await api.get(`/news/search?q=${query}`);
+      console.log("API response:", res.data); // add this
+      setResults(Array.isArray(res.data) ? res.data : res.data.data || []);
+    } catch (err) {
+      console.error("خطأ في جلب نتائج البحث", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (query) fetchResults();
+}, [query]);
 
   return (
     <div className="max-w-7xl mx-auto py-10 px-6 min-h-screen">

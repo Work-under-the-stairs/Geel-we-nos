@@ -419,18 +419,32 @@ exports.getAllNews = async (req, res, next) => {
   }
 };
 
-exports.searchNews = async (req, res) => {
+exports.searchNews = async (req, res, next) => {
   try {
     const { q } = req.query;
-    
-    // استخدام $text للبحث في الفهارس التي حددناها في النموذج
-    const results = await News.find(
-      { $text: { $search: q } },
-      { score: { $meta: "textScore" } } // ترتيب النتائج حسب الأكثر صلة
-    ).sort({ score: { $meta: "textScore" } });
+    console.log("🔍 Search hit! q =", q);
 
+    if (!q || q.trim() === "") {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const results = await News.find({
+      status: { $ne: "draft" },
+      $or: [
+        { title: { $regex: q.trim(), $options: "i" } },
+        { content: { $regex: q.trim(), $options: "i" } },
+        { hashtags: { $regex: q.trim(), $options: "i" } },
+      ]
+    })
+      .sort({ important_rate: -1, createdAt: -1 })
+      .limit(30)
+      .populate("writer", "name avatar")
+      .populate("category", "name icon_name");
+
+    console.log("Results count:", results.length);
     res.status(200).json(results);
   } catch (error) {
-    res.status(500).json({ message: "حدث خطأ أثناء البحث", error });
+    console.error("Search error:", error.message);
+    next(error);
   }
 };

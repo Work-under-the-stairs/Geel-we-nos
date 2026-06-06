@@ -93,27 +93,49 @@ export default function Navbar() {
         onSubmit={(e) => {
           e.preventDefault();
           const value = e.target.search.value.trim();
+          console.log("Submit fired, value:", value);
           if (!value) return;
           setSearchOpen(false);
           navigate(`/search?q=${encodeURIComponent(value)}`);
         }}
-        className="relative flex items-center"
       >
-        <Search className="absolute right-3 text-slate-400" size={20} />
-        <input
-          name="search"
-          type="text"
-          autoFocus
-          placeholder="عن ماذا تبحث؟..."
-          className="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          type="button"
-          onClick={() => setSearchOpen(false)}
-          className="mr-3 text-sm font-bold text-gray-500"
-        >
-          إغلاق
-        </button>
+        <div className="relative flex items-center gap-2" dir="rtl">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input
+              name="search"
+              type="text"
+              autoFocus
+              placeholder="عن ماذا تبحث؟..."
+              className="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-right"
+            />
+          </div>
+          {/* <button
+  type="button"
+  onClick={() => {
+    alert("clicked!");
+    const input = document.querySelector('input[name="search"]');
+    console.log("value:", input?.value);
+    navigate(`/search?q=${encodeURIComponent(input?.value || "test")}`);
+  }}
+  className="bg-primary text-white font-bold text-sm px-4 py-3 rounded-xl"
+>
+  بحث
+</button> */}
+            <button
+            type="submit"
+            className="bg-primary text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-primary/90 transition-all"
+          >
+            بحث
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchOpen(false)}
+            className="text-sm font-bold text-gray-500 px-2"
+          >
+            إغلاق
+          </button>  
+        </div>
       </form>
     </div>
   </>

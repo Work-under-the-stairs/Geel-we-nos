@@ -1,3 +1,4 @@
+ 
 const express = require("express");
 const router = express.Router();
 const newsController = require("../controllers/newsController");
@@ -10,7 +11,7 @@ router.get("/trending", newsController.getTrending);
 router.get("/latest", newsController.getLatest);
 router.get("/grouped-by-category", newsController.getGroupedByCategory);
 router.get("/urgent", newsController.getUrgent);
-
+router.get('/search', newsController.searchNews);
 router.post("/add", protect, restrictTo("admin"), 
 upload.fields([{ name: "images", maxCount: 10 },{ name: "videos", maxCount: 5 },]), 
 newsController.createNews);
@@ -28,9 +29,6 @@ router.post("/:id/view", newsController.trackView);
 router.patch("/:id", protect, restrictTo("admin"), newsController.updateNews);
 
 router.delete("/:id", protect, restrictTo("admin"), newsController.deleteNews);
-router.get('/search', newsController.searchNews);
-module.exports = router;
 
- 
- 
+module.exports = router;
  
