@@ -24,7 +24,6 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    // 1. التحقق من صحة البيانات المدخلة
     if (formData.password.length < 6) {
       setError("كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.");
       return toast.error("كلمة المرور قصيرة جداً.");
@@ -38,7 +37,6 @@ export default function Register() {
     let firebaseUser = null;
 
     try {
-      // 2. إنشاء المستخدم في Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email.toLowerCase().trim(), 
@@ -46,11 +44,9 @@ export default function Register() {
       );
       firebaseUser = userCredential.user;
 
-      // 3. إرسال بريد التحقق
       await sendEmailVerification(firebaseUser);
       toast.success("تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب قبل تسجيل الدخول.");
 
-      // 4. حفظ البيانات في MongoDB
       try {
         await api.post("/users/register-db", {
           firebaseUid: firebaseUser.uid,
@@ -59,13 +55,10 @@ export default function Register() {
           email: formData.email.toLowerCase().trim(),
         });
         
-        // 5. تسجيل الخروج فوراً لمنع الدخول قبل تفعيل البريد
         await signOut(auth);
         
-        // 6. التوجيه لصفحة تسجيل الدخول
         navigate("/login");
       } catch (dbError) {
-        // في حال فشل الحفظ في MongoDB، نقوم بحذف المستخدم من Firebase (Rollback)
         console.error("MongoDB Save Failed, Rolling back Firebase user...");
         if (firebaseUser) await firebaseUser.delete();
         throw dbError;
@@ -74,7 +67,6 @@ export default function Register() {
     } catch (err) {
       console.error(err);
       
-      // معالجة الأخطاء
       if (err.response?.data?.message) {
         setError(err.response.data.message);
         toast.error(err.response.data.message);

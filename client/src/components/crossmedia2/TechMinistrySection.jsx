@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Activity } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Lightbulb, Laptop } from 'lucide-react';
+import { Users, Lightbulb, Laptop, MessageCircle, Puzzle, RefreshCcw, Clock, Heart, Flag, ActivityIcon, Sparkles } from 'lucide-react';
 
 const CursorGlow = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -170,12 +170,108 @@ const TechMinistrySection = () => {
               </p>
             </FadeUpScroll>
 
+
             <FadeUpScroll delay={0.2}>
-              <p className="text-lg md:text-xl font-light leading-relaxed text-slate-300 mb-10 pl-4 border-r-2 border-cyan-500 relative">
-                <span className="absolute -right-[3px] top-0 bottom-0 w-1 bg-cyan-400 blur-[2px]"></span>
-                والمهارات الناعمة هي مجموعة من المهارات الشخصية والاجتماعية التي تحدد طريقة تعامل الشخص مع الآخرين؛ على غرار: التواصل الفعّال، والعمل الجماعي، وحل المشكلات، والمرونة، والتكيف، وإدارة الوقت، والذكاء العاطفي، والقيادة.
-              </p>
+              <div className="relative bg-gradient-to-l from-slate-900/80 to-transparent p-6 md:p-8 rounded-2xl border-r-4 border-cyan-500 mb-8 shadow-[0_0_30px_rgba(6,182,212,0.05)]">
+                <span className="absolute -right-[4px] top-0 bottom-0 w-2 bg-cyan-400 blur-[4px]"></span>
+                <p className="text-lg md:text-xl font-light leading-relaxed text-slate-200">
+                  والمهارات الناعمة هي مجموعة من المهارات الشخصية والاجتماعية التي تحدد طريقة تعامل الشخص مع الآخرين؛ على غرار:
+                </p>
+              </div>
             </FadeUpScroll>
+
+            <div className="relative w-full min-h-[500px] md:min-h-[600px] flex items-center justify-center mt-10 mb-20 font-sans group" dir="rtl">
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-slate-900/80 backdrop-blur-xl border border-cyan-500/50 p-4 md:p-6 rounded-3xl text-center shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col items-center gap-2 md:gap-3 cursor-default"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: 1, scale: 1,
+                  boxShadow: ["0 0 40px rgba(6,182,212,0.15)", "0 0 60px rgba(6,182,212,0.25)", "0 0 40px rgba(6,182,212,0.15)"]
+                }}
+                transition={{
+                  opacity: { duration: 0.6 },
+                  scale: { duration: 0.6, ease: "backOut" },
+                  boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                }}
+              >
+                <div className="p-2 md:p-3 rounded-full bg-cyan-950/50 border border-cyan-700/50">
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-cyan-400 drop-shadow-[0_0_10px_currentColor]" />
+                </div>
+                <p className="relative z-10 text-base md:text-xl font-bold leading-tight text-white whitespace-nowrap">
+                  المهارات الناعمة
+                </p>
+              </motion.div>
+
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-60 group-hover:opacity-100 transition-opacity duration-700" viewBox="0 0 100 100" preserveAspectRatio="none">
+                {[
+                  { x: 15, y: 20 },
+                  { x: 85, y: 20 },
+                  { x: 10, y: 50 },
+                  { x: 90, y: 50 },
+                  { x: 20, y: 80 },
+                  { x: 80, y: 80 },
+                  { x: 50, y: 10 },
+                  { x: 50, y: 90 },
+                ].map((point, index) => (
+                  <motion.path
+                    key={`line-${index}`}
+                    d={`M 50 50 L ${point.x} ${point.y}`}
+                    stroke="#22d3ee"
+                    strokeWidth="0.2"
+                    fill="none"
+                    strokeDasharray="2 2"
+                    initial={{ pathLength: 0 }}
+                    whileInView={{ pathLength: 1 }}
+                    viewport={{ once: false, amount: 0.2 }}
+                    transition={{ duration: 1.5, delay: 0.5 + (index * 0.1), ease: "easeInOut" }}
+                  />
+                ))}
+              </svg>
+
+              {[
+                { name: "التواصل الفعّال", icon: MessageCircle, pos: "top-[15%] right-[10%]", color: "text-blue-400", delay: 0, floatY: -15 },
+                { name: "العمل الجماعي", icon: Users, pos: "top-[15%] left-[10%]", color: "text-cyan-400", delay: 0.5, floatY: 15 },
+                { name: "حل المشكلات", icon: Puzzle, pos: "top-[45%] right-[2%]", color: "text-emerald-400", delay: 1, floatY: -10 },
+                { name: "المرونة", icon: ActivityIcon, pos: "top-[45%] left-[2%]", color: "text-purple-400", delay: 1.5, floatY: 10 },
+                { name: "التكيف", icon: RefreshCcw, pos: "bottom-[15%] right-[15%]", color: "text-pink-400", delay: 2, floatY: -15 },
+                { name: "إدارة الوقت", icon: Clock, pos: "bottom-[15%] left-[15%]", color: "text-amber-400", delay: 2.5, floatY: 15 },
+                { name: "الذكاء العاطفي", icon: Heart, pos: "top-[3%] left-[45%]", color: "text-rose-400", delay: 3, floatY: 12 },
+                { name: "القيادة", icon: Flag, pos: "bottom-[3%] right-[45%]", color: "text-indigo-400", delay: 3.5, floatY: -12 }
+              ].map((skill, index) => (
+                <motion.div
+                  key={index}
+                  className={`absolute ${skill.pos} z-20`}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.3 + (index * 0.1), ease: "backOut" }}
+                >
+                  <motion.div
+                    className="flex flex-col items-center gap-3 p-4 md:p-5 rounded-2xl bg-slate-950/50 backdrop-blur-sm border border-slate-700/50 hover:border-cyan-500/50 transition-colors duration-300 shadow-xl group/skill cursor-pointer"
+                    animate={{
+                      y: [0, skill.floatY, 0],
+                    }}
+                    transition={{
+                      duration: 5 + (index * 0.5),
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: skill.delay
+                    }}
+                    whileHover={{ scale: 1.1, y: 0 }}
+                  >
+                    <div className="p-2 md:p-3 rounded-full bg-slate-800/80 border border-slate-700">
+                      <skill.icon className={`w-6 h-6 md:w-8 md:h-8 ${skill.color} drop-shadow-[0_0_10px_currentColor]`} />
+                    </div>
+                    <span className="text-slate-200 font-medium text-xs md:text-base whitespace-nowrap group-hover/skill:text-cyan-400 transition-colors">
+                      {skill.name}
+                    </span>
+
+                    <div className="absolute -inset-1 bg-cyan-500 blur-2xl opacity-0 group-hover/skill:opacity-20 transition-opacity duration-300 rounded-2xl"></div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+
 
             <FadeUpScroll delay={0.3}>
               <p className="text-lg md:text-xl font-light leading-relaxed text-slate-300 mb-16">

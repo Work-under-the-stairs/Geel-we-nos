@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Bike, ExternalLink, Landmark, Link, Users } from 'lucide-react';
 
 const FadeUpScroll = ({ children, delay = 0 }) => {
   return (
@@ -65,10 +66,8 @@ const YouthMinistrySection = () => {
         </div>
       </section>
 
-      {/* ================= 2. القسم الثاني: متحرك بحرية (الكروت) ================= */}
       <div className="relative z-10 w-full">
         
-        {/* التعرجات العلوية */}
         <div className="absolute left-0 right-0 top-[-18vw] md:top-[-16vw] w-full z-20 pointer-events-none drop-shadow-2xl translate-y-[2px]">
           <svg viewBox="0 0 1440 320" className="w-full h-auto fill-current text-[#111817] block" preserveAspectRatio="none">
             <path fillOpacity="0.4" d="M0,160L48,170.7C96,181,192,203,288,186.7C384,171,480,117,576,96C672,75,768,85,864,112C960,139,1056,181,1152,181.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -98,31 +97,44 @@ const YouthMinistrySection = () => {
               </span>
             </FadeUpScroll>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 font-sans" dir="rtl">
+              
               <FadeUpScroll delay={0.3}>
-                <div className="relative p-8 h-full rounded-tr-3xl rounded-bl-3xl bg-gradient-to-br from-[#1a241e] to-[#111817] border border-emerald-900/30 hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-500 group overflow-hidden">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
-                  <div className="text-emerald-500 font-black text-5xl mb-4 opacity-30 group-hover:opacity-60 transition-opacity duration-300">01</div>
-                  <h4 className="text-emerald-400 font-bold text-xl mb-3 relative z-10">التنشئة السياسية</h4>
-                  <p className="text-gray-400 leading-relaxed relative z-10">من خلال المشاركة المجتمعية، وذلك عن طريق توفير برامج وندوات للنشء والشباب.</p>
+                <div className="relative p-8 h-full rounded-tr-3xl rounded-bl-3xl bg-gradient-to-br from-[#1a241e] to-[#111817] border border-emerald-900/30 hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-500 group overflow-hidden flex flex-col">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 z-0"></div>
+                  <h4 className="text-emerald-400 font-bold text-2xl mb-4 relative z-10 group-hover:text-white transition-colors duration-300">
+                    التنشئة السياسية
+                  </h4>
+                  <p className="text-gray-400 leading-relaxed relative z-10 text-lg flex-grow">
+                    من خلال المشاركة المجتمعية، وذلك عن طريق توفير برامج وندوات للنشء والشباب.
+                  </p>
+                  <Landmark
+                    className="absolute -bottom-10 -left-10 w-48 h-48 text-emerald-500 opacity-10 group-hover:opacity-15 group-hover:scale-105 transition-all duration-700 pointer-events-none z-0" 
+                    strokeWidth={1}
+                  />
                 </div>
               </FadeUpScroll>
               
               <FadeUpScroll delay={0.4}>
-                <div className="relative p-8 h-full rounded-tr-3xl rounded-bl-3xl bg-gradient-to-br from-[#1a241e] to-[#111817] border border-emerald-900/30 hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-500 group overflow-hidden">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
-                  <div className="text-emerald-500 font-black text-5xl mb-4 opacity-30 group-hover:opacity-60 transition-opacity duration-300">02</div>
-                  <h4 className="text-emerald-400 font-bold text-xl mb-3 relative z-10">التنشئة الميدانية والرياضية</h4>
-                  <p className="text-gray-400 leading-relaxed relative z-10">للأسر المصرية، وتنظيم العلاقة بين الآباء والأبناء، في إطار التوعية بطريقة التعامل مع سلوكياتهم.</p>
+                <div className="relative p-8 h-full rounded-tr-3xl rounded-bl-3xl bg-gradient-to-br from-[#1a241e] to-[#111817] border border-emerald-900/30 hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-500 group overflow-hidden flex flex-col">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 z-0"></div>
+                  <h4 className="text-emerald-400 font-bold text-2xl mb-4 relative z-10 group-hover:text-white transition-colors duration-300">
+                    التنشئة الميدانية والرياضية
+                  </h4>
+                  <p className="text-gray-400 leading-relaxed relative z-10 text-lg flex-grow">
+                    للأسر المصرية، وتنظيم العلاقة بين الآباء والأبناء، في إطار التوعية بطريقة التعامل مع سلوكياتهم.
+                  </p>
+                  <Bike 
+                    className="absolute -bottom-10 -left-10 w-48 h-48 text-emerald-500 opacity-10 group-hover:opacity-15 group-hover:scale-105 transition-all duration-700 pointer-events-none z-0" 
+                    strokeWidth={1}
+                  />
                 </div>
               </FadeUpScroll>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ================= 3. القسم الأخير: ثابت (صورة عز العرب) ================= */}
-      {/* هنا السر! القسم ده بياخد h-screen وبيبقى sticky فبيثبت على الشاشة ويسمح للقسم اللي بعده يغطيه */}
 
     {/* </div> */}
       <section className="sticky top-0 h-screen w-full bg-[#111817] z-10 flex flex-col justify-center overflow-hidden pb-20">
@@ -136,6 +148,9 @@ const YouthMinistrySection = () => {
             </h3>
             <p className="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-16 md:mb-24 max-w-3xl">
               وتملك وزارة الشباب والرياضة وسائل محددة لقياس مدى نجاح مبادرات وبرامج الأسرة، غير أن بعض المبادرات لا يمكن قياس نجاحها إلا بملاحظة السلوك المجتمعي.
+            <span onClick={() => window.open('https://youtu.be/-2EU_5wqdlE', '_blank')} className="text-emerald-500 font-semibold cursor-pointer px-2 py-1 hover:bg-emerald-500/20 rounded transition-colors duration-300"> 
+              <ExternalLink className='w-5 inline'/>
+              حوار خاص لعز العرب معاون وزير الشباب والرياضة لشؤون التنمية الثقافية لموقع "جيل ونص" ونصائحه للاهالي</span>
             </p>
           </FadeUpScroll>
 

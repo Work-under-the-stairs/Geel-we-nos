@@ -20,25 +20,20 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. إعداد الـ Persistence
       await setPersistence(auth, browserLocalPersistence);
 
-      // 2. تسجيل الدخول
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 3. التحقق مما إذا كان البريد مفعل
       if (!user.emailVerified) {
         toast.error("يرجى تفعيل بريدك الإلكتروني أولاً قبل تسجيل الدخول.");
         setError("لم يتم تفعيل البريد الإلكتروني. يرجى مراجعة صندوق الوارد الخاص بك.");
         
-        // تسجيل خروج المستخدم فوراً لأنه غير مفعل
         await signOut(auth);
         setLoading(false);
-        return; // إيقاف تنفيذ الكود
+        return; 
       }
       
-      // 4. استكمال عملية جلب البيانات إذا كان البريد مفعلاً
       const idToken = await user.getIdToken();
       const response = await api.get(`/users/me/${user.uid}`, {
         headers: { Authorization: `Bearer ${idToken}` }

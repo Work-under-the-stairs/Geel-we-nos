@@ -3,6 +3,7 @@ import YouthMinistrySection from '../components/crossmedia2/YouthMinistrySection
 import TechMinistrySection from '../components/crossmedia2/TechMinistrySection';
 import CultureMinistrySection from '../components/crossmedia2/CultureMinistrySection';
 import HeroSection from '../components/crossmedia2/HeroSection';
+import CrossmediaFooter from '../components/crossmedia2/CrossmediaFooter';
 
 const CrossMediaArticle2 = () => {
 return (
@@ -11,6 +12,7 @@ return (
       <YouthMinistrySection />
       <TechMinistrySection />
       <CultureMinistrySection />
+      <CrossmediaFooter/>
     </div>
   );
 }

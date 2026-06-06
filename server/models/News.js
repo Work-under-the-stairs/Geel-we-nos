@@ -58,7 +58,7 @@ const newsSchema = new mongoose.Schema(
     crossMediaId: {
       type: Number, default: null,
       ref: 'Story',
-      required: false, // ليس إجبارياً، فقط للمقالات التي لها قصص
+      required: false,
     },
     important_rate: {
       type: Number,

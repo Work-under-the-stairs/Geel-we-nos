@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Globe, PlayCircle, Star, Heart, Palette, Theater, Music, Search, TrendingUp, Microscope, Quote } from 'lucide-react';
+import { BookOpen, Globe, PlayCircle, Star, Heart, Palette, Theater, Music, Search, TrendingUp, Microscope, Quote, Image as ImageIcon } from 'lucide-react';
 
 const FadeUpScroll = ({ children, delay = 0 }) => {
   return (
@@ -55,6 +55,13 @@ const CultureMinistrySection = () => {
     { title: "رعايتها", icon: Heart, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30" },
     { title: "التسويق لها", icon: TrendingUp, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30" },
     { title: "الأبحاث والمتابعة", icon: Microscope, color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/30" }
+  ];
+
+  const galleryImages = [
+    { src: "/assets/crossmedia2/culture1.png", alt: "فعالية فنية للأطفال" },
+    { src: "/assets/crossmedia2/culture2.png", alt: "ورشة عمل إبداعية" },
+    { src: "/assets/crossmedia2/culture3.png", alt: "تكريم الموهوبين الصغار" },
+    { src: "/assets/crossmedia2/culture4.png", alt: "عرض مسرحي للأطفال" }
   ];
 
   return (
@@ -223,32 +230,73 @@ const CultureMinistrySection = () => {
 
           </div>
         </section>
-      </div>
 
-      <section className="sticky top-0 h-screen w-full bg-[#18181b] z-10 flex flex-col justify-center overflow-hidden border-t border-[#3f3f46]">
-        <div className="absolute left-0 right-0 top-0 w-full h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"></div>
-        
-        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
+        <section className="relative py-24 px-6 max-w-7xl mx-auto z-10 border-t border-white/5 mt-16">
+          <div className="absolute left-0 right-0 top-0 w-full h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"></div>
+          
           <FadeUpScroll>
-            <div className="relative inline-block mb-10">
-              <Quote className="w-16 h-16 text-pink-400/20 transform rotate-180 absolute -top-8 -right-8" />
-              <div className="w-20 h-20 bg-[#2b2b36] border border-[#3f3f46] rounded-full flex items-center justify-center mx-auto">
-                <PlayCircle className="w-10 h-10 text-pink-400" strokeWidth={1.5} />
+            <div className="text-center mb-16 max-w-4xl mx-auto relative z-10">
+              
+              <div className="inline-block bg-[#2b2b36] border border-[#3f3f46] px-8 py-4 rounded-full">
+                <p className="text-pink-400 font-bold text-xl mb-1">محمد حافظ ناصف</p>
+                <p className="text-slate-400 text-sm">رئيس المركز القومي لثقافة الطفل</p>
+              </div>
+              
+              <div className="relative inline-block mb-10">
+                <Quote className="w-16 h-16 text-pink-400/20 transform rotate-180 absolute -top-8 -right-8" />
+                <div className="w-20 h-20 bg-[#2b2b36] border border-[#3f3f46] rounded-full flex items-center justify-center mx-auto">
+                  <PlayCircle className="w-10 h-10 text-pink-400" strokeWidth={1.5} />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl md:text-3xl font-light text-white leading-relaxed mb-12 italic relative z-10">
+                "إن مركز ثقافة الطفل يعمل على مشروع عبارة عن <span className="text-pink-400 font-bold">أول عمل درامي (مسلسل) ينتجه المركز بالتعاون مع المركز القومي للسينما</span>، إلى جانب أفلام قصيرة سيجري إنتاجها أيضًا؛ بهدف تقديم محتوى يليق بأجيال مصر الصغيرة ومستقبلها."
+              </h3>
+              
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-bold mb-8">
+                <ImageIcon size={16} />
+                معرض الصور
               </div>
             </div>
-            
-            <h3 className="text-2xl md:text-4xl font-light text-white leading-relaxed mb-12 italic relative z-10">
-              "إن مركز ثقافة الطفل يعمل على مشروع عبارة عن <span className="text-pink-400 font-bold">أول عمل درامي (مسلسل) ينتجه المركز بالتعاون مع المركز القومي للسينما</span>، إلى جانب أفلام قصيرة سيجري إنتاجها أيضًا؛ بهدف تقديم محتوى يليق بأجيال مصر الصغيرة ومستقبلها."
-            </h3>
-            
-            <div className="inline-block bg-[#2b2b36] border border-[#3f3f46] px-8 py-4 rounded-full">
-              <p className="text-pink-400 font-bold text-xl mb-1">محمد حافظ ناصف</p>
-              <p className="text-slate-400 text-sm">رئيس المركز القومي لثقافة الطفل</p>
-            </div>
           </FadeUpScroll>
-        </div>
-      </section>
 
+          <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 px-4 overflow-visible">
+            {galleryImages.map((img, idx) => {
+              const collageStyles = [
+                { rotate: '-4deg', y: '0px',   hoverGlow: 'shadow-pink-500/30' }, // Image 1
+                { rotate: '3deg',  y: '30px',  hoverGlow: 'shadow-purple-500/30' }, // Image 2
+                { rotate: '-2deg', y: '-20px', hoverGlow: 'shadow-pink-500/30' }, // Image 3
+                { rotate: '5deg',  y: '20px',  hoverGlow: 'shadow-purple-500/30' }, // Image 4
+              ];
+              const style = collageStyles[idx % collageStyles.length];
+
+              return (
+                <FadeUpScroll delay={idx * 0.15} key={idx}>
+                  <motion.div 
+                    style={{ rotate: style.rotate, y: style.y }}
+                    whileHover={{ 
+                      rotate: '0deg', 
+                      scale: 1.08, 
+                      y: '-15px',
+                      zIndex: 10,
+                      transition: { duration: 0.4, ease: "easeOut" }
+                    }}
+                    className={`relative aspect-[8/6] sm:aspect-[8/6] rounded-3xl overflow-hidden group border border-[#3f3f46] bg-[#2b2b36] shadow-xl transition-shadow duration-300 hover:shadow-2xl ${style.hoverGlow}`}
+                  >
+                    <img 
+                      src={img.src} 
+                      alt={img.alt}
+                      className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                    />
+                    <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-white/10 transition-colors duration-300 pointer-events-none"></div>
+                  </motion.div>
+                </FadeUpScroll>
+              );
+            })}
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 };
