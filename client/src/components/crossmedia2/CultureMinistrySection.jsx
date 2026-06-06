@@ -116,48 +116,60 @@ const CultureMinistrySection = () => {
           </div>
         </section>
 
-        <section className="relative w-full py-32 mt-16 group overflow-hidden bg-[#18181b]">
-          <img 
-            src="/assets/crossmedia2/zewi-hemam.jpg" 
-            alt="فريق ذوي الهمم" 
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent"></div>
-
-          <div className="max-w-6xl mx-auto px-6 relative z-10">
-            <div className="w-full lg:w-3/5">
-              <FadeUpScroll>
-                <div className="inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-5 py-2 rounded-full mb-8">
-                  <Heart className="w-5 h-5 text-amber-400" />
-                  <span className="text-amber-400 font-bold tracking-wide">طاقات منتجة</span>
-                </div>
-                <h3 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
-                  الاهتمام <span className="text-amber-400">بذوي الهمم</span>
-                </h3>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.2}>
-                <p className="text-xl font-light leading-relaxed text-slate-200 mb-8">
-                  ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
-                </p>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.3}>
-                <div className="bg-[#2b2b36]/80 backdrop-blur-sm border-r-4 border-amber-400 p-6 rounded-l-2xl mb-8 shadow-sm">
-                  <p className="text-lg md:text-xl font-medium leading-relaxed text-white">
-                    هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
-                  </p>
-                </div>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.4}>
-                <p className="text-lg text-slate-300 font-light leading-relaxed">
-                  وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
-                </p>
-              </FadeUpScroll>
-            </div>
+<section className="relative w-full h-screen group overflow-hidden bg-[#18181b] mt-12 md:mt-16 z-0 border-t border-white/5">
+  <div className="relative z-10 w-full h-full lg:absolute lg:inset-0 lg:flex lg:items-center py-10 lg:py-0">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col h-full lg:h-auto justify-start">
+      <div className="w-full lg:w-3/5 text-right flex flex-col items-start h-auto mt-10">
+        <FadeUpScroll>
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full mb-6 lg:mb-8">
+            <Heart className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-400 font-bold text-xs tracking-wide">طاقات منتجة</span>
           </div>
-        </section>
+          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 lg:mb-8 leading-tight">
+            الاهتمام <span className="text-amber-400">بذوي الهمم</span>
+          </h3>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.2}>
+          <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed text-slate-200 mb-6 lg:mb-8 max-w-3xl lg:max-w-none overflow-y-auto lg:overflow-visible">
+            ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
+          </p>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.3}>
+          <div className="bg-[#2b2b36]/70 backdrop-blur-sm border-r-4 border-amber-400 p-4 rounded-l-2xl mb-6 lg:mb-8 shadow-sm w-full">
+            <p className="text-sm md:text-base lg:text-xl font-medium leading-relaxed text-white">
+              هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-lg md:text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
+            </p>
+          </div>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.4}>
+          <p className="text-sm md:text-base lg:text-lg text-slate-300 font-light leading-relaxed max-w-3xl lg:max-w-none">
+            وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
+          </p>
+        </FadeUpScroll>
+      </div>
+    </div>
+  </div>
+
+  <div className="absolute inset-0 z-0 h-full w-full">
+    <img 
+      src="/assets/crossmedia2/zewi-hemam.jpg" 
+      alt="فريق ذوي الهمم" 
+      className="absolute object-cover transition-transform duration-700 group-hover:scale-105 opacity-60 grayscale z-0
+                 lg:inset-0 lg:h-full lg:w-full lg:opacity-80
+                 h-1/2 bottom-0 w-full"
+    />
+    
+    <div className="absolute inset-x-0 bottom-0 h-1/2 z-1 lg:hidden">
+      <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-[#18181b] via-[#18181b]/40 to-transparent" />
+      {/* <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#18181b] via-[#18181b]/10 to-transparent" /> */}
+    </div>
+    
+    <div className="hidden lg:block absolute inset-0 bg-gradient-to-l from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent z-1" />
+  </div>
+</section>
 
         <section className="relative flex flex-col justify-center py-32 px-6 max-w-6xl mx-auto z-10">
           
@@ -259,29 +271,37 @@ const CultureMinistrySection = () => {
               </div>
             </div>
           </FadeUpScroll>
-
-          <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 px-4 overflow-visible">
+          <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-4 px-4 overflow-visible">
             {galleryImages.map((img, idx) => {
               const collageStyles = [
-                { rotate: '-4deg', y: '0px',   hoverGlow: 'shadow-pink-500/30' }, // Image 1
-                { rotate: '3deg',  y: '30px',  hoverGlow: 'shadow-purple-500/30' }, // Image 2
-                { rotate: '-2deg', y: '-20px', hoverGlow: 'shadow-pink-500/30' }, // Image 3
-                { rotate: '5deg',  y: '20px',  hoverGlow: 'shadow-purple-500/30' }, // Image 4
+                { rotate: '-4deg', y: 0,   hoverGlow: 'shadow-pink-500/30' },
+                { rotate: '3deg',  y: 30,  hoverGlow: 'shadow-purple-500/30' },
+                { rotate: '-2deg', y: -20, hoverGlow: 'shadow-pink-500/30' },
+                { rotate: '5deg',  y: 20,  hoverGlow: 'shadow-purple-500/30' },
               ];
               const style = collageStyles[idx % collageStyles.length];
+              const baseRotate = parseFloat(style.rotate);
 
               return (
                 <FadeUpScroll delay={idx * 0.15} key={idx}>
                   <motion.div 
-                    style={{ rotate: style.rotate, y: style.y }}
+                    initial={{ rotate: baseRotate, y: style.y }}
+                    animate={{
+                      y: [style.y, style.y - 15, style.y],
+                      rotate: [baseRotate, baseRotate + 1, baseRotate - 1, baseRotate]
+                    }}
+                    transition={{
+                      y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 },
+                      rotate: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: idx * 0.1 }
+                    }}
                     whileHover={{ 
                       rotate: '0deg', 
-                      scale: 1.08, 
-                      y: '-15px',
+                      scale: 1.05, 
+                      y: style.y - 25,
                       zIndex: 10,
-                      transition: { duration: 0.4, ease: "easeOut" }
+                      transition: { duration: 0.3, ease: "easeOut" }
                     }}
-                    className={`relative aspect-[8/6] sm:aspect-[8/6] rounded-3xl overflow-hidden group border border-[#3f3f46] bg-[#2b2b36] shadow-xl transition-shadow duration-300 hover:shadow-2xl ${style.hoverGlow}`}
+                    className={`relative aspect-[5/4] md:aspect-[8/6] rounded-3xl overflow-hidden group border border-[#3f3f46] bg-[#2b2b36] shadow-xl transition-shadow duration-300 hover:shadow-2xl ${style.hoverGlow}`}
                   >
                     <img 
                       src={img.src} 

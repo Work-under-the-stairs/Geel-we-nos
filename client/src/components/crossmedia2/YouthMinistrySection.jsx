@@ -20,51 +20,63 @@ const YouthMinistrySection = () => {
     <>
     {/* <div className="relative w-full bg-gray-900" dir="rtl"> */}
       
-      {/* ================= 1. القسم الأول: ثابت (الأسرة والخلفية) ================= */}
-      <section className="sticky top-0 h-screen w-full overflow-hidden z-0">
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-[position:left_center] md:bg-center opacity-80"
-          style={{ backgroundImage: "url('/assets/crossmedia2/family.png')" }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-l from-gray-900/80 via-gray-900/60 to-transparent"></div>
+<section className="sticky top-0 h-screen w-full overflow-hidden bg-gray-900 z-0">
+  <div className="relative z-10 w-full h-full lg:absolute lg:inset-0 lg:flex lg:items-center pt-10 pb-4 lg:py-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex flex-col h-full lg:h-auto justify-start lg:justify-center">
+      <div className="w-full lg:w-1/2 text-right flex flex-col items-start h-auto z-20">
+        <motion.h2 
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-xl mt-10 md:mt-0 sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 lg:mb-8 leading-tight border-r-4 border-emerald-500 pr-3 lg:pr-4"
+        >
+          معاون وزير الرياضة: قضايا الأسرة الحاضنة الأولى للنشء.. و5 آلاف مركز شباب لدعم الفئات المستهدفة
+        </motion.h2>
 
-        <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center">
-          <div className="w-full lg:w-1/2">
-            <motion.h2 
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-3xl md:text-4xl font-bold text-white mb-8 leading-tight border-r-4 border-emerald-500 pr-4"
-            >
-              معاون وزير الرياضة: قضايا الأسرة الحاضنة الأولى للنشء.. و5 آلاف مركز شباب لدعم الفئات المستهدفة
-            </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed text-gray-300 font-light mb-4 lg:mb-6"
+        >
+          تختص وزارة الشباب والرياضة برسم السياسات والخطط اللازمة لرعاية النشء والشباب، كما أنها معنية بالقضايا المجتمعية المرتبطة بالأسرة المصرية؛ باعتبار أن 
+          <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الآباء والأمهات هم ركيزة المجتمع</span>
+          ، والمسؤولون عن تنشئة جيل يمثل حاضر البلاد ومستقبلها، 
+          حسب ما يرى 
+          <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1"> مصطفى عز العرب</span>
+          ، معاون الوزير لشؤون التنمية الثقافية والمجتمعية.
+        </motion.p>
 
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-lg md:text-xl leading-relaxed text-gray-300 font-light mb-6"
-            >
-              تختص وزارة الشباب والرياضة برسم السياسات والخطط اللازمة لرعاية النشء والشباب، كما أنها معنية بالقضايا المجتمعية المرتبطة بالأسرة المصرية؛ باعتبار أن 
-              <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الآباء والأمهات هم ركيزة المجتمع</span>
-              ، والمسؤولون عن تنشئة جيل يمثل حاضر البلاد ومستقبلها، 
-              حسب ما يرى 
-             <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1"> مصطفى عز العرب</span>
-              ، معاون الوزير لشؤون التنمية الثقافية والمجتمعية.
-            </motion.p>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed text-gray-300 font-light"
+        >
+          ويضيف عز العرب أن الوزارة تحرص على إعداد خطط وطنية للأسرة؛ باعتبارها 
+          <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الحاضنة الأولى والأهم لإعداد الإنسان وخروجه للمجتمع، حيث إن النشء هو انعكاس لأسلوب الأسرة وتربيتها</span>.
+        </motion.p>
+      </div>
+    </div>
+  </div>
 
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-lg md:text-xl leading-relaxed text-gray-300 font-light"
-            >
-              ويضيف عز العرب أن الوزارة تحرص على إعداد خطط وطنية للأسرة؛ باعتبارها 
-              <span className="text-emerald-500 font-bold bg-emerald-900/20 px-2 py-1 rounded mx-1">الحاضنة الأولى والأهم لإعداد الإنسان وخروجه للمجتمع، حيث إن النشء هو انعكاس لأسلوب الأسرة وتربيتها</span>.
-            </motion.p>
-          </div>
-        </div>
-      </section>
+  <div className="absolute inset-0 z-0 h-full w-full">
+    <img 
+      src="/assets/crossmedia2/family.png" 
+      alt="الأسرة" 
+      className="absolute object-cover transition-transform duration-700 opacity-90 z-0
+                 lg:inset-0 lg:h-full lg:w-full lg:opacity-80
+                 h-2/3 bottom-0 w-full object-[position:left_center] md:object-center"
+    />
+    
+    <div className="absolute inset-x-0 bottom-1 h-2/3 z-1 lg:hidden">
+      <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-gray-900 via-gray-900/40 to-transparent" />
+      {/* <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" /> */}
+    </div>
+    
+    <div className="hidden lg:block absolute inset-0 bg-gradient-to-l from-gray-900 via-gray-900/80 to-transparent z-1" />
+  </div>
+</section>
 
       <div className="relative z-10 w-full">
         
