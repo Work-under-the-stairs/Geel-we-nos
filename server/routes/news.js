@@ -4,7 +4,7 @@ const newsController = require("../controllers/newsController");
 
 const { protect, restrictTo } = require("../middleware/authMiddleware"); 
 const upload = require("../middleware/upload");
-
+ 
 router.get("/featured", newsController.getFeatured);
 router.get("/trending", newsController.getTrending);
 router.get("/latest", newsController.getLatest);
@@ -28,7 +28,7 @@ router.post("/:id/view", newsController.trackView);
 router.patch("/:id", protect, restrictTo("admin"), newsController.updateNews);
 
 router.delete("/:id", protect, restrictTo("admin"), newsController.deleteNews);
-
+router.get('/search', newsController.searchNews);
 module.exports = router;
 
  

@@ -418,3 +418,19 @@ exports.getAllNews = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.searchNews = async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    // استخدام $text للبحث في الفهارس التي حددناها في النموذج
+    const results = await News.find(
+      { $text: { $search: q } },
+      { score: { $meta: "textScore" } } // ترتيب النتائج حسب الأكثر صلة
+    ).sort({ score: { $meta: "textScore" } });
+
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ message: "حدث خطأ أثناء البحث", error });
+  }
+};
