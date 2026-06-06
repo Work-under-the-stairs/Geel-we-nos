@@ -86,17 +86,38 @@ export default function Navbar() {
 
       {/* Search Modal */}
       {searchOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setSearchOpen(false)} />
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg bg-white p-4 rounded-2xl shadow-2xl">
-            <form onSubmit={(e) => { e.preventDefault(); navigate(`/search?q=${e.target.search.value}`); setSearchOpen(false); }} className="relative flex items-center">
-              <Search className="absolute right-3 text-slate-400" size={20} />
-              <input name="search" type="text" autoFocus placeholder="عن ماذا تبحث؟..." className="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary" />
-              <button type="button" onClick={() => setSearchOpen(false)} className="mr-3 text-sm font-bold text-gray-500">إغلاق</button>
-            </form>
-          </div>
-        </>
-      )}
+  <>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setSearchOpen(false)} />
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg bg-white p-4 rounded-2xl shadow-2xl">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const value = e.target.search.value.trim();
+          if (!value) return;
+          setSearchOpen(false);
+          navigate(`/search?q=${encodeURIComponent(value)}`);
+        }}
+        className="relative flex items-center"
+      >
+        <Search className="absolute right-3 text-slate-400" size={20} />
+        <input
+          name="search"
+          type="text"
+          autoFocus
+          placeholder="عن ماذا تبحث؟..."
+          className="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          type="button"
+          onClick={() => setSearchOpen(false)}
+          className="mr-3 text-sm font-bold text-gray-500"
+        >
+          إغلاق
+        </button>
+      </form>
+    </div>
+  </>
+)}
 
       {menuOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setMenuOpen(false)} />}
       <div className={`fixed top-0 right-0 h-full w-[280px] bg-white shadow-2xl z-50 transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
