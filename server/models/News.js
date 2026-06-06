@@ -35,7 +35,7 @@ const newsSchema = new mongoose.Schema(
         name: { type: String, trim: true, required: true },
         role: {
           type: String,
-          enum: ["writer", "photographer", "editor"],
+          enum: ["writer", "photographer", "editor", 'interview', 'investigation', 'report', 'infograph'],
           default: "writer",
         },
       },

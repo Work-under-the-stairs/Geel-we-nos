@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Loader2, Camera, Edit3, PenTool } from 'lucide-react';
+import { User, Calendar, Clock, MessageSquare, SendHorizonal, Play, FolderOpen, Loader2, Camera, Edit3, PenTool, BookOpen, Search, FileText, BarChart2 } from 'lucide-react';
 import PopularArticles from '../components/ui/PopularArticles';
 import Loading from '../components/layout/Loading';
 import { toast } from 'react-hot-toast';
@@ -19,9 +19,13 @@ import {
 } from '../hooks/useArticles';
 import { FALLBACK_IMAGE } from '../constants/Fall_Back_Image';
 const ROLE_MAP = {
-  writer:       { label: "كاتب",    Icon: PenTool  },
-  photographer: { label: "مصور",    Icon: Camera   },
-  editor:       { label: "محرر",    Icon: Edit3    },
+  writer:        { label: "كتابة",        Icon: PenTool },
+  photographer:  { label: "تصوير",      Icon: Camera },
+  interview:    { label: "حوار",       Icon: MessageSquare },
+  investigation:{ label: "تحقيق",     Icon: Search },
+  report:       { label: "تقرير",      Icon: FileText },
+  infograph:    { label: "أنفوجراف",    Icon: BarChart2 },
+  editor:       { label: "تحرير",      Icon: Edit3 },
 };
 
 export default function ArticleDetail() {
@@ -150,8 +154,8 @@ export default function ArticleDetail() {
                         className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full"
                       >
                         <Icon size={13} className="text-[var(--color-secondary)]" />
-                        <span>{name}</span>
                         <span className="text-slate-400 font-normal">· {label}</span>
+                        <span>{name}</span>
                       </div>
                     ));
                   })}
