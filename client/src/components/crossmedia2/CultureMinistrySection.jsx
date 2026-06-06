@@ -116,48 +116,60 @@ const CultureMinistrySection = () => {
           </div>
         </section>
 
-        <section className="relative w-full py-32 mt-16 group overflow-hidden bg-[#18181b]">
-          <img 
-            src="/assets/crossmedia2/zewi-hemam.jpg" 
-            alt="فريق ذوي الهمم" 
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent"></div>
-
-          <div className="max-w-6xl mx-auto px-6 relative z-10">
-            <div className="w-full lg:w-3/5">
-              <FadeUpScroll>
-                <div className="inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-5 py-2 rounded-full mb-8">
-                  <Heart className="w-5 h-5 text-amber-400" />
-                  <span className="text-amber-400 font-bold tracking-wide">طاقات منتجة</span>
-                </div>
-                <h3 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
-                  الاهتمام <span className="text-amber-400">بذوي الهمم</span>
-                </h3>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.2}>
-                <p className="text-xl font-light leading-relaxed text-slate-200 mb-8">
-                  ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
-                </p>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.3}>
-                <div className="bg-[#2b2b36]/80 backdrop-blur-sm border-r-4 border-amber-400 p-6 rounded-l-2xl mb-8 shadow-sm">
-                  <p className="text-lg md:text-xl font-medium leading-relaxed text-white">
-                    هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
-                  </p>
-                </div>
-              </FadeUpScroll>
-
-              <FadeUpScroll delay={0.4}>
-                <p className="text-lg text-slate-300 font-light leading-relaxed">
-                  وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
-                </p>
-              </FadeUpScroll>
-            </div>
+<section className="relative w-full h-screen group overflow-hidden bg-[#18181b] mt-12 md:mt-16 z-0 border-t border-white/5">
+  <div className="relative z-10 w-full h-full lg:absolute lg:inset-0 lg:flex lg:items-center py-10 lg:py-0">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col h-full lg:h-auto justify-start">
+      <div className="w-full lg:w-3/5 text-right flex flex-col items-start h-auto mt-10">
+        <FadeUpScroll>
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full mb-6 lg:mb-8">
+            <Heart className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-400 font-bold text-xs tracking-wide">طاقات منتجة</span>
           </div>
-        </section>
+          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 lg:mb-8 leading-tight">
+            الاهتمام <span className="text-amber-400">بذوي الهمم</span>
+          </h3>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.2}>
+          <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed text-slate-200 mb-6 lg:mb-8 max-w-3xl lg:max-w-none overflow-y-auto lg:overflow-visible">
+            ويضيف حافظ أن وزارة الثقافة تهتم بشكل كبير بذوي القدرات الخاصة، وهو اتجاه عام في الدولة حاليًا، من أجل تحويلهم إلى طاقات منتجة وصاحبة تأثير كبير، ولذلك أنشأت إدارة لذوي الاحتياجات الخاصة تتبع الهيئة العامة لقصور الثقافة.
+          </p>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.3}>
+          <div className="bg-[#2b2b36]/70 backdrop-blur-sm border-r-4 border-amber-400 p-4 rounded-l-2xl mb-6 lg:mb-8 shadow-sm w-full">
+            <p className="text-sm md:text-base lg:text-xl font-medium leading-relaxed text-white">
+              هناك العديد من العروض التي ينفذها <span className="text-amber-400 font-bold text-lg md:text-2xl mx-1">فريقُ ذوي الهمم الغنائي</span>، مثل عرض "محطة جمال عبد الناصر" الذي لقيَ إشادة كبيرة من الحاضرين.
+            </p>
+          </div>
+        </FadeUpScroll>
+
+        <FadeUpScroll delay={0.4}>
+          <p className="text-sm md:text-base lg:text-lg text-slate-300 font-light leading-relaxed max-w-3xl lg:max-w-none">
+            وتسعى الوزارة للحفاظ على الهوية المصرية لدى الأجيال الجديدة عن طريق تنظيم المسرحيات والندوات التاريخية، لمواجهة أي تأثيرات خارجية عبر وسائل التواصل الاجتماعي.
+          </p>
+        </FadeUpScroll>
+      </div>
+    </div>
+  </div>
+
+  <div className="absolute inset-0 z-0 h-full w-full">
+    <img 
+      src="/assets/crossmedia2/zewi-hemam.jpg" 
+      alt="فريق ذوي الهمم" 
+      className="absolute object-cover transition-transform duration-700 group-hover:scale-105 opacity-60 grayscale z-0
+                 lg:inset-0 lg:h-full lg:w-full lg:opacity-80
+                 h-1/2 bottom-0 w-full"
+    />
+    
+    <div className="absolute inset-x-0 bottom-0 h-1/2 z-1 lg:hidden">
+      <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-[#18181b] via-[#18181b]/40 to-transparent" />
+      {/* <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#18181b] via-[#18181b]/10 to-transparent" /> */}
+    </div>
+    
+    <div className="hidden lg:block absolute inset-0 bg-gradient-to-l from-[#1e1e24f3] via-[#1e1e24]/80 to-transparent z-1" />
+  </div>
+</section>
 
         <section className="relative flex flex-col justify-center py-32 px-6 max-w-6xl mx-auto z-10">
           
