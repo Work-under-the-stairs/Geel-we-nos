@@ -418,3 +418,33 @@ exports.getAllNews = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.searchNews = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    console.log("🔍 Search hit! q =", q);
+
+    if (!q || q.trim() === "") {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const results = await News.find({
+      status: { $ne: "draft" },
+      $or: [
+        { title: { $regex: q.trim(), $options: "i" } },
+        { content: { $regex: q.trim(), $options: "i" } },
+        { hashtags: { $regex: q.trim(), $options: "i" } },
+      ]
+    })
+      .sort({ important_rate: -1, createdAt: -1 })
+      .limit(30)
+      .populate("writer", "name avatar")
+      .populate("category", "name icon_name");
+
+    console.log("Results count:", results.length);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Search error:", error.message);
+    next(error);
+  }
+};

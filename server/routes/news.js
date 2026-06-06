@@ -1,16 +1,17 @@
+ 
 const express = require("express");
 const router = express.Router();
 const newsController = require("../controllers/newsController");
 
 const { protect, restrictTo } = require("../middleware/authMiddleware"); 
 const upload = require("../middleware/upload");
-
+ 
 router.get("/featured", newsController.getFeatured);
 router.get("/trending", newsController.getTrending);
 router.get("/latest", newsController.getLatest);
 router.get("/grouped-by-category", newsController.getGroupedByCategory);
 router.get("/urgent", newsController.getUrgent);
-
+router.get('/search', newsController.searchNews);
 router.post("/add", protect, restrictTo("admin"), 
 upload.fields([{ name: "images", maxCount: 10 },{ name: "videos", maxCount: 5 },]), 
 newsController.createNews);
@@ -30,7 +31,4 @@ router.patch("/:id", protect, restrictTo("admin"), newsController.updateNews);
 router.delete("/:id", protect, restrictTo("admin"), newsController.deleteNews);
 
 module.exports = router;
-
- 
- 
  
