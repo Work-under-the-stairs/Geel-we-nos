@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Lightbulb } from 'lucide-react';
+import { Palette, Lightbulb, Code } from 'lucide-react';
 
 const FadeUpScroll = ({ children, delay = 0 }) => {
   return (
@@ -61,11 +61,11 @@ const CrossmediaFooter = () => {
           <FadeUpScroll delay={0.15}>
             <div className="flex items-start gap-4 h-full md:border-r md:border-white/5 md:pr-12">
               <div className="flex-shrink-0 p-3 bg-pink-500/10 rounded-xl border border-pink-500/20">
-                <Palette className="w-5 h-5 text-pink-400" strokeWidth={1.5} />
+                <Code className="w-5 h-5 text-pink-400" strokeWidth={1.5} />
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white tracking-tight mb-4">
-                  تصميم
+                  تصميم وتطوير
                 </h4>
                 <div className="flex flex-wrap gap-3">
                   {designers.map((designer, index) => (
