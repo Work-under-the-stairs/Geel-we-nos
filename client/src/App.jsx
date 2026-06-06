@@ -2,7 +2,11 @@ import React, { useEffect } from 'react'
 import toast, {Toaster} from 'react-hot-toast'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Register from './pages/Register'
-import CrossMediaPage from './pages/CrossMediaPage'
+import DoaaStory from './pages/crossmediastories/DoaaStory'
+import AhmedStory from './pages/crossmediastories/AhmedStory'
+import GhazalStory from './pages/crossmediastories/GhazalStory'
+import HassanStory from './pages/crossmediastories/HassanStory'
+import AdhamStory from './pages/crossmediastories/AdhamStory'
 import CrossMediaPageGaza from './pages/CrossMediaPageGaza'
 import Login from './pages/Login'
 import Category from './pages/Category'
@@ -41,8 +45,11 @@ const App = () => {
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />
         <Route path="/edit/article/:id" element={isAdmin() ? <EditArticle/> : <Navigate to="/" replace />} />
         
-        <Route path="/cross-media" element={<CrossMediaPage/>} />
-
+        <Route path="/cross-media" element={<DoaaStory/>} />
+        <Route path="/cross-media/ahmed" element={<AhmedStory/>} />
+        <Route path="/cross-media/ghazal" element={<GhazalStory/>} />
+        <Route path="/cross-media/hassan" element={<HassanStory/>} />
+        <Route path="/cross-media/adham" element={<AdhamStory/>} />
         <Route path="/cross-media-initiatives" element={<CrossMediaArticle2/>} />
 
         <Route path="/cross-media-gaza" element={<CrossMediaPageGaza/>} />
