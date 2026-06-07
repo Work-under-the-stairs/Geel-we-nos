@@ -274,6 +274,7 @@ exports.createNews = async (req, res, next) => {
       youtube_videos: youtubeVideos,
       hashtags,
       contributors,
+      main_image_comment: req.body.main_image_comment || "",
       status: req.body.status || "draft",
     });
 
@@ -295,7 +296,7 @@ exports.updateNews = async (req, res, next) => {
       return res.status(403).json({ status: "fail", message: "You are not authorized" });
     }
 
-    const allowed = ["title", "content", "images", "videos", "youtube_videos", "category", "crossMediaId", "important_rate", "isUrgent", "hashtags", "contributors", "status"];
+    const allowed = ["title", "content", "images", "main_image_comment", "videos", "youtube_videos", "category", "crossMediaId", "important_rate", "isUrgent", "hashtags", "contributors", "status"];
     const jsonFields = ["hashtags", "contributors", "youtube_videos", "images", "videos"];
 
     jsonFields.forEach((field) => {

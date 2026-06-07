@@ -25,6 +25,12 @@ const newsSchema = new mongoose.Schema(
         caption: { type: String, trim: true, default: "" },
       },
     ],
+    main_image_comment: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     videos: [{ type: String, trim: true }],
     youtube_videos: [{ type: String, trim: true }],
 

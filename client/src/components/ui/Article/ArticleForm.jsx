@@ -118,6 +118,7 @@ export default function ArticleForm({
   const [hashtagInput, setHashtagInput] = useState("");
     // ── States ───────────────────────────────────────────────────
   const [selectedStory, setSelectedStory] = useState("");
+  const [mainImageComment, setMainImageComment] = useState("");
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredUploading, setFeaturedUploading] = useState(false);
   const [featuredProgress, setFeaturedProgress] = useState(0);
@@ -238,6 +239,7 @@ export default function ArticleForm({
     setIsUrgent(initialData.isUrgent || false);
     setHashtags(initialData.hashtags || []);
     setContributors(initialData.contributors || []);
+    setMainImageComment(initialData.main_image_comment || "");
 
     if (initialData.youtube_videos?.length > 0) {
       setYoutubeLinks(initialData.youtube_videos.map(id => ({ id, url: `https://www.youtube.com/watch?v=${id}` })));
@@ -302,10 +304,10 @@ export default function ArticleForm({
 
     if (featuredImage?.url) {
       formattedGallery.unshift({ 
-        url: featuredImage.url, 
-        fileId: featuredImage.fileId, 
-        caption: "الصورة البارزة" 
-      });
+  url: featuredImage.url, 
+  fileId: featuredImage.fileId, 
+  caption: mainImageComment.trim() 
+});
     }
 
     const allVideos = videoPreview?.url ? [videoPreview.url] : [];
@@ -322,6 +324,7 @@ export default function ArticleForm({
       youtube_videos: youtubeIdsArray,
       hashtags,
       contributors,
+      main_image_comment: mainImageComment.trim(),
       crossMediaId: selectedStory || null,
       status: targetStatus,
     };
@@ -639,6 +642,21 @@ export default function ArticleForm({
             removeHashtag={removeHashtag} featuredUploading={featuredUploading} featuredProgress={featuredProgress}
             featuredImage={featuredImage} handleRemoveFeatured={handleRemoveFeatured} handleFeaturedImage={handleFeaturedImage}
           />
+
+          <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm mt-6">
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <h2 className="text-lg font-bold text-slate-800">تعليق الصورة الرئيسية</h2>
+            </div>
+            <input
+              type="text"
+              className="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-primary"
+              placeholder="مثال: الرئيس خلال مؤتمر صحفي في القاهرة..."
+              value={mainImageComment}
+              onChange={(e) => setMainImageComment(e.target.value)}
+            />
+            <p className="text-xs text-slate-400 mt-2">سيظهر هذا النص أسفل الصورة الرئيسية للمقال.</p>
+          </div>
 
           <div className="bg-white rounded-[28px] border border-slate-200 p-4 sm:p-6 shadow-sm mt-6">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
