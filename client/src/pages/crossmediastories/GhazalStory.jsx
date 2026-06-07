@@ -199,7 +199,7 @@ const GhazalStory = () => {
             <FaChild />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">ملحمة التحدي وإرادة القلم</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">غزل الحالمة</h2>
             <p className="text-blue-300/60 text-sm mt-1">كيف تحولت مواهب غزل البسيطة إلى درع صمود جبار أمام خذلان الحرب</p>
           </div>
         </div>

@@ -101,7 +101,7 @@ const DoaaStory = () => {
             <FaChild />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">المخطط الزمني لرحلة الصمود</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">دعاء الصابرة</h2>
             <p className="text-blue-300/60 text-sm mt-1">محطات شكلت حكاية البطلة الصغيرة دعاء</p>
           </div>
         </div>

@@ -201,7 +201,7 @@ const AdhamStory = () => {
             <FaChild />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">محطات حاسمة من الصمود والتحدي</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">أدهم البطل</h2>
             <p className="text-blue-300/60 text-sm mt-1">كيف تخطى ابن السبعة أعوام كبار الأجيال بمواقفه</p>
           </div>
         </div>
