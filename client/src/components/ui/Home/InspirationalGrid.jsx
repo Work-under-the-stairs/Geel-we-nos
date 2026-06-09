@@ -44,7 +44,7 @@ export default function InspirationalGrid({ articles: categoryObject }) {
               <div className="absolute bottom-0 right-0 left-0 p-6 sm:p-8 flex flex-col items-start gap-2">
                 
                 <span className="bg-white text-primary text-[10px] font-black px-3 py-1 rounded-md tracking-wider uppercase">
-                  {art.category?.name || "ألهمني"}
+                  {art.category?.name || "أثر ونجاح"}
                 </span>
                 
                 <h3 className="text-white font-extrabold text-lg sm:text-xl md:text-2xl leading-snug max-w-xl group-hover:text-secondary transition-colors duration-200 drop-shadow-sm">
