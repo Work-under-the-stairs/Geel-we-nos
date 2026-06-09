@@ -1,128 +1,110 @@
 import React, { useState } from 'react';
 
 const HistoricalIcons = () => {
-  // حالة لمتابعة فئة الرموز التاريخية
-  const [activeCategory, setActiveCategory] = useState('leaders');
-  // حالة لمتابعة نمط التحول للطفل (صامت vs فاعل)
-  const [childRole, setChildRole] = useState('silent');
+  const [activeIcon, setActiveIcon] = useState(0);
 
-  const iconCategories = {
-    leaders: {
-      label: "👑 سير القادة والزعماء",
-      quote: "تقديم عبقرية القيادة وبناء الدولة بأسلوب درامي مشوق، يربط الطفل بقرارات أجداده المصيرية."
+  const historicalFigures = [
+    {
+      id: 0,
+      role: "القادة",
+      icon: "🦅",
+      title: "أبطال التحرير والتوحيد",
+      description: "تقديم سير القادة العسكريين والسياسيين الذين حافظوا على تراب الوطن، ليكونوا قدوة حية للطفل في التضحية والقيادة والشجاعة."
     },
-    scientists: {
-      label: "🧪 إسهامات العلماء",
-      quote: "عرض ابتكارات علماء مصر عبر العصور لتثبت للطفل أن وطننا هو مهد العلوم والطب والهندسة الطليعية."
+    {
+      id: 1,
+      role: "العلماء",
+      icon: "🔭",
+      title: "رواد الفكر والاكتشاف",
+      description: "إبراز النماذج الوطنية في الفلك، الطب، والهندسة، لتشجيع عقل الطفل على الابتكار وإدراك إسهامات وطنه العلمية."
     },
-    creators: {
-      label: "🎨 إبداع الفنانين والمبدعين",
-      quote: "إبراز الفنون والعمارة والأدب، لتغذية ذوق الطفل الفني وغرس الاعتزاز بالبصمة الحضارية الفريدة."
+    {
+      id: 2,
+      role: "المبدعين",
+      icon: "✒️",
+      title: "صناع الجمال والفن",
+      description: "عرض روائع الفنانين والمعماريين الذين سطروا إسهامات وطنهم الحضارية بأيديهم الذهبية، لترسيخ التذوق الفني."
     }
-  };
+  ];
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1f1610] to-[#1a120b] text-white py-16 px-6 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden">
-      
-      {/* عناصر فنية في الخلفية */}
-      <div className="absolute inset-0 pointer-events-none opacity-10">
-        <div className="absolute top-1/2 left-5 w-80 h-80 bg-amber-500 rounded-full blur-3xl animate-pulse"></div>
-      </div>
+    <section className="relative w-full bg-[#211b14] text-[#e5e5e5] py-24 px-6 md:px-12 font-serif dir-rtl selection:bg-[#d4b483] selection:text-black overflow-hidden ">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHBhdGggZD0iTTAgMGg4MHY4MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik00MCA0MGw0MC00ME0wIDgwbDQwLTQwIiBzdHJva2U9IiNkNGI0ODMiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')]"></div>
 
-      <div className="relative z-10 max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+      <div className="relative z-10 max-w-6xl mx-auto flex flex-col gap-16">
         
-        {/* الجانب الأيمن: إبراز الرموز وقاعات العرض الفعالة */}
-        <div className="lg:col-span-6 flex flex-col gap-6">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-[2px] bg-amber-400 inline-block"></span>
-            <span className="text-amber-400 font-bold text-sm uppercase tracking-wider">المحور الثالث: قدوة حية لا تلقين</span>
-          </div>
-
-          <h2 className="text-3xl md:text-4xl font-black text-gray-100 leading-tight">
-            إبراز الرموز الوطنية لتقديم <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">قدوة ملهمة للأجيال</span>
-          </h2>
-
-          <p className="text-gray-300 text-sm md:text-base leading-relaxed text-justify font-light">
-            ينوه د. بدوي بضرورة تقديم سير الشخصيات التاريخية بأسلوب مشوق لغرس الاعتزاز داخل نفوس الصغار. اختر الفئة لاستكشاف طريقة العرض المعاصرة:
-          </p>
-
-          {/* تبويبات اختيار الرموز المضيئة */}
-          <div className="flex flex-col gap-3 mt-2">
-            {Object.keys(iconCategories).map((key) => (
-              <button
-                key={key}
-                onClick={() => setActiveCategory(key)}
-                className={`w-full text-right p-4 rounded-xl transition-all duration-300 border flex items-center justify-between ${
-                  activeCategory === key
-                    ? 'bg-amber-400/10 border-amber-400/60 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
-                    : 'bg-white/5 border-white/5 hover:border-white/10'
-                }`}
-              >
-                <span className={`font-bold text-sm md:text-base ${activeCategory === key ? 'text-amber-400' : 'text-gray-300'}`}>
-                  {iconCategories[key].label}
-                </span>
-                <span className={`text-xs ${activeCategory === key ? 'opacity-100 text-amber-300' : 'opacity-0'}`}>✦ نشط الآن</span>
-              </button>
-            ))}
-          </div>
-
-          {/* صندوق عرض المحاكاة */}
-          <div className="bg-black/50 border border-white/10 p-5 rounded-xl min-h-[100px] backdrop-blur-sm">
-            <p className="text-gray-300 text-sm md:text-base leading-relaxed italic font-light">
-              "{iconCategories[activeCategory].quote}"
-            </p>
-          </div>
-        </div>
-
-        {/* الجانب الأيسر: خلاصة الفلسفة والمتحف الناجح (لوحة التحول التفاعلي) */}
-        <div className="lg:col-span-6 w-full flex flex-col items-center">
-          <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-lg relative shadow-2xl">
-            
-            <h3 className="text-xl font-bold text-center text-gray-200 mb-6">
-              معيار المتحف الناجح: تحول دور الطفل
-            </h3>
-
-            {/* أزرار التبديل الحركية بين الحالتين */}
-            <div className="flex bg-black/40 p-1.5 rounded-xl border border-white/10 mb-8 relative">
-              <button
-                onClick={() => setChildRole('silent')}
-                className={`w-1/2 py-2.5 text-xs md:text-sm font-bold rounded-lg transition-all z-10 ${
-                  childRole === 'silent' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'text-gray-400'
-                }`}
-              >
-                🔴 مشاهد صامت وزائر عابر
-              </button>
-              <button
-                onClick={() => setChildRole('active')}
-                className={`w-1/2 py-2.5 text-xs md:text-sm font-bold rounded-lg transition-all z-10 ${
-                  childRole === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-gray-400'
-                }`}
-              >
-                🟢 مشارك فاعل وحارس للتراث
-              </button>
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+          
+          <div className="w-full lg:w-5/12 flex flex-col gap-6">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-[1px] bg-[#d4b483]"></span>
+              <span className="text-[#d4b483] font-bold text-sm tracking-widest uppercase font-sans drop-shadow-md">
+                القدوة الحية
+              </span>
             </div>
 
-            {/* شاشة تجسيد حالة الطفل المستهدف */}
-            <div className={`p-6 rounded-xl border transition-all duration-500 min-h-[190px] flex flex-col justify-center ${
-              childRole === 'silent' 
-                ? 'bg-red-950/20 border-red-900/40' 
-                : 'bg-emerald-950/20 border-emerald-900/40'
-            }`}>
-              <h4 className={`text-base font-bold mb-3 ${childRole === 'silent' ? 'text-red-400' : 'text-emerald-400'}`}>
-                {childRole === 'silent' ? '❌ النمط التقليدي (الحفظ والتلقين)' : '🎯 النمط الحديث (التجربة والتفاعل)'}
-              </h4>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed text-justify font-light">
-                {childRole === 'silent' ? (
-                  "يمر الطفل عبر قنوات التلقين الصامتة، ينظر إلى المقتنيات كأشياء قديمة ميتة لا تربطه بها صلة، ويشعر بالملل السريع وتتبخر التجربة من ذاكرته بمجرد الخروج من بوابات المتحف."
-                ) : (
-                  "يشتبك الطفل مع وجدان المكان، يشعر بالتحدي والمتعة، يتحول عبر التجربة الحية والتفاعل المستمر إلى حارس للتراث يحمل المسؤولية ويشعر من كل قلبه أنه جزء لا يتجزأ من هذا الوطن."
-                )}
+            <h2 className="text-4xl md:text-5xl font-black text-white leading-tight font-sans drop-shadow-lg">
+              إبراز الرموز <span className="text-[#d4b483]">التاريخية</span>
+            </h2>
+
+            <div className="relative bg-[#14100c]/80 backdrop-blur-md border-r-4 border-[#d4b483] p-6 md:p-8 rounded-l-xl shadow-2xl mt-4">
+              <span className="absolute -top-6 right-4 text-7xl text-[#d4b483]/30 font-sans">“</span>
+              <p className="text-gray-200 text-base md:text-lg leading-relaxed text-justify font-light relative z-10">
+                وينوه بدوي إلى ضرورة إبراز الرموز التاريخية والنماذج الوطنية في قاعات العرض، وتقديم سير القادة والعلماء والمبدعين بأسلوب مشوق؛ لتقديم قدوة حية للأطفال تغرس في نفوسهم الاعتزاز بإسهامات وطنهم الحضارية.
               </p>
             </div>
+          </div>
 
-            <p className="text-center text-[11px] text-gray-500 mt-4 italic">
-              * اضغط على الوضعين بالأعلى لتلاحظ الفرق في صياغة هوية الصغار
-            </p>
+          <div className="w-full lg:w-7/12 relative mt-8 lg:mt-0">
+            <div className="text-center mb-8 relative z-20">
+              <h3 className="text-2xl font-bold text-[#d4b483] font-sans drop-shadow-md">قاعة الخالدين</h3>
+              <p className="text-xs md:text-sm text-gray-400 mt-2">انقر على الإطارات لتسليط الضوء على الرموز الوطنية</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 relative z-10">
+              {historicalFigures.map((figure) => (
+                <div 
+                  key={figure.id}
+                  onClick={() => setActiveIcon(figure.id)}
+                  className={`group relative cursor-pointer rounded-2xl transition-all duration-500 overflow-hidden ${
+                    activeIcon === figure.id 
+                      ? 'bg-[#1a1510] border-2 border-[#d4b483] scale-105 shadow-[0_0_30px_rgba(212,180,131,0.2)] z-20' 
+                      : 'bg-black/40 border-2 border-white/5 hover:border-[#d4b483]/40 scale-100 z-10 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full blur-3xl transition-all duration-700 pointer-events-none ${
+                    activeIcon === figure.id ? 'bg-[#d4b483]/20 opacity-100' : 'bg-transparent opacity-0'
+                  }`}></div>
+
+                  <div className="p-6 md:p-8 flex flex-col items-center text-center h-full relative z-10">
+                    <div className={`text-5xl md:text-6xl mb-6 transition-all duration-500 ${
+                      activeIcon === figure.id ? 'scale-110 drop-shadow-[0_0_15px_rgba(212,180,131,0.8)]' : 'grayscale brightness-75'
+                    }`}>
+                      {figure.icon}
+                    </div>
+                    
+                    <span className={`text-[10px] md:text-xs font-bold tracking-widest uppercase mb-2 transition-colors duration-300 ${
+                      activeIcon === figure.id ? 'text-[#d4b483]' : 'text-gray-500'
+                    }`}>
+                      {figure.role}
+                    </span>
+                    
+                    <h4 className="text-white font-bold font-sans text-lg mb-4">
+                      {figure.title}
+                    </h4>
+                    
+                    <div className={`transition-all duration-500 overflow-hidden ${
+                      activeIcon === figure.id ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <p className="text-xs md:text-sm text-gray-300 font-light leading-relaxed">
+                        {figure.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
           </div>
         </div>
