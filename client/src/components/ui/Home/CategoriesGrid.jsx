@@ -6,7 +6,7 @@ export default function CategoriesGrid({ articles = {} }) {
   
   const techArticles    = articles['تكنولوجيا ومهارات']?.articles || [];
   const economyArticles = articles['تعليم وثقافة']?.articles || [];
-  const healthArticles  = articles['صحة']?.articles || [];
+  const healthArticles  = articles['صحة وحياة']?.articles || [];
 
   const sectionsData = [
     { title: 'تكنولوجيا ومهارات', color: 'border-secondary', data: techArticles },
