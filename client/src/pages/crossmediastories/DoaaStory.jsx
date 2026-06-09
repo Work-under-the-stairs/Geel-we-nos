@@ -152,7 +152,7 @@ const DoaaStory = () => {
           >
             <div className="text-left">
               <span className="block text-[10px] text-blue-200/70 font-medium uppercase tracking-wider">القصة التالية</span>
-              <span className="text-sm font-semibold">المحطة القادمة</span>
+              <span className="text-sm font-semibold">غزل الحالمة</span>
             </div>
             <FaArrowLeft className="text-sm transition-transform group-hover:-translate-x-1" />
           </a>

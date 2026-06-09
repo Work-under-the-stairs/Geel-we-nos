@@ -322,7 +322,7 @@ const AdhamStory = () => {
             <FaArrowRight className="text-sm transition-transform group-hover:translate-x-1" />
             <div className="text-right">
               <span className="block text-[10px] text-slate-500 font-medium uppercase tracking-wider">القصة السابقة</span>
-              <span className="text-sm font-semibold">غزل المحاربه</span>
+              <span className="text-sm font-semibold">غزل الحالمة</span>
             </div>
           </a>
 
@@ -332,7 +332,7 @@ const AdhamStory = () => {
           >
             <div className="text-left">
               <span className="block text-[10px] text-blue-200/70 font-medium uppercase tracking-wider">القصة التالية</span>
-              <span className="text-sm font-semibold">حسن المحارب</span>
+              <span className="text-sm font-semibold">حسن الصامد</span>
             </div>
             <FaArrowLeft className="text-sm transition-transform group-hover:-translate-x-1" />
           </a>
