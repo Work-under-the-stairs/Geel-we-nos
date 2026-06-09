@@ -20,6 +20,10 @@ import EditArticle from './pages/EditArticle'
 import ScrollToTop from './ScrollToTop'
 import CrossMediaArticle2 from './pages/CrossMediaArticle2'
 import SearchPage from './pages/SearchPage'
+import AboutUs from './pages/AboutUs'
+import OurVision from './pages/OurVision'
+import PublishingPolicy from './pages/PublishingPolicy'
+import ContactUs from './pages/ContactUs'
 const App = () => {
   
   return (
@@ -39,7 +43,11 @@ const App = () => {
           <Route index element={<Home/>}/>
           <Route path="/:category" element={<Category/>} />
           <Route path="/news/:id" element={<ArticleDetail/>}/>
-          <Route path="/search" element={<SearchPage/>} />  {/* ← add this */}
+          <Route path="/search" element={<SearchPage/>} />
+          <Route path="/about" element={<AboutUs/>} />
+          <Route path="/vision" element={<OurVision/>} />
+          <Route path="/publishing-policy" element={<PublishingPolicy/>} />
+          <Route path="/contact" element={<ContactUs/>} />
         </Route>
         <Route path="/admin" element={isAdmin() ? <AdminDashboard/> : <Navigate to="/" replace />} />
         <Route path="/add/article" element={isAdmin() ? <AddArticle/> : <Navigate to="/" replace />} />

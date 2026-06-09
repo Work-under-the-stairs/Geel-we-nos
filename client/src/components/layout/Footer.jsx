@@ -58,8 +58,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="text-white/70 hover:text-secondary font-bold text-[14px] transition-colors duration-200 block">
-                  سياسة الخصوصية
+                <Link to="/publishing-policy" className="text-white/70 hover:text-secondary font-bold text-[14px] transition-colors duration-200 block">
+                  سياسة النشر
                 </Link>
               </li>
               <li>
@@ -78,7 +78,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           
           <p className="text-white/50 text-xs font-semibold tracking-wide order-2 sm:order-1">
-            &copy; {new Date().getFullYear()} جيل ونص. جميع الحقوق محفوظة.
+            &copy; {new Date().getFullYear()} جميع حقوق النشر محفوظة لدى موقع «جيل ونص» التابع لكلية الإعلام جامعة عين شمس ٢٠٢٦، ويحظر نشر أو توزيع أو طبع أي مادة دون إذن مسبق من الكلية.
           </p>
 
           <div className="flex items-center gap-5 order-1 sm:order-2">

@@ -5,12 +5,12 @@ import { FALLBACK_IMAGE } from '../../../constants/Fall_Back_Image';
 export default function CategoriesGrid({ articles = {} }) {
   
   const techArticles    = articles['تكنولوجيا ومهارات']?.articles || [];
-  const economyArticles = articles['اقتصاد']?.articles || [];
+  const economyArticles = articles['تعليم وثقافة']?.articles || [];
   const healthArticles  = articles['صحة']?.articles || [];
 
   const sectionsData = [
     { title: 'تكنولوجيا ومهارات', color: 'border-secondary', data: techArticles },
-    { title: 'اقتصاد والمال', color: 'border-primary', data: economyArticles },
+    { title: 'تعليم وثقافة', color: 'border-primary', data: economyArticles },
     { title: 'صحة وحياة', color: 'border-emerald-500', data: healthArticles },
   ]
 
