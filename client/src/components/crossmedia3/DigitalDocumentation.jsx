@@ -76,7 +76,7 @@ const DigitalDocumentation = () => {
                       : 'bg-[#3e2723] border-amber-900/30 text-stone-400 hover:border-amber-700'
                   }`}
                 >
-                  <span className="block text-2xl mb-2">{key === 'archive' ? '📊' : key === 'hologram' ? '🧞‍♂️' : '🎥'}</span>
+                  <span className="block text-2xl mb-2">{key === 'archive' ? '📜' : key === 'hologram' ? '👁️' : '🏺'}</span>
                   <span className={`font-bold text-sm ${activeMode === key ? 'text-amber-400' : 'text-stone-300'}`}>
                     {docFeatures[key].title}
                   </span>
