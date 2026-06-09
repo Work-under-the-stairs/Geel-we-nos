@@ -1,106 +1,456 @@
 import React, { useState } from 'react';
 
-const FinalLegacy = () => {
-  // حالة لمتابعة الأثر التربوي المستكشف داخل سمات الطفل
-  const [activeTrait, setActiveTrait] = useState('initiative');
+const childTraits = {
+  initiative: {
+    title: "مبادر تفاعلي",
+    icon: "✦",
+    desc: "يتحول الطفل من زائر صامت يتلقى التلقين إلى عنصر حركي يبادر بالتجربة، يلمس الشاشات الرقمية، ويقود جولته الاستكشافية بنفسه داخل القصر."
+  },
+  curious: {
+    title: "مندهش وفضولي",
+    icon: "◈",
+    desc: "تثير تقنيات الهولوجرام والواقع الافتراضي دهشة الصغير، وتحول فضوله الفطري نحو استكشاف أسرار أجداده والبحث عن جذوره الحضارية."
+  },
+  researcher: {
+    title: "يسأل ويبحث",
+    icon: "◎",
+    desc: "الربط الذكي بين المنهج المدرسي والسينوغرافيا يدفع الطفل لطرح أسئلة عميقة وعفوية، محاولاً تفكيك وتحليل التجارب الإنسانية للماضي."
+  },
+  guardian: {
+    title: "حارس للتراث",
+    icon: "⬡",
+    desc: "القمة والهدف الأسمى؛ حيث يولد لدى الطفل شعور حقيقي بالمسؤولية والانتماء، فيشعر من أعماقه أنه حارس ووريث شرعي لهذا التاريخ العريق."
+  }
+};
 
-  const childTraits = {
-    initiative: {
-      title: "⚡ مبادر تفاعلي",
-      desc: "يتحول الطفل من زائر صامت يتلقى التلقين إلى عنصر حركي يبادر بالتجربة، يلمس الشاشات الرقمية، ويقود جولته الاستكشافية بنفسه داخل القصر."
-    },
-    curious: {
-      title: "👁️ مندهش وفضولي",
-      desc: "تثير تقنيات الهولوجرام والواقع الافتراضي دهشة الصغير، وتحول فضوله الفطري نحو استكشاف أسرار أجداده والبحث عن جذوره الحضارية."
-    },
-    researcher: {
-      title: "🔍 يسأل ويبحث",
-      desc: "الربط الذكي بين المنهج المدرسي والسينوغرافيا يدفع الطفل لطرح أسئلة عميقة وعفوية، محاولاً تفكيك وتحليل التجارب الإنسانية للماضي."
-    },
-    guardian: {
-      title: "🛡️ حارس للتراث",
-      desc: "القمة والهدف الأسمى؛ حيث يولد لدى الطفل شعور حقيقي بالمسؤولية والانتماء، فيشعر من أعماقه أنه حارس ووريث شرعي لهذا التاريخ العريق."
+const traitKeys = Object.keys(childTraits);
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+  .fl-root {
+    direction: rtl;
+    font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+    background: #0f0a06;
+    color: #e8dcc8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .fl-root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,115,20,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 30% at 10% 20%, rgba(180,115,20,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .fl-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .fl-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    align-items: center;
+  }
+
+  /* ── Header ── */
+  .fl-header {
+    text-align: center;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .fl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c8921a;
+    background: rgba(200,146,26,0.08);
+    border: 0.5px solid rgba(200,146,26,0.3);
+    padding: 6px 18px;
+    border-radius: 100px;
+  }
+
+  .fl-badge::before,
+  .fl-badge::after {
+    content: '—';
+    opacity: 0.5;
+  }
+
+  .fl-headline {
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 900;
+    line-height: 1.35;
+    color: #f0e6d0;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .fl-headline em {
+    font-style: normal;
+    color: #c8921a;
+  }
+
+  /* ── Main grid ── */
+  .fl-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* ── Display image ── */
+  .fl-display-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 0.5px solid rgba(200,146,26,0.2);
+    display: block;
+    margin-bottom: 20px;
+    opacity: 0.9;
+  }
+
+  /* ── Panel ── */
+  .fl-panel {
+    background: rgba(30,18,8,0.7);
+    border: 0.5px solid rgba(200,146,26,0.2);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .fl-panel-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media (min-width: 640px) {
+    .fl-panel-grid {
+      grid-template-columns: 5fr 7fr;
     }
-  };
+  }
+
+  /* ── Trait buttons ── */
+  .fl-traits {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .fl-trait-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 0.5px solid rgba(200,146,26,0.15);
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    text-align: right;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    outline: none;
+    width: 100%;
+  }
+
+  .fl-trait-btn:hover {
+    background: rgba(200,146,26,0.07);
+    border-color: rgba(200,146,26,0.3);
+  }
+
+  .fl-trait-btn.active {
+    background: rgba(200,146,26,0.12);
+    border-color: rgba(200,146,26,0.5);
+  }
+
+  .fl-trait-btn.active::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20%;
+    height: 60%;
+    width: 2px;
+    background: #c8921a;
+    border-radius: 2px;
+  }
+
+  .fl-trait-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    background: rgba(200,146,26,0.08);
+    border: 0.5px solid rgba(200,146,26,0.2);
+    color: #c8921a;
+    order: 1;
+  }
+
+  .fl-trait-btn.active .fl-trait-icon {
+    background: rgba(200,146,26,0.2);
+    border-color: rgba(200,146,26,0.5);
+  }
+
+  .fl-trait-text {
+    flex: 1;
+    order: 0;
+  }
+
+  .fl-trait-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #d4c4a8;
+    display: block;
+    margin-bottom: 2px;
+    transition: color 0.2s;
+  }
+
+  .fl-trait-btn.active .fl-trait-name {
+    color: #e8d4a0;
+  }
+
+  .fl-trait-hint {
+    font-size: 10px;
+    color: #5a4a30;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .fl-trait-btn.active .fl-trait-hint {
+    color: #8a6a30;
+  }
+
+  /* ── Display ── */
+  .fl-display {
+    background: rgba(0,0,0,0.3);
+    border: 0.5px solid rgba(200,146,26,0.15);
+    border-radius: 14px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 420px;
+  }
+
+  .fl-display-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8a6820;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fl-display-label::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: rgba(200,146,26,0.2);
+  }
+
+  .fl-display-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #e8d4a0;
+    margin: 0 0 14px;
+    line-height: 1.4;
+  }
+
+  .fl-display-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: #a89878;
+    line-height: 1.9;
+    text-align: justify;
+    margin: 0;
+  }
+
+  /* ── Footer ── */
+  .fl-footer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 40px;
+    border-top: 0.5px solid rgba(200,146,26,0.2);
+  }
+
+  .fl-ornament {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0.35;
+  }
+
+  .fl-ornament-line {
+    width: 60px;
+    height: 0.5px;
+    background: #c8921a;
+  }
+
+  .fl-ornament-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #c8921a;
+  }
+
+  .fl-quote {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: clamp(15px, 2vw, 22px);
+    font-weight: 400;
+    font-style: italic;
+    color: #c8aa78;
+    text-align: center;
+    line-height: 1.7;
+    max-width: 720px;
+    margin: 0;
+    quotes: '"' '"';
+  }
+
+  .fl-quote::before { content: open-quote; }
+  .fl-quote::after  { content: close-quote; }
+
+  .fl-attribution {
+    font-size: 10px;
+    color: #4a3820;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-family: 'Cairo', monospace;
+  }
+
+  .fl-attribution strong {
+    color: #6a5030;
+    font-weight: 600;
+  }
+`;
+
+const FinalLegacy = () => {
+  const [activeTrait, setActiveTrait] = useState('initiative');
+  const trait = childTraits[activeTrait];
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-[#061d24] via-[#0f1423] to-[#1a120b] text-white py-16 px-6 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden">
-      
-      {/* جزيئات ضوئية ذهبية ناعمة تتطاير وتتلاشى في الأسفل ترمز لخلود الأثر والذاكرة */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-64 bg-gradient-to-t from-amber-500/10 to-transparent blur-3xl"></div>
-      </div>
+    <>
+      <style>{styles}</style>
+      <section className="fl-root">
+        <div className="fl-grain" aria-hidden="true" />
 
-      <div className="relative z-10 max-w-5xl w-full flex flex-col items-center gap-12">
-        
-        {/* الجزء العلوي: رسالة الأسر وميثاق الاستثمار الحقيقي */}
-        <div className="text-center max-w-3xl mx-auto flex flex-col items-center gap-4">
-          <span className="text-amber-400 text-xs font-black tracking-widest uppercase bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-400/25 backdrop-blur-sm animate-pulse">
-            ✉️ رسالة ختامية إلى الأسر المصرية
-          </span>
-          <h2 className="text-3xl md:text-5xl font-black text-gray-150 leading-tight">
-            اصطحاب طفلك للمتحف ليس نزهة عابرة.. <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200">بل استثمار في هويته!</span>
-          </h2>
-          <p className="text-gray-300 text-sm md:text-base leading-relaxed text-justify sm:text-center font-light">
-            في عصر تستحوذ فيه وسائل التواصل الاجتماعي على الجزء الأكبر من اهتمام الصغار، يمثل المتحف التفاعلي الذكي مساحة الاكتشاف الحقيقية لبناء الشخصية، الوعي، والثقافة، وتأصيل روح الانتماء في وجدان جيل الغد.
-          </p>
-        </div>
+        <div className="fl-wrap">
 
-        {/* المنتصف: لوحة التفاعل وسمات الطفل الأربعة المتطورة */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl backdrop-blur-lg shadow-2xl relative">
-          
-          {/* شريط زينة علوي مضيء يختم اللوحة */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+          {/* Header */}
+          <header className="fl-header">
+            <span className="fl-badge">رسالة ختامية إلى الأسر المصرية</span>
+            <h2 className="fl-headline">
+              اصطحاب طفلك للمتحف ليس نزهة عابرة..{' '}
+              <em>بل استثمار في هويته!</em>
+            </h2>
+          </header>
 
-          {/* الجانب الأيمن للوحة: أزرار السمات الأربعة */}
-          <div className="lg:col-span-5 grid grid-cols-2 gap-2 w-full">
-            {Object.keys(childTraits).map((key) => (
-              <button
-                key={key}
-                onClick={() => setActiveTrait(key)}
-                className={`p-4 text-right rounded-2xl transition-all duration-300 border flex flex-col gap-1 ${
-                  activeTrait === key
-                    ? 'bg-amber-400 text-black font-bold border-amber-400 shadow-xl shadow-amber-400/10'
-                    : 'bg-black/40 border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
-                }`}
-              >
-                <span className="text-sm md:text-base font-bold">
-                  {childTraits[key].title}
-                </span>
-                <span className={`text-[9px] ${activeTrait === key ? 'text-black/70' : 'text-gray-500'}`}>
-                  انقري لرصد الأثر
-                </span>
-              </button>
-            ))}
+          {/* Main */}
+          <div className="fl-grid">
+
+            {/* Interaction panel */}
+            <div className="fl-panel">
+              <div className="fl-panel-grid">
+
+                {/* Trait buttons */}
+                <div className="fl-traits" role="tablist" aria-label="اختر الأثر لاستعراضه">
+                  {traitKeys.map((key) => (
+                    <button
+                      key={key}
+                      role="tab"
+                      aria-selected={activeTrait === key}
+                      aria-controls="trait-display"
+                      onClick={() => setActiveTrait(key)}
+                      className={`fl-trait-btn${activeTrait === key ? ' active' : ''}`}
+                    >
+                      <span className="fl-trait-text">
+                        <span className="fl-trait-name">{childTraits[key].title}</span>
+                        <span className="fl-trait-hint">اضغط لرصد الأثر</span>
+                      </span>
+                      <span className="fl-trait-icon" aria-hidden="true">
+                        {childTraits[key].icon}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Display */}
+                <div
+                  id="trait-display"
+                  className="fl-display"
+                  role="tabpanel"
+                  aria-live="polite"
+                >
+                  <img
+                    src="/images/IM1.jpeg"
+                    alt="أطفال في المتحف"
+                    className="fl-display-img"
+                  />
+                  <span className="fl-display-label">الأثر الحقيقي في وعي الصغير</span>
+                  <h3 className="fl-display-title">
+                    كيف يصنع قصر الزعفران طفلاً {trait.title}؟
+                  </h3>
+                  <p className="fl-display-desc">{trait.desc}</p>
+                </div>
+
+              </div>
+            </div>
           </div>
 
-          {/* الجانب الأيسر للوحة: شاشة رصد الأثر النفسي للسمة المفعّلة */}
-          <div className="lg:col-span-7 bg-black/50 border border-white/5 p-6 rounded-2xl min-h-[160px] flex flex-col justify-center transition-all duration-500">
-            <span className="text-[10px] font-bold text-amber-400 mb-1 block uppercase tracking-wider">
-              🎯 الأثر الحقيقي في وعي الصغير ومشاعرها:
-            </span>
-            <h4 className="text-gray-200 font-bold text-base mb-2">
-              كيف يصنع قصر الزعفران طفلاً {childTraits[activeTrait].title.split(' ').slice(1).join(' ')}؟
-            </h4>
-            <p className="text-gray-300 text-xs md:text-sm leading-relaxed text-justify font-light">
-              {childTraits[activeTrait].desc}
+          {/* Footer quote */}
+          <footer className="fl-footer">
+            <div className="fl-ornament" aria-hidden="true">
+              <div className="fl-ornament-line" />
+              <div className="fl-ornament-dot" />
+              <div className="fl-ornament-line" />
+            </div>
+            <blockquote className="fl-quote">
+              النجاح الحقيقي للمتحف لا يُقاس فقط بعدد الزوار، بل بقدرته على ترك أثر حقيقي في وعي الطفل ومشاعره وذاكرته.
+            </blockquote>
+            <p className="fl-attribution">
+              ختام حديث <strong>د. أحمد محمد حميدة</strong> • رئيس قطاع المتاحف
             </p>
-          </div>
+          </footer>
 
         </div>
-
-        {/* التوقيع والمقتبس الملكي الأخير للمقال */}
-        <div className="w-full border-t border-white/10 pt-8 text-center flex flex-col items-center gap-3">
-          <p className="text-amber-300 font-serif text-lg md:text-2xl max-w-2xl mx-auto italic leading-relaxed font-light">
-            "النجاح الحقيقي للمتحف لا يُقاس فقط بعدد الزوار، بل بقدرته على ترك أثر حقيقي في وعي الطفل ومشاعره وذاكرته."
-          </p>
-          <span className="text-[11px] text-gray-500 uppercase tracking-widest font-mono">
-            — ختام حديث د. أحمد محمد حميدة • رئيس قطاع المتاحف
-          </span>
-        </div>
-
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
