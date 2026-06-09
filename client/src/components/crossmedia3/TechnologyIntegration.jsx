@@ -70,7 +70,7 @@ const TechnologyIntegration = () => {
         <div className="lg:col-span-6 flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <span className="w-8 h-[2px] bg-[#c5a880] inline-block"></span>
-            <span className="text-[#c5a880] font-bold text-sm uppercase tracking-wider">المحور الرابع: مواكبة الثورة الرقمية</span>
+            <span className="text-[#c5a880] font-bold text-sm uppercase tracking-wider">مواكبة الثورة الرقمية</span>
           </div>
 
           <h2 className="text-3xl md:text-4xl font-black text-[#dfc5a3] leading-tight">

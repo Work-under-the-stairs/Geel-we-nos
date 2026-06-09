@@ -1,106 +1,172 @@
 import React, { useState } from 'react';
 
 const ModernDisplayTechniques = () => {
-  // حالة لمتابعة أسلوب العرض الحديث المختار
-  const [activeTechnique, setActiveTechnique] = useState('visualPath');
+  // حالة لمتابعة المحور النشط المختار للعرض التفاعلي في القائمة المائلة
+  const [activeTab, setActiveTab] = useState('knowledge');
 
-  const techniques = {
-    visualPath: {
-      title: "👁️ تنظيم المسارات البصرية والسينوغرافيا",
-      concept: "بديل لـ 'صف القطع التقليدي'",
-      desc: "توظيف هندسة إضاءة متطورة ومسارات بصرية مدروسة توجه عين الطفل تلقائياً نحو قصة القطعة الأثرية، مما يخلق تجربة درامية تفاعلية جذابة للزوار دون الإخلال بالهوية التاريخية للمقتنيات."
+  // الأيقونات الهندسية النظيفة (بدون إيموجي) المتوافقة مع أسلوب العرض المتحفي
+  const icons = {
+    knowledge: (
+      <svg className="w-10 h-10 text-stone-400 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+    ),
+    message: (
+      <svg className="w-10 h-10 text-stone-400 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501c1.153-.086 2.294-.213 3.422-.379 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+      </svg>
+    ),
+    participation: (
+      <svg className="w-10 h-10 text-stone-400 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+      </svg>
+    ),
+    decorativeLine: (
+      <svg className="w-5 h-5 text-[#c5a880] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21V3m0 18a9 9 0 110-18 9 9 0 010 18z" />
+      </svg>
+    )
+  };
+
+  // مصفوفة البيانات المبنية بالكامل وحصرياً على النص المزود دون أي إضافات خارجية
+  const museumData = {
+    knowledge: {
+      id: 'knowledge',
+      title: "تبسيط المادة المعرفية وعناصر الجذب",
+      text: "ومن هذا المنطلق، نجحت التجربة في بناء جسور التواصل مع الأجيال الجديدة بفضل تبسيط المادة المعرفية، واعتماد عناصر الجذب البصرية والتفاعلية، الأمر الذي جعل النشء أكثر تلاحماً مع تاريخهم، وأشد تمسكاً بهويتهم الثقافية في زمن الطفرات التكنولوجية المتسارعة."
     },
-    digitalScreens: {
-      title: "🖥️ الشاشات التفاعلية والوسائل الرقمية",
-      concept: "تبسيط المعلومات في قالب عصري",
-      desc: "استعانة المتحف بشاشات لمس ذكية ووسائط رقمية متعددة لتبسيط التاريخ المعقد؛ مما يجعل التراث الثقافي الأصيل أكثر قرباً وفهماً للأجيال الجديدة المعتادة كلياً على التكنولوجيا."
+    message: {
+      id: 'message',
+      title: "رسالة متحف قصر الزعفران للأطفال",
+      text: "وذكر حميدة أن متحف قصر الزعفران يوظف التجارب التفاعلية في توصيل رسالة للأطفال ملخصها أن \"التاريخ والتراث ليسا شيئاً جامداً، أو بعيداً عن حياتهم\"، بل هما تجربة حية وممتعة يمكنهم التفاعل معها، واستيعابها، والشعور بالانتماء إليها."
     },
-    liveWorkshops: {
-      title: "🎭 البرامج والأنشطة والورش التعليمية",
-      concept: "الزيارة كتجربة معرفية متكاملة",
-      desc: "تنظيم ورش عمل وبرامج ثقافية حية تضمن تحول زيارة الطفل من مجرد مشاهدة عابرة إلى تجربة تفاعلية تمس مشاعره وتزرع في وعيه أن التراث المصري عنصر ممتد في تفاصيل الحاضر."
+    participation: {
+      id: 'participation',
+      title: "الاستكشاف والتعلم بالمشاركة والتجربة",
+      text: "وغيّرت التجارب التفاعلية الصورة النمطية للمتحف التقليدي القائم على المشاهدة الصامتة، إذ باتت تدفع الطفل نحو الاستكشاف والتعلم بالمشاركة والتجربة. فحين يقترب الصغير من القطع التراثية ويتعرف على قيمتها الإنسانية والتاريخية، يبدأ في إدراك أهمية حماية هذا الموروث والحفاظ عليه للأجيال القادمة، ومن ثمَّ ينمو لديه شعورٌ بالمسؤولية والانتماء."
     }
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1a120b] to-[#111827] text-white py-16 px-6 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden">
+    <section className="relative min-h-screen bg-museum-grid text-stone-100 py-24 px-6 md:px-12 font-sans flex flex-col justify-center items-center overflow-hidden" dir="rtl">
       
-      {/* هالة ضوئية ناعمة تحاكي كشافات الإضاءة المتحفية الذكية */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      {/* ستايل مخصص لتطبيق شبكة الخطوط الذهبية المائلة الموازية بناءً على مرجع صورة image_0c03b3.png */}
+      <style>{`
+        .bg-museum-grid {
+          background-color: #1a130e;
+          background-image: repeating-linear-gradient(
+            -35deg,
+            transparent,
+            transparent 45px,
+            rgba(197, 168, 128, 0.04) 45px,
+            rgba(197, 168, 128, 0.04) 47px
+          );
+        }
+        .skewed-container {
+          transform: rotate(-4deg);
+        }
+      `}</style>
+      
+      {/* توهج ضوئي دافئ لتعزيز الطابع المتحفي المعاصر */}
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#c5a880]/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative z-10 max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         
-        {/* الجانب الأيمن: فلسفة كسر التقليد والرسالة التعليمية */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-[2px] bg-cyan-400 inline-block"></span>
-            <span className="text-cyan-400 font-bold text-sm uppercase tracking-wider">المحور السابع: أساليب العرض الحديثة</span>
+        {/* الجانب الأيمن: العنوان الرئيسي والتوثيق السردي المعتمد على النص فقط */}
+        <div className="lg:col-span-5 flex flex-col gap-6 text-right">
+          <div className="flex items-center gap-3 justify-start">
+            <span className="w-8 h-[2px] bg-[#c5a880] inline-block"></span>
+            <span className="text-[#c5a880] font-bold text-xs uppercase tracking-wider">آليات العرض الحديثة</span>
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-black text-gray-100 leading-tight">
-            التاريخ ليس ماضياً منفصلاً بل <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">عنصر حي يمتد في حاضرنا</span>
+          <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
+            تبسيط المادة المعرفية <br />
+            <span className="text-[#dfc5a3] font-light block mt-1">وتعزيز الهوية الثقافية للنشء</span>
           </h2>
 
-          <p className="text-gray-300 text-sm md:text-base leading-relaxed text-justify font-light">
-            تأككيداً لرؤية د. أحمد حميدة، نجح قصر الزعفران في كسر الصورة النمطية للعرض عبر دمج أدوات التطور الرقمي لحماية أصالة المكان. اضغط على أساليب العرض لاستكشاف الكواليس:
-          </p>
-
-          {/* اقتباس الرسالة الذهبية للدكتور حميدة */}
-          <div className="bg-white/5 border-r-4 border-cyan-400 p-4 rounded-l-xl backdrop-blur-sm">
-            <p className="text-amber-300 text-xs font-bold mb-1">🎯 رسالة المتحف للأجيال:</p>
-            <p className="text-gray-300 text-xs md:text-sm italic font-light">
-              \"العرض المتحفي داخل قصر تاريخي بالتوازي مع توظيف أدوات حديثة يبعث برسالة مفادها أن الحفاظ على التراث لا يتعارض مع التطور، بل يمكنهما السير معاً جنباً إلى جنب\"
+          <div className="bg-[#120b06]/60 border-r-4 border-[#c5a880] p-5 rounded-l-xl backdrop-blur-sm flex items-start gap-3">
+            {icons.decorativeLine}
+            <p className="text-stone-300 text-sm md:text-base leading-relaxed text-justify font-light">
+              نجحت التجربة المتحفية من خلال كسر الصورة النمطية للعرض التقليدي، وتوظيف الأدوات التفاعلية المباشرة لتحويل التاريخ إلى تجربة حية قريبة من وعي ومستقبل الأجيال الجديدة.
             </p>
           </div>
         </div>
 
-        {/* الجانب الأيسر: لوحة التحكم في المسارات وأساليب العرض (اللوحة التفاعلية) */}
-        <div className="lg:col-span-7 w-full">
-          <div className="bg-black/40 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-lg shadow-2xl flex flex-col gap-6">
+        {/* الجانب الأيسر: الهيكل المائل تماماً المكون من بطاقات متراكمة قابلة للتمدد التفاعلي وفقاً لـ image_0c03b3.png */}
+        <div className="lg:col-span-7 w-full flex justify-center items-center py-6">
+          <div className="skewed-container flex flex-col gap-5 w-full max-w-[600px]">
             
-            <div>
-              <h3 className="text-base md:text-lg font-bold text-gray-200">
-                🧭 استكشف الهندسة الجديدة للعرض المتحفي
-              </h3>
-              <p className="text-xs text-gray-400 mt-1">
-                انقر على الأساليب لتكتشف كيف تحولت المقتنيات من قطع صامتة إلى قصص حية:
-              </p>
-            </div>
+            {/* المحور الأول: تبسيط المادة المعرفية وعناصر الجذب */}
+            <button
+              onClick={() => setActiveTab('knowledge')}
+              className={`w-full text-right p-6 rounded-2xl transition-all duration-500 border flex flex-col justify-center ${
+                activeTab === 'knowledge'
+                  ? 'bg-[#14100c] border-[#c5a880] shadow-[0_15px_40px_rgba(197,168,128,0.12)] ring-1 ring-[#c5a880]/20 scale-[1.02]'
+                  : 'bg-[#120d09]/95 border-stone-800/80 text-stone-400 hover:bg-[#15100b]'
+              }`}
+            >
+              <div className="w-full flex items-center justify-between">
+                <h3 className={`text-lg md:text-xl font-bold transition-colors duration-300 ${activeTab === 'knowledge' ? 'text-[#dfc5a3]' : 'text-stone-300'}`}>
+                  {museumData.knowledge.title}
+                </h3>
+                <div className={`transition-colors duration-300 ${activeTab === 'knowledge' ? 'text-[#dfc5a3]' : 'text-stone-600'}`}>
+                  {icons.knowledge}
+                </div>
+              </div>
+              {activeTab === 'knowledge' && (
+                <p className="text-stone-300 text-xs md:text-sm font-light leading-relaxed text-justify mt-4 border-t border-stone-800/60 pt-3 transition-all duration-500">
+                  {museumData.knowledge.text}
+                </p>
+              )}
+            </button>
 
-            {/* الأزرار التفاعلية للمسارات */}
-            <div className="flex flex-col gap-3">
-              {Object.keys(techniques).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTechnique(key)}
-                  className={`w-full text-right p-4 rounded-xl transition-all duration-300 border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 ${
-                    activeTechnique === key
-                      ? 'bg-cyan-500/10 border-cyan-400 shadow-lg shadow-cyan-500/5'
-                      : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`font-bold text-xs md:text-sm ${activeTechnique === key ? 'text-cyan-300' : 'text-gray-300'}`}>
-                    {techniques[key].title}
-                  </span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                    activeTechnique === key ? 'bg-cyan-400/20 text-cyan-400' : 'bg-white/5 text-gray-500'
-                  }`}>
-                    {techniques[key].concept}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {/* المحور الثاني: رسالة متحف قصر الزعفران للأطفال */}
+            <button
+              onClick={() => setActiveTab('message')}
+              className={`w-full text-right p-6 rounded-2xl transition-all duration-500 border flex flex-col justify-center ${
+                activeTab === 'message'
+                  ? 'bg-[#14100c] border-[#c5a880] shadow-[0_15px_40px_rgba(197,168,128,0.12)] ring-1 ring-[#c5a880]/20 scale-[1.02]'
+                  : 'bg-[#120d09]/95 border-stone-800/80 text-stone-400 hover:bg-[#15100b]'
+              }`}
+            >
+              <div className="w-full flex items-center justify-between">
+                <h3 className={`text-lg md:text-xl font-bold transition-colors duration-300 ${activeTab === 'message' ? 'text-[#dfc5a3]' : 'text-stone-300'}`}>
+                  {museumData.message.title}
+                </h3>
+                <div className={`transition-colors duration-300 ${activeTab === 'message' ? 'text-[#dfc5a3]' : 'text-stone-600'}`}>
+                  {icons.message}
+                </div>
+              </div>
+              {activeTab === 'message' && (
+                <p className="text-stone-300 text-xs md:text-sm font-light leading-relaxed text-justify mt-4 border-t border-stone-800/60 pt-3 transition-all duration-500">
+                  {museumData.message.text}
+                </p>
+              )}
+            </button>
 
-            {/* شاشة العرض والشرخ الفني للمسار المختار */}
-            <div className="bg-black/60 border border-white/5 p-5 rounded-xl min-h-[140px] flex flex-col justify-center transition-all duration-500">
-              <span className="text-[11px] font-bold text-amber-400 mb-1.5 block uppercase tracking-wider">
-                ✦ فلسفة التصميم المعاصر:
-              </span>
-              <p className="text-gray-300 text-xs md:text-sm leading-relaxed text-justify font-light">
-                {techniques[activeTechnique].desc}
-              </p>
-            </div>
+            {/* المحور الثالث: الاستكشاف والتعلم بالمشاركة والتجربة */}
+            <button
+              onClick={() => setActiveTab('participation')}
+              className={`w-full text-right p-6 rounded-2xl transition-all duration-500 border flex flex-col justify-center ${
+                activeTab === 'participation'
+                  ? 'bg-[#14100c] border-[#c5a880] shadow-[0_15px_40px_rgba(197,168,128,0.12)] ring-1 ring-[#c5a880]/20 scale-[1.02]'
+                  : 'bg-[#120d09]/95 border-stone-800/80 text-stone-400 hover:bg-[#15100b]'
+              }`}
+            >
+              <div className="w-full flex items-center justify-between">
+                <h3 className={`text-lg md:text-xl font-bold transition-colors duration-300 ${activeTab === 'participation' ? 'text-[#dfc5a3]' : 'text-stone-300'}`}>
+                  {museumData.participation.title}
+                </h3>
+                <div className={`transition-colors duration-300 ${activeTab === 'participation' ? 'text-[#dfc5a3]' : 'text-stone-600'}`}>
+                  {icons.participation}
+                </div>
+              </div>
+              {activeTab === 'participation' && (
+                <p className="text-stone-300 text-xs md:text-sm font-light leading-relaxed text-justify mt-4 border-t border-stone-800/60 pt-3 transition-all duration-500">
+                  {museumData.participation.text}
+                </p>
+              )}
+            </button>
 
           </div>
         </div>
