@@ -84,16 +84,6 @@ const TechnologyIntegration = () => {
             </p>
           </div>
 
-          {/* حكمة الختام لأستاذ بدوي */}
-          <div className="p-5 rounded-2xl bg-gradient-to-l from-[#2c2016]/30 to-transparent border border-[#c5a880]/10">
-            <h4 className="text-amber-200 font-bold text-sm mb-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c5a880] inline-block"></span>
-              معيار النجاح الحضاري:
-            </h4>
-            <p className="text-stone-300 text-sm leading-relaxed text-justify font-light">
-              وفي ختام حديثه, يشير <strong className="text-[#dfc5a3] font-medium">بدوي</strong> إلى أن المتحف الناجح هو الذي يملك القدرة على <span className="text-[#dfc5a3] font-semibold">تحويل الطفل من مجرد مشاهدٍ صامت إلى مشاركٍ فاعل</span>، ومن زائرٍ عابر إلى حارسٍ للتراث يشعر أنه جزء منه؛ فبناء الهوية الوطنية لا يمر عبر قنوات الحفظ والتلقين، بل يصنع بالتجربة الحية والتفاعل المستمر.
-            </p>
-          </div>
         </div>
 
         {/* الجانب الأيسر: محاكي التابلت (Tablet) باللون البني الأصلي وبحجم وارتفاع أكبر */}
