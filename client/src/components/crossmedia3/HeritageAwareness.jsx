@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TechnologyIntegration = () => {
+const HeritageAwareness = () => {
   const [activeFeature, setActiveFeature] = useState('vr');
 
   const techFeatures = {
@@ -172,4 +172,4 @@ const TechnologyIntegration = () => {
   );
 };
 
-export default TechnologyIntegration;
+export default HeritageAwareness;
