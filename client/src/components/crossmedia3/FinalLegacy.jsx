@@ -116,6 +116,26 @@ const styles = `
     color: #c8921a;
   }
 
+  /* ── Intro text ── */
+  .fl-intro {
+    max-width: 820px;
+    text-align: center;
+  }
+
+  .fl-intro-text {
+    font-size: 15px;
+    font-weight: 300;
+    color: #a89878;
+    line-height: 2;
+    text-align: justify;
+    margin: 0;
+  }
+
+  .fl-intro-text strong {
+    color: #d4b870;
+    font-weight: 600;
+  }
+
   /* ── Main grid ── */
   .fl-grid {
     width: 100%;
@@ -299,6 +319,87 @@ const styles = `
     margin: 0;
   }
 
+  /* ── Divider ── */
+  .fl-divider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0.3;
+  }
+
+  .fl-divider-line {
+    flex: 1;
+    height: 0.5px;
+    background: #c8921a;
+  }
+
+  .fl-divider-diamond {
+    width: 6px;
+    height: 6px;
+    background: #c8921a;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ── Closing message box ── */
+  .fl-closing-box {
+    width: 100%;
+    background: rgba(30,18,8,0.7);
+    border: 0.5px solid rgba(200,146,26,0.2);
+    border-radius: 20px;
+    padding: 40px 44px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .fl-closing-eyebrow {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8a6820;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .fl-closing-eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: rgba(200,146,26,0.2);
+  }
+
+  .fl-closing-body {
+    font-size: 15px;
+    font-weight: 300;
+    color: #a89878;
+    line-height: 2;
+    text-align: justify;
+    margin: 0;
+  }
+
+  .fl-closing-body strong {
+    color: #d4b870;
+    font-weight: 600;
+  }
+
+  .fl-closing-highlight {
+    background: rgba(200,146,26,0.08);
+    border-right: 2px solid #c8921a;
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #c8aa78;
+    line-height: 1.9;
+    font-style: italic;
+  }
+
   /* ── Footer ── */
   .fl-footer {
     width: 100%;
@@ -381,6 +482,18 @@ const FinalLegacy = () => {
             </h2>
           </header>
 
+          {/* Intro paragraph — full text from the article */}
+          <div className="fl-intro">
+            <p className="fl-intro-text">
+              وعن رسالته للأسر المصرية، قال حميدة إنها تتلخص في أن{' '}
+              <strong>اصطحاب الأطفال إلى المتاحف لم يعد مجرد نشاط ترفيهي أو زيارة عابرة</strong>،
+              بل هو استثمار حقيقي في وعي الطفل، وثقافته، وشخصيته، وهويته الوطنية؛
+              فالمتحف بات مساحة للتعلم والاكتشاف وبناء الانتماء،
+              في عصر أصبحت فيه التكنولوجيا ووسائل التواصل تستحوذ على{' '}
+              <strong>الجزء الأكبر من اهتمام الصغار</strong>.
+            </p>
+          </div>
+
           {/* Main */}
           <div className="fl-grid">
 
@@ -430,6 +543,30 @@ const FinalLegacy = () => {
                 </div>
 
               </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="fl-divider" aria-hidden="true">
+            <div className="fl-divider-line" />
+            <div className="fl-divider-diamond" />
+            <div className="fl-divider-line" />
+          </div>
+
+          {/* Closing statement — full closing paragraph */}
+          <div className="fl-closing-box">
+            <div className="fl-closing-eyebrow">خلاصة حديث د. أحمد محمد حميدة • رئيس قطاع المتاحف</div>
+            <p className="fl-closing-body">
+              وختم حديثه مؤكداً أن متحف قصر الزعفران{' '}
+              <strong>"نجح في الوصول إلى الطفل المصري"</strong>،
+              الذي تحوّل من{' '}
+              <strong>زائر صامت</strong>{' '}
+              إلى{' '}
+              <strong>مبادر تفاعلي ومندهش وفضولي</strong>؛
+              يسأل ويبحث ويريد أن يكتشف المزيد بنفسه.
+            </p>
+            <div className="fl-closing-highlight">
+              فالنجاح الحقيقي للمتحف لا يُقاس فقط بعدد الزوار، بل بقدرته على ترك أثر حقيقي في وعي الطفل ومشاعره وذاكرته.
             </div>
           </div>
 
