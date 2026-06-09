@@ -93,7 +93,7 @@ export default function Navbar() {
                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
 
-              <img src={uniLogo} alt="Uni Logo" className="h-12 xl:h-28 w-auto object-contain pr-3" />
+              <img src={uniLogo} alt="Uni Logo" className="h-12 xl:h-26 w-auto object-contain pr-3" />
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export default function Navbar() {
                 <button onClick={() => setMenuOpen(p => !p)} className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm">
                   {menuOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
-                <img src={uniLogo} alt="Uni Logo" className="h-14 sm:h-14 w-auto object-contain" />
+                <img src={uniLogo} alt="Uni Logo" className="h-12 sm:h-14 w-auto object-contain" />
               </div>
             </div>
 
