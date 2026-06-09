@@ -35,13 +35,11 @@ export default function Navbar() {
   const isUserAdmin = isAdmin();
 
   return (
-    // زيادة مساحة الـ padding-top في الموبايل pt-[140px] لاستيعاب التوسعة الجديدة
     <header className="w-full select-none pt-[140px] sm:pt-[150px] md:pt-[120px]" dir="rtl">
       
       <div className="fixed top-0 left-0 z-50 w-full bg-main-bg border-b border-gray-200 shadow-sm h-auto md:h-[120px]">
         <div className="max-w-7xl mx-auto md:px-10 px-4 md:flex items-center justify-between md:h-full relative py-0">
 
-          {/* 1. تصميم شاشات الكمبيوتر الكبيرة (كما هو) */}
           <div className="hidden md:flex items-center justify-between h-full w-full relative">
             
             <Link to="/" className="flex items-center shrink-0">
@@ -93,28 +91,25 @@ export default function Navbar() {
                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
 
-              <img src={uniLogo} alt="Uni Logo" className="h-12 xl:h-26 w-auto object-contain pr-3" />
+              <img src={uniLogo} alt="Uni Logo" className="h-12 xl:h-28 w-auto object-contain pr-3" />
             </div>
           </div>
 
-          {/* 2. تصميم شاشة الموبايل (الفون) - تم توسيع الدنيا وتكبير العناصر */}
           <div className="flex md:hidden flex-col items-center gap-3 pt-3 pb-3 w-full px-2">
             
-            {/* الصف العلوي: اللوجوهات والقائمة (حجم أكبر ومساحات أوسع) */}
             <div className="flex items-center justify-between w-full">
               <Link to="/" className="flex items-center shrink-0">
                 <img src={logo} alt="جيل ونص" className="h-12 sm:h-14 w-auto object-contain" />
               </Link>
 
               <div className="flex items-center gap-3">
+                <img src={uniLogo} alt="Uni Logo" className="h-12 sm:h-14 w-auto object-contain" />
                 <button onClick={() => setMenuOpen(p => !p)} className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm">
                   {menuOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
-                <img src={uniLogo} alt="Uni Logo" className="h-12 sm:h-14 w-auto object-contain" />
               </div>
             </div>
 
-            {/* الصف السفلي: الأسماء تأخذ العرض بالكامل وبحجم أكبر */}
             <div className="w-full flex justify-between items-center border-t border-gray-100 pt-3 pb-1 px-1 ">
                <div className="flex flex-col items-center">
                  <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">رئيس مجلس الإدارة</span>
@@ -135,7 +130,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* شريط الأقسام (Categories) */}
       <div className="border-b border-gray-200 bg-white overflow-x-auto scrollbar-none relative z-30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
           <ul className="flex items-center lg:justify-between gap-6 min-w-max sm:min-w-0">
@@ -152,7 +146,6 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* نافذة البحث المنبثقة */}
       {searchOpen && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setSearchOpen(false)} />
@@ -196,7 +189,6 @@ export default function Navbar() {
         </>
       )}
 
-      {/* القائمة الجانبية (Sidebar) */}
       {menuOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setMenuOpen(false)} />}
       <div className={`fixed top-0 right-0 h-full w-[280px] bg-white shadow-2xl z-50 transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">

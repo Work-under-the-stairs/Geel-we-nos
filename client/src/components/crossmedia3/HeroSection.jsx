@@ -10,9 +10,8 @@ const HeroSection = () => {
       name: "قناع توت عنخ آمون الذهبي",
       image: "/assets/crossmedia3/pharaoh-mask.png",
       positionClass: "top-[5%] left-[5%] md:left-[10%]",
-      animationClass: "animate-bounce",
+      animationClass: "custom-float-1",
       tiltClass: "rotate-6 md:rotate-[12deg]",
-      style: { animationDuration: '6s' }
     },
     {
       id: 2,
@@ -20,9 +19,8 @@ const HeroSection = () => {
       name: "تمثال الإسكندر الأكبر الرخامي",
       image: "/assets/crossmedia3/greek-statue.png",
       positionClass: "top-[28%] right-[5%] md:right-[8%]",
-      animationClass: "animate-pulse",
+      animationClass: "custom-float-2",
       tiltClass: "-rotate-6 md:-rotate-[15deg]",
-      style: { animationDuration: '4s' }
     },
     {
       id: 3,
@@ -30,9 +28,8 @@ const HeroSection = () => {
       name: "عملة رومانية أثرية ذهبية",
       image: "/assets/crossmedia3/roman-coin.png",
       positionClass: "top-[60%] left-[8%] md:left-[12%]",
-      animationClass: "animate-bounce",
+      animationClass: "custom-float-3",
       tiltClass: "rotate-6 md:rotate-[10deg]",
-      style: { animationDuration: '8s' }
     },
     {
       id: 4,
@@ -40,20 +37,9 @@ const HeroSection = () => {
       name: "مشكاة السلطان حسن",
       image: "/assets/crossmedia3/islamic-lamp.png",
       positionClass: "top-[85%] right-[8%] md:right-[12%]",
-      animationClass: "animate-pulse",
+      animationClass: "custom-float-4",
       tiltClass: "-rotate-6 md:-rotate-[12deg]",
-      style: { animationDuration: '5s' }
     },
-    // {
-    //   id: 5,
-    //   era: "إسلامي",
-    //   name: "مشكاة زجاجية مموهة بالمينا",
-    //   image: "/assets/crossmedia3/islamic-lamp.png",
-    //   positionClass: "bottom-[2%] left-[15%]",
-    //   animationClass: "animate-bounce",
-    //   tiltClass: "rotate-6 md:rotate-[10deg]",
-    //   style: { animationDuration: '7s' }
-    // }
   ];
 
   const renderArtifact = (artifact, isMobile) => {
@@ -66,7 +52,6 @@ const HeroSection = () => {
             ? 'relative flex md:hidden justify-center items-center my-2 z-20 w-full' 
             : `hidden md:block absolute ${artifact.positionClass} z-20`
         } ${artifact.animationClass} pointer-events-auto group cursor-pointer`}
-        style={artifact.style}
         onMouseEnter={() => setHoveredItem(artifact.id)}
         onMouseLeave={() => setHoveredItem(null)}
       >
@@ -92,6 +77,36 @@ const HeroSection = () => {
   return (
     <div className="relative w-full bg-[#48392a] text-[#e5e5e5] font-serif dir-rtl overflow-hidden selection:bg-[#d4b483] selection:text-black">
       
+      {/* 
+        إضافة أكواد CSS للأنيميشن المخصصة لتأثير الطفو المستمر في مسارات مختلفة 
+      */}
+      <style>{`
+        @keyframes floatOrganic1 {
+          0%, 100% { transform: translate(0px, 0px); }
+          33% { transform: translate(15px, -20px); }
+          66% { transform: translate(-10px, 15px); }
+        }
+        @keyframes floatOrganic2 {
+          0%, 100% { transform: translate(0px, 0px); }
+          33% { transform: translate(-20px, 15px); }
+          66% { transform: translate(15px, -10px); }
+        }
+        @keyframes floatOrganic3 {
+          0%, 100% { transform: translate(0px, 0px); }
+          33% { transform: translate(20px, 20px); }
+          66% { transform: translate(-15px, -15px); }
+        }
+        @keyframes floatOrganic4 {
+          0%, 100% { transform: translate(0px, 0px); }
+          33% { transform: translate(-15px, -20px); }
+          66% { transform: translate(20px, 15px); }
+        }
+        .custom-float-1 { animation: floatOrganic1 8s ease-in-out infinite; }
+        .custom-float-2 { animation: floatOrganic2 9s ease-in-out infinite; }
+        .custom-float-3 { animation: floatOrganic3 10s ease-in-out infinite; }
+        .custom-float-4 { animation: floatOrganic4 11s ease-in-out infinite; }
+      `}</style>
+
       <div className="absolute top-0 left-0 w-full z-0 pointer-events-none">
         <img 
           src="/assets/crossmedia3/herobg2.png" 
@@ -138,7 +153,7 @@ const HeroSection = () => {
 
         <div className="w-full md:w-3/5 md:self-end bg-[#2a2118]/60 backdrop-blur-md p-6 md:p-8 rounded-2xl border border-white/5 shadow-2xl transition-all duration-300 hover:border-[#d4b483]/40 hover:bg-[#2a2118]/80">
           <p className="text-gray-200 text-base md:text-xl leading-relaxed text-justify font-light">
-            تسهم المتاحف -على تنوعها واختلافها بين أثرية وتاريخية وعسكرية ودينية وعلمية وفنية وزراعية- في تشكيل هوية الطفل وإذكاء روح الانتماء داخله، فضلاً عن تعريفه بتاريخ وحضارة بلده؛ فمصر التي تميزت بتعاقب حضاري فريد، يشمل العصور الفرعونية واليونانية والرومانية والقبطية والإسلامية، تمنح الطفل زاداً معرفياً ينمي لديه مشاعر الفخر، ويعزز وعيه بضرورة صون التراث.
+            تسهم المتاحف -على تنوعها واختلافها بين أثرية وتاريخية  وعسكرية ودينية وعلمية وفنية وزراعية- في تشكيل هوية الطفل وإذكاء روح الانتماء داخله، فضلاً عن تعريفه بتاريخ وحضارة بلده؛ فمصر التي تميزت بتعاقب حضاري فريد، يشمل العصور الفرعونية واليونانية والرومانية والقبطية والإسلامية، تمنح الطفل زاداً معرفياً ينمي لديه مشاعر الفخر، ويعزز وعيه بضرورة صون التراث.
           </p>
         </div>
 
