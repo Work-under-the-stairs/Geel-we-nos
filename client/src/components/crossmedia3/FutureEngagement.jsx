@@ -27,7 +27,7 @@ const FutureEngagement = () => {
         <div className="lg:col-span-6 w-full flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <span className="w-8 h-[2px] bg-amber-500 inline-block"></span>
-            <span className="text-amber-500 font-bold text-sm uppercase tracking-wider">المحور الحادي عشر: تكرار الزيارة واستدامة الوعي</span>
+            <span className="text-amber-500 font-bold text-sm uppercase tracking-wider">تكرار الزيارة واستدامة الوعي</span>
           </div>
 
           <h2 className="text-3xl md:text-4xl font-black text-stone-50 leading-tight">
