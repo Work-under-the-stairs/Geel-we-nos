@@ -210,7 +210,7 @@ const DevelopmentAndBalance = () => {
             <p className="text-stone-200 text-sm md:text-base leading-relaxed font-light text-justify">
               ويستطرد قائلاً إن العرض المتحفي داخل قصر تاريخي، بالتوازي مع توظيف أدوات حديثة، يبعث برسالة مفادها أن: 
               <span className="text-[#dfc5a3] font-black text-base md:text-md block sm:inline sm:mr-1">
-                ."الحفاظ على التراث لا يتعارض مع التطور، بل يمكنهما السير معاً جنباً إلى جنب"
+                "الحفاظ على التراث لا يتعارض مع التطور، بل يمكنهما السير معاً جنباً إلى جنب".
               </span>
             </p>
           </div>
