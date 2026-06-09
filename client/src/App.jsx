@@ -24,6 +24,7 @@ import AboutUs from './pages/AboutUs'
 import OurVision from './pages/OurVision'
 import PublishingPolicy from './pages/PublishingPolicy'
 import ContactUs from './pages/ContactUs'
+import CrossMediaMuseum from './pages/CrossMediaMuseum'
 const App = () => {
   
   return (
@@ -59,6 +60,7 @@ const App = () => {
         <Route path="/cross-media/hassan" element={<HassanStory/>} />
         <Route path="/cross-media/adham" element={<AdhamStory/>} />
         <Route path="/cross-media-initiatives" element={<CrossMediaArticle2/>} />
+        <Route path="/cross-media-museum" element={<CrossMediaMuseum/>} />
 
         <Route path="/cross-media-gaza" element={<CrossMediaPageGaza/>} />
         <Route path="*" element={<Navigate to="/" replace />} />
