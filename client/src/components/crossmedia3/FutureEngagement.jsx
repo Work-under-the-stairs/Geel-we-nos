@@ -9,17 +9,16 @@ const FutureEngagement = () => {
     ai: {
       title: " رادار الذكاء الاصطناعي (AI)",
       badge: "الرؤية المستقبلية",
-      desc: "يمثل التوسع في دمج أدوات الذكاء الاصطناعي جزءاً أساسياً من خطة التطوير القادمة داخل قصر الزعفران، لمواكبة التحول العالمي نحو مؤسسات متحفية تتوقع اهتمامات الطفل وتخصص له مساراً معرفياً ذكياً يناسب فضوله."
+      desc: "أكد حميدة أن التوسع في دمج أدوات الذكاء الاصطناعي يمثل جزءاً أساسياً من رؤية التطوير المستقبلية داخل متحف قصر الزعفران؛ لا سيما في ظل التحول المتسارع الذي تشهده الممارسات المتحفية عالمياً، وانتقال المتاحف إلى منظومة المؤسسات التعليمية والثقافية القائمة على التفاعل الرقمي والابتكار."
     },
     generalization: {
       title: " تعميم التجربة على متاحف مصر",
       badge: "الاستراتيجية الوطنية",
-      desc: "إمكانية نقل فلسفة قصر الزعفران الناجحة إلى مختلف متاحف الجمهورية؛ عبر المزاوجة بين الهوية التاريخية والتكنولوجيا، وتحويل القاعات الجامدة إلى مؤسسات تفاعلية قادرة على التواصل الفعّال مع المجتمع."
+      desc: "أفاد حميدة بإمكانية تعميم تجربة متحف قصر الزعفران على مختلف المتاحف في مصر، عبر الاستفادة من فلسفته القائمة على المزاوجة بين الهوية التاريخية والتكنولوجيا الحديثة، وتحويل قاعات العرض التقليدية إلى مؤسسات تعليمية وثقافية تفاعلية، قادرة على التواصل الفعّال مع المجتمع والأجيال الجديدة."
     }
   };
 
   return (
-    // الخلفية باللون البني الغامق
     <section className="relative min-h-screen bg-[#2d1b19] text-stone-100 py-16 px-6 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden">
       
       <div className="relative z-10 max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -28,7 +27,7 @@ const FutureEngagement = () => {
         <div className="lg:col-span-6 w-full flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <span className="w-8 h-[2px] bg-amber-500 inline-block"></span>
-            <span className="text-amber-500 font-bold text-sm uppercase tracking-wider">المحور الحادي عشر: تكرار الزيارة واستدامة الوعي</span>
+            <span className="text-amber-500 font-bold text-sm uppercase tracking-wider">تكرار الزيارة واستدامة الوعي</span>
           </div>
 
           <h2 className="text-3xl md:text-4xl font-black text-stone-50 leading-tight">
@@ -36,7 +35,7 @@ const FutureEngagement = () => {
           </h2>
 
           <p className="text-stone-300 text-sm md:text-base leading-relaxed text-justify font-light">
-            يوضح د. حميدة أن التكنولوجيا غيرت معادلة الاستيعاب؛ فالطفل لم يعد يكتفي بالمشاهدة العابرة بل أصبح أكثر تركيزاً، وكل جولة باتت تحمل له عنصراً متجدداً يدفعه لتكرار الزيارة. اضغط لمعاينة سلوك الطفل:
+            يوضح د. حميدة أن التكنولوجيا نجحت في تحويل الزائر من متلقٍ سلبي إلى مشارك فعّال. فبعد توظيف الشاشات التفاعلية والعروض البصرية والوسائط الرقمية، أصبح الأطفال أكثر اندماجاً، حيث بات الطفل يضغط ويستكشف ويتفاعل ويطرح الأسئلة.
           </p>
 
           {/* الصناديق باللون البني الفاتح */}
@@ -63,11 +62,11 @@ const FutureEngagement = () => {
             <div className="min-h-[100px] flex flex-col justify-center">
               {experienceMode === 'traditional' ? (
                 <div className="text-stone-300 text-sm leading-relaxed text-justify flex items-start gap-2">
-                  <p>في السابق، كان الأطفال يشعرون <span className="text-amber-400 font-semibold">بالملل السريع</span> نتيجة التلقين العابر والمشاهدة الصامتة خلف زجاج مغلق، مما يجعل الزيارة روتينية ولا تولد أي رغبة في العودة.</p>
+                  <p>في السابق، كان الأطفال يشعرون <span className="text-amber-400 font-semibold">بالملل السريع</span> نتيجة أساليب العرض التقليدية، مما يجعل الزيارة روتينية ولا تولد أي رغبة في العودة.</p>
                 </div>
               ) : (
                 <div className="text-stone-100 text-sm leading-relaxed text-justify flex items-start gap-2">
-                  <p>الآن، أضحى الطفل <span className="text-amber-400 font-semibold">يضغط، يستكشف، يتفاعل، ويشارك بنفسه</span> عبر الألعاب والواقع الافتراضي، مما يضاعف ارتباطه بالمحتوى ويدفعه للمطالبة بتكرار الزيارة للاكتشاف.</p>
+                  <p>الآن، الأطفال أصبحوا أكثر اندماجاً وتركيزاً، وكل جولة باتت تحمل عنصراً متجدداً من الاكتشاف، مما يضاعف ارتباطهم بالمحتوى ويدفعهم للمطالبة بتكرار الزيارة.</p>
                 </div>
               )}
             </div>
@@ -76,7 +75,6 @@ const FutureEngagement = () => {
 
         {/* الجانب الأيسر */}
         <div className="lg:col-span-6 w-full">
-          {/* الصندوق باللون البني الفاتح */}
           <div className="bg-[#4e342e] border border-amber-800/30 rounded-2xl p-6 md:p-8 relative">
             
             <div className="mb-6">
@@ -109,7 +107,7 @@ const FutureEngagement = () => {
               </button>
             </div>
 
-            <div className="bg-[#3e2723] border border-amber-900/50 p-5 rounded-xl min-h-[160px] flex flex-col justify-center">
+            <div className="bg-[#3e2723] border border-amber-900/50 p-5 rounded-xl min-h-[220px] flex flex-col justify-center">
               <div className="flex items-center justify-between gap-2 border-b border-stone-700 pb-2 mb-3">
                 <h4 className="font-bold text-sm md:text-base text-amber-200">
                   {futureVision[futureTab].title}
