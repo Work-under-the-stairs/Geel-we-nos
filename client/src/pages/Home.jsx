@@ -49,7 +49,7 @@ export default function Home() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 ">
-        <InspirationalGrid articles={groupedCategories?.["ألهمني"] || []} />
+        <InspirationalGrid articles={groupedCategories?.["أثر ونجاح"] || []} />
       </div>
 
     </main>
