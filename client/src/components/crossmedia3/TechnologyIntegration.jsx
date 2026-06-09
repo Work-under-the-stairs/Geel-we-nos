@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import bgImage from '/assets/crossmedia3/kid_touching_tablet.jpeg';
 const TechnologyIntegration = () => {
   // حالة لمتابعة الميزة التكنولوجية المستكشفة داخل محاكي التابلت
   const [activeFeature, setActiveFeature] = useState('tickets');
@@ -53,7 +53,12 @@ const TechnologyIntegration = () => {
   };
 
   return (
-    <section className="relative min-h-screen text-stone-100 pt-16 pb-40 md:pt-24 md:pb-52 px-4 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden bg-[url('assets/crossmedia3/tech.png')] bg-cover bg-center bg-fixed bg-no-repeat">
+    <section style={{
+    backgroundImage: `url(${bgImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  }} className="relative min-h-screen text-stone-100 pt-16 pb-40 md:pt-24 md:pb-52 px-4 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden bg-fixed ">
       
       <div className="absolute inset-0 bg-gradient-to-br from-[#16110d]/60 via-[#120d0a]/70 to-[#221811]/70 pointer-events-none"></div>
       {/* الشبكة التكنولوجية الخفيفة باللون الذهبي الرملي */}
