@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const CurriculumAndHeritage = () => {
   const [scenography, setScenography] = useState({
@@ -8,8 +8,21 @@ const CurriculumAndHeritage = () => {
   });
 
   const boxRef = useRef(null);
+  const audioRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 150, y: 100 });
   const [activeWorkshop, setActiveWorkshop] = useState(0);
+
+  useEffect(() => {
+    audioRef.current = new Audio('/assets/crossmedia3/sound.mp3');
+    audioRef.current.loop = true;
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
 
   const handleMouseMove = (e) => {
     if (!boxRef.current) return;
@@ -21,7 +34,20 @@ const CurriculumAndHeritage = () => {
   };
 
   const toggleScenography = (element) => {
-    setScenography(prev => ({ ...prev, [element]: !prev[element] }));
+    setScenography(prev => {
+      const newState = { ...prev, [element]: !prev[element] };
+      
+      // التعامل الفوري مع الصوت داخل الـ Event Handler نفسه لتخطي منع المتصفح
+      if (element === 'sound') {
+        if (newState.sound) {
+          audioRef.current?.play().catch(err => console.log("Audio play blocked by browser:", err));
+        } else {
+          audioRef.current?.pause();
+        }
+      }
+      
+      return newState;
+    });
   };
 
   const isStoryComplete = scenography.lighting && scenography.sound && scenography.decor;
