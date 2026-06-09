@@ -16,7 +16,7 @@ const FadeUpScroll = ({ children, delay = 0 }) => {
 };
 
 const CrossmediaFooter = () => {
-  const executionNames = ["فوزي عيد", "ملك محمود"];
+  const executionNames = ["فوزي محمد", "ملك محمود"];
   
   const designers = [
     { name: "إيمان أشرف", url: "https://www.linkedin.com/in/eman-ashraf-fullstack/" },

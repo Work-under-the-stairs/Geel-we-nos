@@ -160,7 +160,7 @@ const HassanStory = () => {
             <FaArrowRight className="text-sm transition-transform group-hover:translate-x-1" />
             <div className="text-right">
               <span className="block text-[10px] text-slate-500 font-medium uppercase tracking-wider">القصة السابقة</span>
-              <span className="text-sm font-semibold">أدهم المحارب</span>
+              <span className="text-sm font-semibold">أدهم البطل</span>
             </div>
           </a>
 
@@ -171,7 +171,7 @@ const HassanStory = () => {
           >
             <div className="text-left">
               <span className="block text-[10px] text-blue-200/70 font-medium uppercase tracking-wider">القصة التالية</span>
-              <span className="text-sm font-semibold">أحمد حامد</span>
+              <span className="text-sm font-semibold">أحمد المحارب</span>
             </div>
             <FaArrowLeft className="text-sm transition-transform group-hover:-translate-x-1" />
           </a>

@@ -305,7 +305,7 @@ const AhmedStory = () => {
             <FaArrowRight className="text-sm transition-transform group-hover:translate-x-1" />
             <div className="text-right">
               <span className="block text-[10px] text-slate-500 font-medium uppercase tracking-wider">القصة السابقة</span>
-              <span className="text-sm font-semibold">حسن المحارب</span>
+              <span className="text-sm font-semibold">حسن الصامد</span>
             </div>
           </a>
 
