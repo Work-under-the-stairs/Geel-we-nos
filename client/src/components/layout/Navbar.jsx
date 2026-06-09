@@ -19,6 +19,17 @@ export default function Navbar() {
   
   const { data: categories = [] } = useCategories()
   
+
+  const otherCategories = categories?.data?.filter(cat => cat.name !== 'كروس ميديا' && cat.name !== 'بودكاست') || [];
+  const crossMediaCat = categories?.data?.find(cat => cat.name === 'كروس ميديا');
+  const podcastCat = categories?.data?.find(cat => cat.name === 'بودكاست');
+
+  const sortedCategories = [
+    ...otherCategories,
+    ...(crossMediaCat ? [crossMediaCat] : []),
+    ...(podcastCat ? [podcastCat] : [])
+  ];
+
   const isAuth = isAuthenticated();
   const username = getUsername();
   const isUserAdmin = isAdmin();
@@ -73,7 +84,8 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
           <ul className="flex items-center lg:justify-between gap-6 min-w-max sm:min-w-0">
             <li><NavLink to="/" end className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}><Home size={16} /> الرئيسية</NavLink></li>
-            {categories?.data?.map(cat => (
+            
+            {sortedCategories.map(cat => (
               <li key={cat._id || cat.name}>
                 <NavLink to={`/${encodeURIComponent(cat.name)}`} className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}>
                   <NavIcon name={cat.icon_name} /> {cat.name}
@@ -84,62 +96,49 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Search Modal */}
       {searchOpen && (
-  <>
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setSearchOpen(false)} />
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg bg-white p-4 rounded-2xl shadow-2xl">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const value = e.target.search.value.trim();
-          console.log("Submit fired, value:", value);
-          if (!value) return;
-          setSearchOpen(false);
-          navigate(`/search?q=${encodeURIComponent(value)}`);
-        }}
-      >
-        <div className="relative flex items-center gap-2" dir="rtl">
-          <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <input
-              name="search"
-              type="text"
-              autoFocus
-              placeholder="عن ماذا تبحث؟..."
-              className="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-right"
-            />
+        <>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setSearchOpen(false)} />
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg bg-white p-4 rounded-2xl shadow-2xl">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const value = e.target.search.value.trim();
+                console.log("Submit fired, value:", value);
+                if (!value) return;
+                setSearchOpen(false);
+                navigate(`/search?q=${encodeURIComponent(value)}`);
+              }}
+            >
+              <div className="relative flex items-center gap-2" dir="rtl">
+                <div className="relative flex-1">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <input
+                    name="search"
+                    type="text"
+                    autoFocus
+                    placeholder="عن ماذا تبحث؟..."
+                    className="w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-primary text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-primary/90 transition-all"
+                >
+                  بحث
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="text-sm font-bold text-gray-500 px-2"
+                >
+                  إغلاق
+                </button>  
+              </div>
+            </form>
           </div>
-          {/* <button
-  type="button"
-  onClick={() => {
-    alert("clicked!");
-    const input = document.querySelector('input[name="search"]');
-    console.log("value:", input?.value);
-    navigate(`/search?q=${encodeURIComponent(input?.value || "test")}`);
-  }}
-  className="bg-primary text-white font-bold text-sm px-4 py-3 rounded-xl"
->
-  بحث
-</button> */}
-            <button
-            type="submit"
-            className="bg-primary text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-primary/90 transition-all"
-          >
-            بحث
-          </button>
-          <button
-            type="button"
-            onClick={() => setSearchOpen(false)}
-            className="text-sm font-bold text-gray-500 px-2"
-          >
-            إغلاق
-          </button>  
-        </div>
-      </form>
-    </div>
-  </>
-)}
+        </>
+      )}
 
       {menuOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setMenuOpen(false)} />}
       <div className={`fixed top-0 right-0 h-full w-[280px] bg-white shadow-2xl z-50 transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -174,7 +173,8 @@ export default function Navbar() {
           )}
           
           <NavLink to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50"><Home size={16} /> الرئيسية</NavLink>
-          {categories?.data?.map(cat => (
+          
+          {sortedCategories.map(cat => (
             <NavLink key={cat._id} to={`/${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50">
               <NavIcon name={cat.icon_name} /> {cat.name}
             </NavLink>

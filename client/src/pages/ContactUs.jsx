@@ -3,11 +3,11 @@ import { MapPin, Mail } from 'lucide-react';
 
 const ContactUs = () => {
   return (
-    <div className="min-h-screen bg-white text-[#111827] font-arabic py-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+    <div className="min-h-screen bg-white text-primary font-arabic py-16 px-4 sm:px-6 lg:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-black text-[#0d4857] mb-4 relative inline-block">
+        <h1 className="text-4xl md:text-5xl font-black text-primary mb-4 relative inline-block">
           اتصل بنا
-          <span className="absolute bottom-[-10px] right-0 left-0 h-1.5 bg-[#fc6955] rounded-full"></span>
+          <span className="absolute bottom-[-10px] right-0 left-0 h-1.5 bg-secondary rounded-full"></span>
         </h1>
       </div>
 
@@ -16,10 +16,10 @@ const ContactUs = () => {
           
           <div className="bg-slate-50 border border-slate-100 p-8 rounded-3xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
             <div>
-              <div className="w-12 h-12 bg-[#0d4857]/10 text-[#0d4857] rounded-2xl flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
                 <MapPin size={24} />
               </div>
-              <h2 className="text-xl font-bold text-[#0d4857] mb-4">- المقر الرئيسي:</h2>
+              <h2 className="text-xl font-bold text-primary mb-4">- المقر الرئيسي:</h2>
               <p className="text-lg text-gray-700 leading-relaxed font-medium">
                 جامعة عين شمس، كلية الإعلام، العباسية، القاهرة.
               </p>
@@ -28,13 +28,13 @@ const ContactUs = () => {
 
           <div className="bg-slate-50 border border-slate-100 p-8 rounded-3xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
             <div>
-              <div className="w-12 h-12 bg-[#fc6955]/10 text-[#fc6955] rounded-2xl flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center mb-6">
                 <Mail size={24} />
               </div>
-              <h2 className="text-xl font-bold text-[#0d4857] mb-4">- الإيميل:</h2>
+              <h2 className="text-xl font-bold text-primary mb-4">- الإيميل:</h2>
               <a 
                 href="mailto:info@masscomm.asu.edu.eg" 
-                className="text-lg text-gray-700 font-medium block hover:text-[#fc6955] transition-colors duration-200 break-all text-right"
+                className="text-lg text-gray-700 font-medium block hover:text-secondary transition-colors duration-200 break-all text-right"
               >
                 info@masscomm.asu.edu.eg
               </a>

@@ -8,11 +8,11 @@ const AboutUs = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-[#111827] font-arabic py-16 px-4 sm:px-6 lg:px-8" dir="rtl">
+    <div className="min-h-screen bg-white text-primary font-arabic py-16 px-4 sm:px-6 lg:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-black text-[#0d4857] mb-4 relative inline-block">
+        <h1 className="text-4xl md:text-5xl font-black text-primary mb-4 relative inline-block">
           من نحن
-          <span className="absolute bottom-[-10px] right-0 left-0 h-1.5 bg-[#fc6955] rounded-full"></span>
+          <span className="absolute bottom-[-10px] right-0 left-0 h-1.5 bg-secondary rounded-full"></span>
         </h1>
       </div>
 
@@ -24,7 +24,7 @@ const AboutUs = () => {
           </p>
         </section>
 
-        <section className="bg-[#0d4857] text-white p-8 md:p-10 rounded-3xl shadow-lg">
+        <section className="bg-primary text-white p-8 md:p-10 rounded-3xl shadow-lg">
           <p className="text-lg md:text-xl leading-relaxed text-slate-100 text-justify">
             يتبع مشروع تخرج موقع «جيل ونص» كلية الإعلام جامعة عين شمس، تحت رئاسة الأستاذة الدكتورة هبة شاهين عميدة الكلية، والإشراف العام الدكتورة مروة سعيد المدرس بقسم الصحافة الإخبارية بالكلية، ورئيس التحرير الأستاذة خلود خالد المعيدة بقسم الصحافة الإخبارية بالكلية.
           </p>
@@ -45,7 +45,7 @@ const AboutUs = () => {
                   href={designer.url} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-[#17738a] font-semibold hover:text-[#fc6955] transition-colors duration-200 mx-1"
+                  className="text-[#17738a] font-semibold hover:text-secondary transition-colors duration-200 mx-1"
                 >
                   {designer.name}
                 </a>
