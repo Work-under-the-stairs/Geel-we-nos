@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import bgImage from '/assets/crossmedia3/kid_touching_tablet.jpeg';
+import bgImage from '/assets/crossmedia3/tech.png';
 const TechnologyIntegration = () => {
   // حالة لمتابعة الميزة التكنولوجية المستكشفة داخل محاكي التابلت
   const [activeFeature, setActiveFeature] = useState('tickets');
