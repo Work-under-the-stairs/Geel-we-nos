@@ -17,9 +17,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const navigate = useNavigate()
-  
+
   const { data: categories = [] } = useCategories()
-  
+
   const otherCategories = categories?.data?.filter(cat => cat.name !== 'كروس ميديا' && cat.name !== 'بودكاست') || [];
   const crossMediaCat = categories?.data?.find(cat => cat.name === 'كروس ميديا');
   const podcastCat = categories?.data?.find(cat => cat.name === 'بودكاست');
@@ -36,12 +36,12 @@ export default function Navbar() {
 
   return (
     <header className="w-full select-none pt-[140px] sm:pt-[150px] md:pt-[120px]" dir="rtl">
-      
+
       <div className="fixed top-0 left-0 z-50 w-full bg-main-bg border-b border-gray-200 shadow-sm h-auto md:h-[120px]">
         <div className="max-w-7xl mx-auto md:px-10 px-4 md:flex items-center justify-between md:h-full relative py-0">
 
           <div className="hidden md:flex items-center justify-between h-full w-full relative">
-            
+
             <Link to="/" className="flex items-center shrink-0">
               <img src={logo} alt="جيل ونص" className="h-16 md:h-20 w-auto object-contain" />
             </Link>
@@ -96,33 +96,33 @@ export default function Navbar() {
           </div>
 
           <div className="flex md:hidden flex-col items-center gap-3 pt-3 pb-3 w-full px-2">
-            
+
             <div className="flex items-center justify-between w-full">
               <Link to="/" className="flex items-center shrink-0">
                 <img src={logo} alt="جيل ونص" className="h-12 sm:h-14 w-auto object-contain" />
               </Link>
 
               <div className="flex items-center gap-3">
-                <img src={uniLogo} alt="Uni Logo" className="h-12 sm:h-14 w-auto object-contain" />
                 <button onClick={() => setMenuOpen(p => !p)} className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm">
                   {menuOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
+                <img src={uniLogo} alt="Uni Logo" className="h-12 sm:h-14 w-auto object-contain" />
               </div>
             </div>
 
             <div className="w-full flex justify-between items-center border-t border-gray-100 pt-3 pb-1 px-1 ">
-               <div className="flex flex-col items-center">
-                 <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">رئيس مجلس الإدارة</span>
-                 <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">أ.د. هبة شاهين</span>
-               </div>
-               <div className="flex flex-col items-center">
-                 <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">المشرف العام</span>
-                 <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">د. مروة سعيد</span>
-               </div>
-               <div className="flex flex-col items-center">
-                 <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">رئيس التحرير</span>
-                 <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">أ.خلود خالد</span>
-               </div>
+              <div className="flex flex-col items-center">
+                <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">رئيس مجلس الإدارة</span>
+                <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">أ.د. هبة شاهين</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">المشرف العام</span>
+                <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">د. مروة سعيد</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-primary font-bold text-[10px] sm:text-[11px] mb-1">رئيس التحرير</span>
+                <span className="text-secondary font-extrabold text-[12px] sm:text-[13px]">أ.خلود خالد</span>
+              </div>
             </div>
 
           </div>
@@ -134,7 +134,7 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
           <ul className="flex items-center lg:justify-between gap-6 min-w-max sm:min-w-0">
             <li><NavLink to="/" end className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}><Home size={16} /> الرئيسية</NavLink></li>
-            
+
             {sortedCategories.map(cat => (
               <li key={cat._id || cat.name}>
                 <NavLink to={`/${encodeURIComponent(cat.name)}`} className={({ isActive }) => `flex items-center gap-1.5 text-md font-bold py-4 px-1 border-b-2 ${isActive ? 'text-secondary border-secondary' : 'text-slate-500 border-transparent'}`}>
@@ -182,7 +182,7 @@ export default function Navbar() {
                   className="text-sm font-bold text-gray-500 px-2"
                 >
                   إغلاق
-                </button>  
+                </button>
               </div>
             </form>
           </div>
@@ -210,8 +210,8 @@ export default function Navbar() {
               </div>
 
               {isUserAdmin && (
-                <Link 
-                  to="/admin" 
+                <Link
+                  to="/admin"
                   className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-white font-bold text-xs py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-[var(--color-primary)]/20 active:scale-[0.98]"
                 >
                   <LayoutDashboard size={14} />
@@ -224,11 +224,11 @@ export default function Navbar() {
           <button onClick={() => { setSearchOpen(true); setMenuOpen(false); }} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50 w-full text-right transition-colors">
             <Search size={16} /> بحث
           </button>
-          
+
           <NavLink to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50">
             <Home size={16} /> الرئيسية
           </NavLink>
-          
+
           {sortedCategories.map(cat => (
             <NavLink key={cat._id} to={`/${encodeURIComponent(cat.name)}`} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 font-bold px-4 py-3 rounded-xl text-slate-600 hover:bg-gray-50">
               <NavIcon name={cat.icon_name} /> {cat.name}
