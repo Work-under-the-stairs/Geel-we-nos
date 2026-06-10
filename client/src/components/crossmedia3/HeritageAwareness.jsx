@@ -1,27 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const HeritageAwareness = () => {
-  const [activeFeature, setActiveFeature] = useState('vr');
-
-  const techFeatures = {
-    vr: {
-      image: "assets/crossmedia3/img1_sec6.png"
-    },
-    apps: {
-      image: "assets/crossmedia3/tot.png"
-    },
-    games: {
-      image: "assets/crossmedia3/final_sec6.png"
-    },
-    zaafarana: {
-      image: "assets/crossmedia3/tech.png"
-    }
-  };
-
   return (
     <section className="relative min-h-screen text-stone-100 pt-20 pb-20 md:pt-28 md:pb-28 px-4 md:px-12 font-sans dir-rtl flex flex-col justify-center items-center overflow-hidden bg-[#2d2219]">
       
-      {/* دمج حركات الدوران المداري العكسي للحفاظ على اعتدال الصور أثناء الدوران */}
+      {/* حركات الدوران المداري المخصصة للهوية البصرية */}
       <style>{`
         @keyframes museumOrbit {
           from { transform: rotate(0deg); }
@@ -47,6 +30,7 @@ const HeritageAwareness = () => {
       <div className="absolute inset-0 bg-gradient-to-tr from-[#201812] via-[#2d2219] to-[#1a140f] pointer-events-none"></div>
       <div className="absolute inset-0 bg-[radial-gradient(#c5a88004_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none"></div>
       
+      {/* شبكة العرض الرئيسية المكونة من 12 عموداً */}
       <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         
         {/* الجانب الأيمن: المحتوى المعرفي (غرس الوعي التراثي) */}
@@ -76,95 +60,34 @@ const HeritageAwareness = () => {
           {/* الفقرة الثالثة */}
           <div className="p-5 rounded-2xl bg-gradient-to-l from-[#1e1610]/50 to-transparent border border-[#c5a880]/10">
             <p className="text-stone-300 text-xs md:text-sm leading-relaxed text-justify font-light">
-              كما أن التراث، بما يحتويه من قصص وفنون وعمارة وأساطير، يفتح آفاق الخيال والإبداع لدى الطفل، الذي بات يتعرض لكم هائل من المحتوى عبر منصات التواصل الاجتماعي، يعكس في أغلبه أنماطاً ثقافية بعيدة كلياً عن بيئته ومجتمعه.
+              كما أن التراث، بما يحتويه من قصص وفنون وعمارة وأساطير, يفتح آفاق الخيال والإبداع لدى الطفل، الذي بات يتعرض لكم هائل من المحتوى عبر منصات التواصل الاجتماعي، يعكس في أغلبه أنماطاً ثقافية بعيدة كلياً عن بيئته ومجتمعه.
             </p>
           </div>
         </div>
 
-        {/* الجانب الأيسر: المنظومة المدارية الصافية (صور فقط بدون أي نصوص توضيحية) */}
-        <div className="lg:col-span-6 w-full flex justify-center items-center group orbit-group">
-          
-          <div className="relative w-80 h-80 md:w-[460px] md:h-[460px] flex items-center justify-center">
+        {/* الجانب الأيسر: مشغل الفيديو المحلي الفاخر المدمج بالتصميم المتحفي */}
+        <div className="lg:col-span-6 w-full flex justify-center items-center py-6">
+          <div className="w-full max-w-[640px] bg-[#14100c] border border-[#c5a880]/40 rounded-2xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative group">
             
-            {/* المسار الدائري الوهمي */}
-            <div className="absolute w-[80%] h-[80%] rounded-full border-2 border-dashed border-[#c5a880]/20 pointer-events-none"></div>
-            <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#c5a880]/5 rounded-full blur-3xl pointer-events-none"></div>
+            {/* تأثير توهج خلفي ناعم */}
+            <div className="absolute inset-0 bg-[#c5a880]/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
-            {/* الدائرة المركزية الكبرى (تعرض الصورة النشطة) */}
-            <div className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full p-2 bg-[#1a130e] border-4 border-[#c5a880] shadow-[0_0_50px_rgba(0,0,0,0.85)] z-30 overflow-hidden">
-              <div className="w-full h-full rounded-full overflow-hidden relative">
-                <img 
-                  src={techFeatures[activeFeature].image} 
-                  alt="" 
-                  className="w-full h-full object-cover transition-all duration-700 ease-out"
-                />
-                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_40px_rgba(0,0,0,0.8)]"></div>
-              </div>
+            {/* حاوية الفيديو بنسبة عرض 16:9 القياسية */}
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-stone-800/80 z-10 bg-black">
+              <video
+                className="absolute top-0 left-0 w-full h-full object-contain"
+                src="assets/crossmedia3/vedio.mp4"
+                controls
+                playsInline
+                preload="metadata"
+              >
+                تصفحك لا يدعم تشغيل هذا الفيديو.
+              </video>
             </div>
 
-            {/* النطاق المداري الخارجي الحاضن لدوائر الصور المتحركة */}
-            <div className="absolute w-full h-full rounded-full animate-museum-orbit pointer-events-none z-20">
-              
-              {/* دائرة الصورة الأولى (أعلى) */}
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-                <button 
-                  onClick={() => setActiveFeature('vr')}
-                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
-                    activeFeature === 'vr' 
-                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
-                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
-                  }`}
-                >
-                  <img src={techFeatures.vr.image} alt="" className="w-full h-full object-cover rounded-full" />
-                </button>
-              </div>
-
-              {/* دائرة الصورة الثانية (يمين) */}
-              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-                <button 
-                  onClick={() => setActiveFeature('apps')}
-                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
-                    activeFeature === 'apps' 
-                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
-                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
-                  }`}
-                >
-                  <img src={techFeatures.apps.image} alt="" className="w-full h-full object-cover rounded-full" />
-                </button>
-              </div>
-
-              {/* دائرة الصورة الثالثة (أسفل) */}
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-auto">
-                <button 
-                  onClick={() => setActiveFeature('games')}
-                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
-                    activeFeature === 'games' 
-                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
-                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
-                  }`}
-                >
-                  <img src={techFeatures.games.image} alt="" className="w-full h-full object-cover rounded-full" />
-                </button>
-              </div>
-
-              {/* دائرة الصورة الرابعة (يسار) */}
-              <div className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-                <button 
-                  onClick={() => setActiveFeature('zaafarana')}
-                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
-                    activeFeature === 'zaafarana' 
-                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
-                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
-                  }`}
-                >
-                  <img src={techFeatures.zaafarana.image} alt="" className="w-full h-full object-cover rounded-full" />
-                </button>
-              </div>
-
-            </div>
-
+            {/* شريط زينة سفلي يعكس فخامة الهوية البصرية للمتحف */}
+            <div className="w-1/4 h-[2px] bg-[#c5a880]/60 mx-auto mt-3 rounded-full opacity-60"></div>
           </div>
-
         </div>
 
       </div>

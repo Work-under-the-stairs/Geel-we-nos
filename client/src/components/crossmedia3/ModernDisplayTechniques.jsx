@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 
 const ModernDisplayTechniques = () => {
+  const [activeFeature, setActiveFeature] = useState('vr');
+  
+    const techFeatures = {
+      vr: {
+        image: "assets/crossmedia3/img1_sec6.png"
+      },
+      apps: {
+        image: "assets/crossmedia3/tot.png"
+      },
+      games: {
+        image: "assets/crossmedia3/final_sec6.png"
+      },
+      zaafarana: {
+        image: "assets/crossmedia3/tech.png"
+      }
+    };
   // حالة لمتابعة المحور النشط المختار للعرض التفاعلي في القائمة المائلة
   const [activeTab, setActiveTab] = useState('knowledge');
 
@@ -84,15 +100,7 @@ const ModernDisplayTechniques = () => {
             <span className="text-[#dfc5a3] font-light block mt-1">وتعزيز الهوية الثقافية للنشء</span>
           </h2>
 
-          <div className="bg-[#120b06]/60 border-r-4 border-[#c5a880] p-5 rounded-l-xl backdrop-blur-sm flex items-start gap-3">
-            {icons.decorativeLine}
-            <p className="text-stone-300 text-sm md:text-base leading-relaxed text-justify font-light">
-              نجحت التجربة المتحفية من خلال كسر الصورة النمطية للعرض التقليدي، وتوظيف الأدوات التفاعلية المباشرة لتحويل التاريخ إلى تجربة حية قريبة من وعي ومستقبل الأجيال الجديدة.
-            </p>
-          </div>
-        </div>
-
-        {/* الجانب الأيسر: الهيكل المائل تماماً المكون من بطاقات متراكمة قابلة للتمدد التفاعلي وفقاً لـ image_0c03b3.png */}
+          {/* الجانب الأيسر: الهيكل المائل تماماً المكون من بطاقات متراكمة قابلة للتمدد التفاعلي وفقاً لـ image_0c03b3.png */}
         <div className="lg:col-span-7 w-full flex justify-center items-center py-6">
           <div className="skewed-container flex flex-col gap-5 w-full max-w-[600px]">
             
@@ -169,6 +177,93 @@ const ModernDisplayTechniques = () => {
             </button>
 
           </div>
+        </div>
+        </div>
+
+        {/* الجانب الأيسر: المنظومة المدارية الصافية (صور فقط بدون أي نصوص توضيحية) */}
+        <div className="lg:col-span-6 w-full flex justify-center items-center group orbit-group">
+          
+          <div className="relative w-80 h-80 md:w-[460px] md:h-[460px] flex items-center justify-center">
+            
+            {/* المسار الدائري الوهمي */}
+            <div className="absolute w-[80%] h-[80%] rounded-full border-2 border-dashed border-[#c5a880]/20 pointer-events-none"></div>
+            <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#c5a880]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            {/* الدائرة المركزية الكبرى (تعرض الصورة النشطة) */}
+            <div className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full p-2 bg-[#1a130e] border-4 border-[#c5a880] shadow-[0_0_50px_rgba(0,0,0,0.85)] z-30 overflow-hidden">
+              <div className="w-full h-full rounded-full overflow-hidden relative">
+                <img 
+                  src={techFeatures[activeFeature].image} 
+                  alt="" 
+                  className="w-full h-full object-cover transition-all duration-700 ease-out"
+                />
+                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_40px_rgba(0,0,0,0.8)]"></div>
+              </div>
+            </div>
+
+            {/* النطاق المداري الخارجي الحاضن لدوائر الصور المتحركة */}
+            <div className="absolute w-full h-full rounded-full animate-museum-orbit pointer-events-none z-20">
+              
+              {/* دائرة الصورة الأولى (أعلى) */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+                <button 
+                  onClick={() => setActiveFeature('vr')}
+                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
+                    activeFeature === 'vr' 
+                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
+                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
+                  }`}
+                >
+                  <img src={techFeatures.vr.image} alt="" className="w-full h-full object-cover rounded-full" />
+                </button>
+              </div>
+
+              {/* دائرة الصورة الثانية (يمين) */}
+              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+                <button 
+                  onClick={() => setActiveFeature('apps')}
+                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
+                    activeFeature === 'apps' 
+                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
+                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
+                  }`}
+                >
+                  <img src={techFeatures.apps.image} alt="" className="w-full h-full object-cover rounded-full" />
+                </button>
+              </div>
+
+              {/* دائرة الصورة الثالثة (أسفل) */}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-auto">
+                <button 
+                  onClick={() => setActiveFeature('games')}
+                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
+                    activeFeature === 'games' 
+                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
+                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
+                  }`}
+                >
+                  <img src={techFeatures.games.image} alt="" className="w-full h-full object-cover rounded-full" />
+                </button>
+              </div>
+
+              {/* دائرة الصورة الرابعة (يسار) */}
+              <div className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+                <button 
+                  onClick={() => setActiveFeature('zaafarana')}
+                  className={`w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden p-1 bg-[#1a130e] transition-all duration-500 border-2 animate-museum-counter ${
+                    activeFeature === 'zaafarana' 
+                      ? 'border-[#c5a880] scale-110 shadow-[0_0_25px_#c5a880]' 
+                      : 'border-[#c5a880]/30 hover:border-[#c5a880] hover:scale-105'
+                  }`}
+                >
+                  <img src={techFeatures.zaafarana.image} alt="" className="w-full h-full object-cover rounded-full" />
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
 
       </div>
